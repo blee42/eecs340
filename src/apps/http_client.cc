@@ -51,10 +51,11 @@ int main(int argc, char * argv[]) {
     }
 
     /* create socket */
+    int socket = new minet_socket(SOCK_STREAM);
 
     // Do DNS lookup
     /* Hint: use gethostbyname() */
-
+    struct hostent* host = gethostbyname(server_name);
     /* set address */
 
     /* connect socket */
