@@ -15,9 +15,9 @@ int main(int argc, char * argv[]) {
     int rc = -1;
     int datalen = 0;
     bool ok = true;
-    struct sockaddr_in sa;
+    struct sockaddr_in sin;
     FILE * wheretoprint = stdout;
-    struct hostent * site = NULL;
+    struct hostent *host = NULL;
     char * req = NULL;
 
     char buf[BUFSIZE + 1];
@@ -51,14 +51,30 @@ int main(int argc, char * argv[]) {
     }
 
     /* create socket */
-    int socket = new minet_socket(SOCK_STREAM);
+    sock = new socket(AF_INET, SOCK_STREAM, 0);
+    if (sock == -1)
+      return sock;
 
     // Do DNS lookup
-    /* Hint: use gethostbyname() */
-    struct hostent* host = gethostbyname(server_name);
+    // Hint: use gethostbyname()
+    host = gethostbyname(server_name);
+    if (host == NULL) {
+      close(sock);
+      return -1;
+    }
+
+    
     /* set address */
+    memset(&sin, 0, sizeof(sin));
+    sin.sin_family=AF_INET;
+    sin.sin_port=htons(port);
+    sin.sin_addr.s_addr = *(unsigned long *) host->host_addr_list[0];
 
     /* connect socket */
+    if (connect(sock, (struct sockaddr *) &sin, sizeof(sin)) != 0 {
+      close(sock);
+      return -1;
+    }
     
     /* send request */
 
