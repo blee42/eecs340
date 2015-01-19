@@ -49,9 +49,11 @@ int main(int argc, char * argv[]) {
     }
     //fprintf(wheretoprint, "path: %s", &server_path);
 
-    // create request
-    req = "GET /index.html HTTP/1.0\r\n\r\n";
-    // strcat(req, " HTTP/1.0\r\n\r\n");
+    // create requesti
+    req = (char*) malloc(100 * sizeof(char));
+    strcpy(req, "GET ");
+    strcat(req, server_path);
+    strcat(req, " HTTP/1.0\r\n\r\n");
 
     /* create socket */
     sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -87,16 +89,6 @@ int main(int argc, char * argv[]) {
     /* wait till socket can be read */
     /* Hint: use select(), and ignore timeout for now. */
     //int status = select(1, &set, NULL, NULL, NULL);i
-    int socket_fd, status;
-    do {
-      FD_ZERO(&set);
-      FD_SET(socket_fd, &set);
-      status = select(socket_fd + 1, &set, NULL, NULL, NULL);
-    } while (status == -1);
-    if (status == -1) {
-      close(sock);
-      return -1;
-    }
     fprintf(wheretoprint, "selected socket?\n");
 
     /* first read loop -- read headers */
