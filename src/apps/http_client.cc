@@ -87,11 +87,16 @@ int main(int argc, char * argv[]) {
     /* wait till socket can be read */
     /* Hint: use select(), and ignore timeout for now. */
     //int status = select(1, &set, NULL, NULL, NULL);i
-    int socket_fd, status;
+    int status;
+    int fdmax = 0;
+    if (fdmax < sock) {
+        fdmax = sock;
+    }
+
     do {
       FD_ZERO(&set);
-      FD_SET(socket_fd, &set);
-      status = select(socket_fd + 1, &set, NULL, NULL, NULL);
+      FD_SET(sock, &set);
+      status = select(fdmax + 1, &set, NULL, NULL, NULL);
     } while (status == -1);
     if (status == -1) {
       close(sock);
