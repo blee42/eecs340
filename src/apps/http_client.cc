@@ -49,9 +49,11 @@ int main(int argc, char * argv[]) {
     }
     //fprintf(wheretoprint, "path: %s", &server_path);
 
-    // create request
-    req = "GET /index.html HTTP/1.0\r\n\r\n";
-    // strcat(req, " HTTP/1.0\r\n\r\n");
+    // create requesti
+    req = (char*) malloc(100 * sizeof(char));
+    strcpy(req, "GET ");
+    strcat(req, server_path);
+    strcat(req, " HTTP/1.0\r\n\r\n");
 
     /* create socket */
     sock = socket(AF_INET, SOCK_STREAM, 0);
