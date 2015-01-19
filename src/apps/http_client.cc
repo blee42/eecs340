@@ -47,7 +47,6 @@ int main(int argc, char * argv[]) {
  	fprintf(stderr, "First argument must be k or u\n");
 	exit(-1);
     }
-    //fprintf(wheretoprint, "path: %s", &server_path);
 
     // create requesti
     req = (char*) malloc(100 * sizeof(char));
@@ -85,26 +84,18 @@ int main(int argc, char * argv[]) {
       close(sock);
       return -1;
     }
-    fprintf(wheretoprint, "sended socket\n");
     /* wait till socket can be read */
     /* Hint: use select(), and ignore timeout for now. */
     //int status = select(1, &set, NULL, NULL, NULL);i
-    int status;
     int fdmax = 0;
     if (fdmax < sock) {
         fdmax = sock;
     }
-
     do {
       FD_ZERO(&set);
       FD_SET(sock, &set);
-      status = select(fdmax + 1, &set, NULL, NULL, NULL);
-    } while (status == -1);
-    if (status == -1) {
-      close(sock);
-      return -1;
-    }
-    fprintf(wheretoprint, "selected socket?\n");
+      rc = select(fdmax + 1, &set, NULL, NULL, NULL);
+    } while (rc == -1);
 
     /* first read loop -- read headers */
     datalen = read(sock, &buf, BUFSIZE);
@@ -112,17 +103,23 @@ int main(int argc, char * argv[]) {
       close(sock);
       return -1;
     }
-    fprintf(wheretoprint, "%s\n", buf);
-   
+
     /* examine return code */   
     //Skip "HTTP/1.0"
     //remove the '\0'
     // Normal reply has return code 200
-
-    /* print first part of response */
-
-    /* second read loop -- print out the rest of the response */
-    
+    int code = 200;
+    if (code != 200) {
+      
+      ok == false;
+    }
+    else {      
+      while (datalen != 0) {
+        fprintf(wheretoprint, "%s", buf);
+        memset(&buf, 0, BUFSIZE);
+        datalen = read(sock, &buf, BUFSIZE);
+      }
+    }
     /*close socket and deinitialize */
     close(sock);
 
