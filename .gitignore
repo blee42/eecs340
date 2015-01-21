@@ -1,6 +1,10 @@
 # folder
 bin/*
 
+# swap files
+*.swo
+*.swp
+
 # Object files
 *.o
 *.ko
