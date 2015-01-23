@@ -48,7 +48,7 @@ int main(int argc, char * argv[]) {
 	exit(-1);
     }
 
-    // create requesti
+    // create request
     req = (char*) malloc(100 * sizeof(char));
     strcpy(req, "GET ");
     strcat(req, server_path);
@@ -108,18 +108,45 @@ int main(int argc, char * argv[]) {
     //Skip "HTTP/1.0"
     //remove the '\0'
     // Normal reply has return code 200
-    int code = 200;
-    if (code != 200) {
-      
-      ok == false;
+    int i=0;
+    while (buf[i] != 32) 
+    {
+        i++;
     }
-    else {      
-      while (datalen != 0) {
-        fprintf(wheretoprint, "%s", buf);
+    char code[3];
+    memset(&code, 0, 3);
+    code[0] = buf[i+1];
+    code[1] = buf[i+2];
+    code[2] = buf[i+3];
+
+    if (atoi(code) != 200) 
+    {
+        ok == false;
+        while (datalen !=0)
+        {
+            fprintf(stderr, "%s", buf);
+            memset(&buf, 0, BUFSIZE);
+            datalen = read(sock, &buf, BUFSIZE);
+        }
+    }
+    else
+    {
+        int j=0;
+        while (buf[j] != 60)
+        {
+            j++;
+        }
+        fprintf(wheretoprint, "%s", buf+(j*sizeof(char)));
         memset(&buf, 0, BUFSIZE);
-        datalen = read(sock, &buf, BUFSIZE);
-      }
+        datalen = read(sock, &buf, BUFSIZE);       
+        while (datalen !=0)
+        {
+            fprintf(wheretoprint, "%s", buf);
+            memset(&buf, 0, BUFSIZE);
+            datalen = read(sock, &buf, BUFSIZE);
+        }
     }
+
     /*close socket and deinitialize */
     close(sock);
 
