@@ -14,8 +14,8 @@ int readnbytes(int,char *,int);
 int main(int argc,char *argv[])
 {
   int server_port;
-  int sock,sock2;
-  struct sockaddr_in sa,sa2;
+  int server_sock, client_sock;
+  struct sockaddr_in server_sa, client_sa;
   int rc,i;
   fd_set readlist;
   fd_set connections;
@@ -35,12 +35,32 @@ int main(int argc,char *argv[])
   }
 
   /* initialize and make socket */
+  server_sock = socket(AF_INET, SOCK_STREAM, 0);
+  if (server_sock < 0)
+  {
+    fprintf(stderr, "Error creating socket. Exiting.\n");
+    return -1;
+  }
 
   /* set server address*/
+  memset(&server_sa, 0, sizeof(server_sa));
+  server_sa.sin_family = AF_INET;
+  server_sa.sin_addr.s_addr = htonl(INADDR_ANY);
+  server_sa.sin_port = htons(server_port);
 
   /* bind listening socket */
+  if (bind(server_sock, (struct sockaddr *) &server_sa, sizeof(server_sa)) < 0)
+  {
+    fprintf(stderr, "Error binding socket. Exiting.\n");
+    return -1;
+  }
 
   /* start listening */
+  if (listen(server_sock, MAX_QUEUE_LENGTH) < 0)
+  {
+    fprintf(stderr, "Error setting listener. Exiting.\n");
+    return -1;
+  }
 
   /* connection handling loop */
   while(1)
@@ -62,7 +82,7 @@ int main(int argc,char *argv[])
   }
 }
 
-int handle_connection(int sock2)
+int handle_connection(int client_sock)
 {
   char filename[FILENAMESIZE+1];
   int rc;
@@ -73,11 +93,11 @@ int handle_connection(int sock2)
   char *endheaders;
   char *bptr;
   int datalen=0;
-  char *ok_response_f = "HTTP/1.0 200 OK\r\n"\
+  char *ok_response_f = "\nHTTP/1.0 200 OK\r\n"\
                       "Content-type: text/plain\r\n"\
                       "Content-length: %d \r\n\r\n";
   char ok_response[100];
-  char *notok_response = "HTTP/1.0 404 FILE NOT FOUND\r\n"\
+  char *notok_response = "\nHTTP/1.0 404 FILE NOT FOUND\r\n"\
                          "Content-type: text/html\r\n\r\n"\
                          "<html><body bgColor=black text=white>\n"\
                          "<h2>404 FILE NOT FOUND</h2>\n"\
@@ -85,25 +105,92 @@ int handle_connection(int sock2)
   bool ok=true;
 
   /* first read loop -- get request and headers*/
+  memset(&buf, 0, BUFSIZE);
+  memset(&filename, 0, FILENAMESIZE);
+  datalen = read(client_sock, &buf, BUFSIZE);
+  fprintf(stdout, "[REQUEST] %s", buf);
 
   /* parse request to get file name */
   /* Assumption: this is a GET request and filename contains no spaces*/
+  int i=0, j=0;
+  bool copy = false;
+  while (buf[i] != 0) {
+    if (buf[i] == 32 && j==0)
+    {
+      // " " ascii number is 32
+      // first loop, start copying into filename
+      copy = true;
+    }
+    else if (buf[i] == 32 && copy)
+    {
+      // finished copying filename
+      break;
+    }
+    else if (copy)
+    {
+      filename[j] = buf[i];
+      j++;
+    }
+    i++;
+  }
+  fprintf(stdout, "[FILE] %s\n", filename);
 
-    /* try opening the file */
+  /* try opening the file */
+  FILE* stream;
+  if (access(filename, F_OK) != -1)
+  {
+    fprintf(stdout, "[FILE] File found!\n\n");
+    stream = fopen(filename, "r");
+    fd = fileno(stream);
+    fstat(fd, &filestat);
+  }
+  else
+  {
+    fprintf(stderr, "[FILE] File not found.\n");
+    char cwd[1024];
+    fprintf(stdout, "[FILE-CWD] %s\n\n", getcwd(cwd, 1024));
+    ok = false;
+  }
 
   /* send response */
   if (ok)
   {
+    int count_left = filestat.st_size;
     /* send headers */
-
+    memset(&ok_response, 0, 100);
+    sprintf(ok_response, ok_response_f, count_left);
+    fprintf(stdout, "[RES] Response: %s\n", ok_response);
+    datalen = send(client_sock, ok_response, strlen(ok_response)+1, 0);
+    if (datalen < 0)
+    {
+      fprintf(stderr, "[SOCK] Could not send headers to client socket.\n");
+      return -1;
+    }
     /* send file */
+    int to_copy;
+    while (count_left > 0)
+    {
+      memset(&buf, 0, BUFSIZE);
+      to_copy = (count_left > 1000) ? 1000 : count_left;
+      fprintf(stdout, "[RES] Copying %d bytes.", to_copy);
+      fread(buf, sizeof(char), to_copy, stream);
+      datalen = send(client_sock, buf, BUFSIZE, 0);
+      if (datalen < 0)
+      {
+        fprintf(stderr, "[SOCK] Could not send headers to client socket.\n");
+        return -1;
+      }
+      count_left -= to_copy;
+    }
   }
   else	// send error response
   {
+    memset(&buf, 0, BUFSIZE);
+    datalen = send(client_sock, notok_response, strlen(notok_response)+1, 0);
   }
 
   /* close socket and free space */
-
+  close(client_sock);
   if (ok)
     return 0;
   else
