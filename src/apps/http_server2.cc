@@ -17,9 +17,9 @@ int main(int argc,char *argv[])
   int server_sock, client_sock;
   struct sockaddr_in server_sa, client_sa;
   int rc,i;
-  fd_set readlist;
-  fd_set connections;
-  int maxfd;
+  fd_set master;
+  fd_set read_fds;
+  int fdmax;
 
   /* parse command line args */
   if (argc != 3)
@@ -33,6 +33,10 @@ int main(int argc,char *argv[])
     fprintf(stderr,"INVALID PORT NUMBER: %d; can't be < 1500\n",server_port);
     exit(-1);
   }
+
+  /* initialize fd sets */
+  FD_ZERO(&master);
+  FD_ZERO(&read_fds);
 
   /* initialize and make socket */
   server_sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -62,27 +66,54 @@ int main(int argc,char *argv[])
     return -1;
   }
 
+  FD_SET(server_sock, &master);
+  fdmax = server_sock;
+
   /* connection handling loop */
   while(1)
   {
     /* create read list */
+    read_fds = master;
 
     /* do a select */
+    if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1) 
+    {
+      fprintf(stderr, "Error in select usage.\n");
+      return -1;
+    }
 
     /* process sockets that are ready */
-
+    for(i = 0; i <= fdmax; i++) {
       /* for the accept socket, add accepted connection to connections */
-      if (i == sock)
+      if (i == server_sock)
       {
+        memset(&client_sa, 0, sizeof(client_sa));
+        rc = sizeof(client_sa);
+        client_sock = accept(server_sock, (struct sockaddr *) &client_sa, (socklen_t*) &rc); 
+        if (client_sock < 0)
+        {
+          fprintf(stderr, "Error accepting socket. Exiting.\n");
+          return -1;
+        }
+        else
+        {
+          FD_SET(client_sock, &master);
+          if (client_sock > fdmax)
+          {
+            fdmax = client_sock;
+          }
+          fprintf(stdout, "[SELECT] new connection from %s on socket %d\n", inet_ntoa(client_sa.sin_addr), client_sock);
+        }
       }
       else /* for a connection socket, handle the connection */
       {
-	rc = handle_connection(i);
+        rc = handle_connection(i, server_sock, fdmax, master);
       }
+    }
   }
 }
 
-int handle_connection(int client_sock)
+int handle_connection(int client_sock, int server_sock, int fdmax, fdset master)
 {
   char filename[FILENAMESIZE+1];
   int rc;
@@ -170,17 +201,24 @@ int handle_connection(int client_sock)
     int to_copy;
     while (count_left > 0)
     {
-      memset(&buf, 0, BUFSIZE);
-      to_copy = (count_left > 1000) ? 1000 : count_left;
-      fprintf(stdout, "[RES] Copying %d bytes.", to_copy);
-      fread(buf, sizeof(char), to_copy, stream);
-      datalen = send(client_sock, buf, BUFSIZE, 0);
-      if (datalen < 0)
+      for(i; i <= fdmax; i++)
       {
-        fprintf(stderr, "[SOCK] Could not send headers to client socket.\n");
-        return -1;
+        if (FD_ISSET(i, &master) && i != server_sock && i != client_sock)
+        {
+          memset(&buf, 0, BUFSIZE);
+          to_copy = (count_left > 1000) ? 1000 : count_left;
+          fprintf(stdout, "[RES] Copying %d bytes.", to_copy);
+          fread(buf, sizeof(char), to_copy, stream);
+          datalen = send(client_sock, buf, BUFSIZE, 0);
+          if (datalen < 0)
+          {
+            fprintf(stderr, "[SOCK] Could not send headers to client socket.\n");
+            return -1;
+          }
+          count_left -= to_copy;
+
+        }
       }
-      count_left -= to_copy;
     }
   }
   else	// send error response
@@ -191,6 +229,7 @@ int handle_connection(int client_sock)
 
   /* close socket and free space */
   close(client_sock);
+  FD_CLR(i, &master);
   if (ok)
     return 0;
   else
