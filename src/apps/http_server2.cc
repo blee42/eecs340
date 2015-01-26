@@ -6,8 +6,9 @@
 
 #define BUFSIZE 1024
 #define FILENAMESIZE 100
+#define MAX_QUEUE_LENGTH 10
 
-int handle_connection(int);
+int handle_connection(int, int, int, fd_set);
 int writenbytes(int,char *,int);
 int readnbytes(int,char *,int);
 
@@ -113,7 +114,7 @@ int main(int argc,char *argv[])
   }
 }
 
-int handle_connection(int client_sock, int server_sock, int fdmax, fdset master)
+int handle_connection(int client_sock, int server_sock, int fdmax, fd_set master)
 {
   char filename[FILENAMESIZE+1];
   int rc;
