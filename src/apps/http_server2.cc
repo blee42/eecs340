@@ -204,7 +204,6 @@ int handle_connection(int client_sock)
       return -1;
     }
     /* send file */
-    fprintf(stdout, "[FDMAX] %d\n", fdmax);
     int to_copy;
     while (count_left > 0)
     {
