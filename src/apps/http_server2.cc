@@ -237,7 +237,7 @@ int handle_connection(int client_sock, int server_sock, int fdmax, fd_set master
 
   /* close socket and free space */
   close(client_sock);
-  FD_CLR(i, &master);
+  FD_CLR(client_sock, &master);
   if (ok)
     return 0;
   else
