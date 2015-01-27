@@ -84,31 +84,35 @@ int main(int argc,char *argv[])
     }
 
     /* process sockets that are ready */
-    for(i = 0; i <= fdmax; i++) {
+    for(i = 0; i <= fdmax; i++) 
+    {
       /* for the accept socket, add accepted connection to connections */
-      if (i == server_sock)
-      {
-        memset(&client_sa, 0, sizeof(client_sa));
-        rc = sizeof(client_sa);
-        client_sock = accept(server_sock, (struct sockaddr *) &client_sa, (socklen_t*) &rc); 
-        if (client_sock < 0)
+      if (FD_ISSET(i, &read_fds)) 
+      { 
+        if (i == server_sock)
         {
-          fprintf(stderr, "Error accepting socket. Exiting.\n");
-          return -1;
-        }
-        else
-        {
-          FD_SET(client_sock, &master);
-          if (client_sock > fdmax)
+          memset(&client_sa, 0, sizeof(client_sa));
+          rc = sizeof(client_sa);
+          client_sock = accept(server_sock, (struct sockaddr *) &client_sa, (socklen_t*) &rc); 
+          if (client_sock < 0)
           {
-            fdmax = client_sock;
+            fprintf(stderr, "Error accepting socket. Exiting.\n");
+            return -1;
           }
-          fprintf(stdout, "[SELECT] new connection from %s on socket %d\n", inet_ntoa(client_sa.sin_addr), client_sock);
+          else
+          {
+            FD_SET(client_sock, &master);
+            if (client_sock > fdmax)
+            {
+              fdmax = client_sock;
+            }
+            fprintf(stdout, "[SELECT] new connection from %s on socket %d\n", inet_ntoa(client_sa.sin_addr), client_sock);
+          }
         }
-      }
-      else /* for a connection socket, handle the connection */
-      {
-        rc = handle_connection(i, server_sock, fdmax, master);
+        else /* for a connection socket, handle the connection */
+        {
+          rc = handle_connection(i, server_sock, fdmax, master);
+        }
       }
     }
   }
