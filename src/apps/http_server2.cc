@@ -208,20 +208,22 @@ int handle_connection(int client_sock, int server_sock, int fdmax, fd_set master
     {
       for(i; i <= fdmax; i++)
       {
-        if (FD_ISSET(i, &master) && i != server_sock && i != client_sock)
+        if (FD_ISSET(i, &master))
         {
-          memset(&buf, 0, BUFSIZE);
-          to_copy = (count_left > 1000) ? 1000 : count_left;
-          fprintf(stdout, "[RES] Copying %d bytes.", to_copy);
-          fread(buf, sizeof(char), to_copy, stream);
-          datalen = send(client_sock, buf, BUFSIZE, 0);
-          if (datalen < 0)
+          if (i != server_sock && i != client_sock)
           {
-            fprintf(stderr, "[SOCK] Could not send headers to client socket.\n");
-            return -1;
+            memset(&buf, 0, BUFSIZE);
+            to_copy = (count_left > 1000) ? 1000 : count_left;
+            fprintf(stdout, "[RES] Copying %d bytes.", to_copy);
+            fread(buf, sizeof(char), to_copy, stream);
+            datalen = send(client_sock, buf, BUFSIZE, 0);
+            if (datalen < 0)
+            {
+              fprintf(stderr, "[SOCK] Could not send headers to client socket.\n");
+              return -1;
+            }
+            count_left -= to_copy;
           }
-          count_left -= to_copy;
-
         }
       }
     }
