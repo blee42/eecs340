@@ -112,7 +112,7 @@ int main(int argc,char *argv[])
         else /* for a connection socket, handle the connection */
         {
           rc = handle_connection(i);
-          FD_CLR(i, &master)
+          FD_CLR(i, &master);
         }
       }
     }
