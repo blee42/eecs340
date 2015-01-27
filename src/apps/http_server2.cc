@@ -209,11 +209,9 @@ int handle_connection(int client_sock, int server_sock, int fdmax, fd_set master
     {
       for(i=0; i <= fdmax; i++)
       {
-        fprintf(stdout, "[FORLOOP] i: %d\n", i);
         if (FD_ISSET(i, &master))
         {
-          fprintf(stdout, "[FD_ISSET] got past!\n");
-          if (i != server_sock && i != client_sock)
+          if (i == client_sock)
           {
             memset(&buf, 0, BUFSIZE);
             to_copy = (count_left > 1000) ? 1000 : count_left;
