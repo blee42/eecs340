@@ -8,7 +8,7 @@
 #define FILENAMESIZE 100
 #define MAX_QUEUE_LENGTH 10
 
-int handle_connection(int, int, int, fd_set);
+int handle_connection(int);
 int writenbytes(int,char *,int);
 int readnbytes(int,char *,int);
 
