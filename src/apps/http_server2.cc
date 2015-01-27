@@ -111,14 +111,15 @@ int main(int argc,char *argv[])
         }
         else /* for a connection socket, handle the connection */
         {
-          rc = handle_connection(i, server_sock, fdmax, master);
+          rc = handle_connection(i);
+          FD_CLR(i, &master)
         }
       }
     }
   }
 }
 
-int handle_connection(int client_sock, int server_sock, int fdmax, fd_set master)
+int handle_connection(int client_sock)
 {
   char filename[FILENAMESIZE+1];
   int rc;
@@ -207,26 +208,17 @@ int handle_connection(int client_sock, int server_sock, int fdmax, fd_set master
     int to_copy;
     while (count_left > 0)
     {
-      for(i=0; i <= fdmax; i++)
+      memset(&buf, 0, BUFSIZE);
+      to_copy = (count_left > 1000) ? 1000 : count_left;
+      fprintf(stdout, "[RES] Copying %d bytes.", to_copy);
+      fread(buf, sizeof(char), to_copy, stream);
+      datalen = send(client_sock, buf, BUFSIZE, 0);
+      if (datalen < 0)
       {
-        if (FD_ISSET(i, &master))
-        {
-          if (i == client_sock)
-          {
-            memset(&buf, 0, BUFSIZE);
-            to_copy = (count_left > 1000) ? 1000 : count_left;
-            fprintf(stdout, "[RES] Copying %d bytes.", to_copy);
-            fread(buf, sizeof(char), to_copy, stream);
-            datalen = send(client_sock, buf, BUFSIZE, 0);
-            if (datalen < 0)
-            {
-              fprintf(stderr, "[SOCK] Could not send headers to client socket.\n");
-              return -1;
-            }
-            count_left -= to_copy;
-          }
-        }
+        fprintf(stderr, "[SOCK] Could not send headers to client socket.\n");
+        return -1;
       }
+      count_left -= to_copy;        
     }
   }
   else	// send error response
@@ -237,7 +229,6 @@ int handle_connection(int client_sock, int server_sock, int fdmax, fd_set master
 
   /* close socket and free space */
   close(client_sock);
-  FD_CLR(client_sock, &master);
   if (ok)
     return 0;
   else
