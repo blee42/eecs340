@@ -203,10 +203,11 @@ int handle_connection(int client_sock, int server_sock, int fdmax, fd_set master
       return -1;
     }
     /* send file */
+    fprintf(stdout, "[FDMAX] %d\n", fdmax);
     int to_copy;
     while (count_left > 0)
     {
-      for(i; i <= fdmax; i++)
+      for(i=0; i <= fdmax; i++)
       {
         fprintf(stdout, "[FORLOOP] i: %d\n", i);
         if (FD_ISSET(i, &master))
