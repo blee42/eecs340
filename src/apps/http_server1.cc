@@ -77,7 +77,6 @@ int main(int argc,char *argv[])
 
 int handle_connection(int client_sock)
 {
-  bool rn_flag = false;
   char filename[FILENAMESIZE+1];
   int rc;
   int fd;
@@ -99,9 +98,9 @@ int handle_connection(int client_sock)
   bool ok=true;
 
   /* first read loop -- get request and headers*/
-  memset(&buf, 0, BUFSIZE);
+  memset(&buf, 0, BUFSIZE + 2);
   memset(&filename, 0, FILENAMESIZE);
-  datalen = read(client_sock, &buf, BUFSIZE);
+  datalen = read(client_sock, &buf, BUFSIZE + 1);
   // fprintf(stdout, "[REQUEST] %s", buf);
 
   /* parse request to get file name */
@@ -132,14 +131,9 @@ int handle_connection(int client_sock)
     i++;
   }
 
-  if (rn_count == 4)
+  if (rn_count < 4)
   {
-    rn_flag = true;
-  }
-
-  if (!rn_flag)
-  {
-    datalen = read(client_sock, &buf, BUFSIZE);
+    datalen = read(client_sock, &buf, BUFSIZE + 1);
   }
   // fprintf(stdout, "[FILE] %s\n", filename);
   /* try opening the file */
@@ -176,11 +170,11 @@ int handle_connection(int client_sock)
     int to_copy;
     while (count_left > 0)
     {
-      memset(&buf, 0, BUFSIZE);
+      memset(&buf, 0, BUFSIZE + 2);
       to_copy = (count_left > 1000) ? 1000 : count_left;
       fprintf(stdout, "[RES] Copying %d bytes.", to_copy);
       fread(buf, sizeof(char), to_copy, stream);
-      datalen = send(client_sock, buf, BUFSIZE, 0);
+      datalen = send(client_sock, buf, BUFSIZE + 1, 0);
       if (datalen < 0)
       {
         fprintf(stderr, "[SOCK] Could not send headers to client socket.\n");
@@ -191,7 +185,7 @@ int handle_connection(int client_sock)
   }
   else // send error response
   {
-    memset(&buf, 0, BUFSIZE);
+    memset(&buf, 0, BUFSIZE + 2);
     datalen = send(client_sock, notok_response, strlen(notok_response)+1, 0);
   }
 
