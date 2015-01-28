@@ -130,11 +130,11 @@ int handle_connection(int client_sock)
   char *endheaders;
   char *bptr;
   int datalen=0;
-  char *ok_response_f = "\nHTTP/1.0 200 OK\r\n"\
+  char *ok_response_f = "HTTP/1.0 200 OK\r\n"\
                       "Content-type: text/plain\r\n"\
                       "Content-length: %d \r\n\r\n";
   char ok_response[100];
-  char *notok_response = "\nHTTP/1.0 404 FILE NOT FOUND\r\n"\
+  char *notok_response = "HTTP/1.0 404 FILE NOT FOUND\r\n"\
                          "Content-type: text/html\r\n\r\n"\
                          "<html><body bgColor=black text=white>\n"\
                          "<h2>404 FILE NOT FOUND</h2>\n"\
