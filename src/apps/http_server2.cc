@@ -121,6 +121,7 @@ int main(int argc,char *argv[])
 
 int handle_connection(int client_sock)
 {
+  bool rn_flag = false;
   char filename[FILENAMESIZE+1];
   int rc;
   int fd;
@@ -150,25 +151,39 @@ int handle_connection(int client_sock)
   /* parse request to get file name */
   /* Assumption: this is a GET request and filename contains no spaces*/
   int i=0, j=0;
-  bool copy = false;
+  int rn_count = 0;
+  int copy = 0;
   while (buf[i] != 0) {
     if (buf[i] == 32 && j==0)
     {
       // " " ascii number is 32
       // first loop, start copying into filename
-      copy = true;
+      copy = 1;
     }
-    else if (buf[i] == 32 && copy)
+    else if (copy == 2)
     {
-      // finished copying filename
-      break;
+      // counting \r\ns
+      if (buf[i] == 13 || buf[i] == 10)
+      {
+        rn_count++;
+      }
     }
-    else if (copy)
+    else if (copy == 1)
     {
       filename[j] = buf[i];
       j++;
     }
     i++;
+  }
+
+  if (rn_count == 4)
+  {
+    rn_flag = true;
+  }
+
+  if (!rn_flag)
+  {
+    datalen = read(client_sock, &buf, BUFSIZE);
   }
   //fprintf(stdout, "[FILE] %s\n", filename);
 
