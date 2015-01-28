@@ -7,6 +7,7 @@
 
 #define FILENAMESIZE 100
 #define BUFSIZE 1024
+#define MAX_QUEUE_LENGTH 10
 
 typedef enum \
 {NEW,READING_HEADERS,WRITING_RESPONSE,READING_FILE,WRITING_FILE,CLOSED} states;
@@ -31,7 +32,7 @@ struct connection_s
 
 struct connection_list_s
 {
-  connection *first,*last;
+  connection *first, *last;
 };
 
 void add_connection(int,connection_list *);
@@ -49,10 +50,10 @@ void write_file(connection *);
 int main(int argc,char *argv[])
 {
   int server_port;
-  int sock,sock2;
-  struct sockaddr_in sa,sa2;
+  int server_sock, client_sock;
+  struct sockaddr_in server_sa, client_sa;
   int rc;
-  fd_set readlist,writelist;
+  fd_set readlist, writelist;
   connection_list connections;
   connection *i;
   int maxfd;
@@ -71,21 +72,96 @@ int main(int argc,char *argv[])
   }
 
   /* initialize and make socket */
+  server_sock = socket(AF_INET, SOCK_STREAM, 0);
+  if (server_sock < 0)
+  {
+    fprintf(stderr, "Error creating socket. Exiting.\n", );
+    return -1;
+  }
 
   /* set server address*/
+  memset(&server_sa, 0, sizeof(server_sa));
+  server_sa.sin_family = AF_INET;
+  server_sa.sin_addr.s_addr = htonl(INADDR_ANY);
+  server_sa.sin_port = htons(server_port);
 
   /* bind listening socket */
+  if (bind(server_sock, (struct sockaddr *) &server_sa, sizeof(server_sa)) < 0)
+  {
+    fprintf(stderr, "Error binding socket. Exiting.\n", );
+    return -1;
+  }
 
   /* start listening */
+  if (listen(server_sock, MAX_QUEUE_LENGTH) < 0)
+  {
+    fprintf(stderr, "Error setting listener. Exiting.\n", );
+    return -1;
+  }
+
+  /* initialize connections list */
+  init_connection(i);
+  connections->first = i;
+  connections->last = i;
+
+  maxfd = server_sock;
 
   /* connection handling loop */
   while(1)
   {
     /* create read and write lists */
+    // NOT SURE HOW TO DO THIS:
+    // Do we loop through all of the connections in the connection list
+    // and look to see what is read/write and then create those read/write
+    // lists?
 
     /* do a select */
+    if (select(maxfd+1, &read_fds, NULL, NULL, NULL) == -1)
+    {
+      fprintf(stderr, "Error in select usage.\n", );
+      return -1;
+    }
 
     /* process sockets that are ready */
+    for (i = 0; i <= maxfd; i++)
+    {
+      if (FD_ISSET(i, &read_fds)) // should this just be read, what about write?
+      {
+        /* if socket is the server sock */
+        if (i == server_sock)
+        {
+          memset(&client_sa, 0, sizeof(client_sa));
+          rc = szieof(cloent_sa);
+          client_sock = accept(server_scok, (struct sockaddr *) &client_sa, (socklen_t*) &rc);
+          if (client_sock == EAGAIN)
+          {
+            //handle eagain case
+          }
+          else if (client_sock == EWOULDBLOCK)
+          {
+            //handle ewouldbblock case
+          }
+          else if (client_sock < 0)
+          {
+            fprintf(stderr, "Error accepting socket. Exiting.\n");
+            return -1;
+          }
+          else
+          {
+            //add client sock to open connection list?
+            if (client_sock > fdmax)
+            {
+              fdmax = client_sock;
+            }
+          }
+        }
+        /* if socket is a connection socket */
+        else
+        {
+          // what are we doing here?
+        }
+      }
+    }
   }
 }
 
