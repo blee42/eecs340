@@ -106,7 +106,7 @@ int main(int argc,char *argv[])
             {
               fdmax = client_sock;
             }
-            fprintf(stdout, "[SELECT] new connection from %s on socket %d\n", inet_ntoa(client_sa.sin_addr), client_sock);
+            //fprintf(stdout, "[SELECT] new connection from %s on socket %d\n", inet_ntoa(client_sa.sin_addr), client_sock);
           }
         }
         else /* for a connection socket, handle the connection */
@@ -145,7 +145,7 @@ int handle_connection(int client_sock)
   memset(&buf, 0, BUFSIZE);
   memset(&filename, 0, FILENAMESIZE);
   datalen = read(client_sock, &buf, BUFSIZE);
-  fprintf(stdout, "[REQUEST] %s", buf);
+  //fprintf(stdout, "[REQUEST] %s", buf);
 
   /* parse request to get file name */
   /* Assumption: this is a GET request and filename contains no spaces*/
@@ -170,22 +170,22 @@ int handle_connection(int client_sock)
     }
     i++;
   }
-  fprintf(stdout, "[FILE] %s\n", filename);
+  //fprintf(stdout, "[FILE] %s\n", filename);
 
   /* try opening the file */
   FILE* stream;
   if (access(filename, F_OK) != -1)
   {
-    fprintf(stdout, "[FILE] File found!\n\n");
+    //fprintf(stdout, "[FILE] File found!\n\n");
     stream = fopen(filename, "r");
     fd = fileno(stream);
     fstat(fd, &filestat);
   }
   else
   {
-    fprintf(stderr, "[FILE] File not found.\n");
-    char cwd[1024];
-    fprintf(stdout, "[FILE-CWD] %s\n\n", getcwd(cwd, 1024));
+    //fprintf(stderr, "[FILE] File not found.\n");
+    //char cwd[1024];
+    //fprintf(stdout, "[FILE-CWD] %s\n\n", getcwd(cwd, 1024));
     ok = false;
   }
 
@@ -196,7 +196,7 @@ int handle_connection(int client_sock)
     /* send headers */
     memset(&ok_response, 0, 100);
     sprintf(ok_response, ok_response_f, count_left);
-    fprintf(stdout, "[RES] Response: %s\n", ok_response);
+    //fprintf(stdout, "[RES] Response: %s\n", ok_response);
     datalen = send(client_sock, ok_response, strlen(ok_response)+1, 0);
     if (datalen < 0)
     {
