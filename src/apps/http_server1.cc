@@ -109,13 +109,13 @@ int handle_connection(int client_sock)
   int rn_count = 0;
   int copy = 0;
   while (buf[i] != 0) {
-    if (buf[i] == 32 && j==0)
+    if (buf[i] == 32)
     {
       // " " ascii number is 32
       // first loop, start copying into filename
-      copy = 1;
+      copy++;
     }
-    else if (copy == 2)
+    else if (copy > 1)
     {
       // counting \r\ns
       if (buf[i] == 13 || buf[i] == 10)
