@@ -53,16 +53,20 @@ int main(int argc, char * argv[]) {
     strcpy(req, "GET ");
     strcat(req, server_path);
     strcat(req, " HTTP/1.0\r\n\r\n");
+    memset(&buf, 0, BUFSIZE+2);
 
     /* create socket */
     sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock == -1)
+    if (sock == -1) {
+      fprintf(stderr, "Could not create socket\n");
       return sock;
+    }
 
     // Do DNS lookup
     // Hint: use gethostbyname()
     host = gethostbyname(server_name);
     if (host == NULL) {
+      fprintf(stderr, "Could not get host\n");
       close(sock);
       return -1;
     }
@@ -75,12 +79,14 @@ int main(int argc, char * argv[]) {
 
     /* connect socket */
     if (connect(sock, (struct sockaddr *) &sin, sizeof(sin)) != 0) {
+      fprintf(stderr, "Could not connect socket\n");
       close(sock);
       return -1;
     }
     /* send request */
     datalen = send(sock, req, strlen(req)+1, 0);
     if (datalen == -1) {
+      fprintf(stderr, "Could not send request\n");
       close(sock);
       return -1;
     }
@@ -98,8 +104,9 @@ int main(int argc, char * argv[]) {
     } while (rc == -1);
 
     /* first read loop -- read headers */
-    datalen = read(sock, &buf, BUFSIZE);
+    datalen = read(sock, &buf, BUFSIZE+1);
     if (datalen == -1) {
+      fprintf(stderr, "Error in select\n");
       close(sock);
       return -1;
     }
@@ -125,8 +132,8 @@ int main(int argc, char * argv[]) {
         while (datalen !=0)
         {
             fprintf(stderr, "%s", buf);
-            memset(&buf, 0, BUFSIZE);
-            datalen = read(sock, &buf, BUFSIZE);
+            memset(&buf, 0, BUFSIZE+1);
+            datalen = read(sock, &buf, BUFSIZE+1);
         }
     }
     else
@@ -137,13 +144,13 @@ int main(int argc, char * argv[]) {
             j++;
         }
         fprintf(wheretoprint, "%s", buf+(j*sizeof(char)));
-        memset(&buf, 0, BUFSIZE);
-        datalen = read(sock, &buf, BUFSIZE);       
+        memset(&buf, 0, BUFSIZE+1);
+        datalen = read(sock, &buf, BUFSIZE+1);       
         while (datalen !=0)
         {
             fprintf(wheretoprint, "%s", buf);
-            memset(&buf, 0, BUFSIZE);
-            datalen = read(sock, &buf, BUFSIZE);
+            memset(&buf, 0, BUFSIZE+1);
+            datalen = read(sock, &buf, BUFSIZE+1);
         }
     }
 
