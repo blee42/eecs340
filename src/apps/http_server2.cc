@@ -179,7 +179,7 @@ int handle_connection(int client_sock)
   {
     datalen = read(client_sock, &buf, BUFSIZE + 1);
   }
-  //fprintf(stdout, "[FILE] %s\n", filename);
+  fprintf(stdout, "[FILE] %s\n", filename);
 
   /* try opening the file */
   FILE* stream;
