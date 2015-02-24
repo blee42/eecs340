@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
                     case CONNECT:
                     case ACCEPT:
                         // TODO: create and send response that connection is ok
+                        break;
                     case STATUS:
                         // no response needed
                         break;
@@ -100,14 +101,19 @@ int main(int argc, char *argv[])
                         // TODO: add header to packet (IP and TCP)
                         // TODO: send packet and request a response
                         // TODO:: send response request??
+                        break;
                     case FORWARD:
                         // TODO: find connection of request
                         // TODO: request response to that connection?
+                        break;
                     case CLOSE:
                         // TODO: find connection of request
-                        // TODO: create and send request 
+                        // TODO: create and send request
+                        break; 
                     default: 
-                        // TODO: resend request
+                        // TODO: responsd to request with
+                        break;
+
                 }
             }
         }
