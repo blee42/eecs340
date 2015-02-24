@@ -1,0 +1,14 @@
+*.sh
+minet-netclass-w15-proj2/bin/
+minet-netclass-w15-proj2/fifos/
+minet-netclass-w15-proj2/docs/
+minet-netclass-w15-proj2/example_launch_scripts/
+minet-netclass-w15-proj2/java-gui/
+minet-netclass-w15-proj2/lib/
+minet-netclass-w15-proj2/scripts/
+minet-netclass-w15-proj2/minet.*
+minet-netclass-w15-proj2/src/apps/
+minet-netclass-w15-proj2/src/libminet/
+minet-netclass-w15-proj2/src/lowlevel/
+minet-netclass-w15-proj2/src/test/
+minet-netclass-w15-proj2/src/timeline-viewer/
