@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
                         // no response needed
                         break;
                     case WRITE:
-                        unsigned bytes = MIN_MACRO(IP_PACKET_MAX_LENGTH-TCP_HEADER_MAX_LENGTH, s.data.GetSize())
+                        unsigned bytes = MIN_MACRO(IP_PACKET_MAX_LENGTH-TCP_HEADER_MAX_LENGTH, s.data.GetSize());
                         // create the payload of the packet
                         Packet p(s.data.ExtractFront(bytes));
                         // make IP header because we need to do tcp checksum
@@ -140,15 +140,13 @@ int main(int argc, char *argv[])
                         // push ip header onto packet
                         p.PushFrontHeader(iph);
                         // make the TCP header
-                        TCPHeader tcph
+                        TCPHeader tcph;
                         tcph.SetSourcePort(s.connection.srcport, p);
                         tcph.SetDestPort(s.connection.destport, p);
                         tcph.SetHeaderLen(TCP_HEADER_MAX_LENGTH, p);
                         // push the TCP header behind the IP header
                         p.PushBackHeader(tcph);
-                        Minet.send(mux, p);
-
-                        
+                        MinetSend(mux, p);
                         break;
                     case FORWARD:
                         // TODO: find connection of request
