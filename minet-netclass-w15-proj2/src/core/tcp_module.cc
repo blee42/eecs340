@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
                         SockRequestResponse reply;
                         reply.type = STATUS;
                         reply.connection = s.connection;
-                        reply.buffer = 0;
+                        reply.bytes = 0;
                         reply.error = EOK;
                         MinetSend(sock, reply);
                         
