@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    cerr << "BEGINNING TO HANDLE TCP.......\n";
+    cerr << "\nBEGINNING TO HANDLE TCP.......\n";
 
     MinetSendToMonitor(MinetMonitoringEvent("tcp_module handling TCP traffic"));
 
@@ -135,8 +135,12 @@ int main(int argc, char *argv[])
                     }
                     break;
                     case STATUS:
+                    {
+                        cerr << "\n===STATUS===\n";
+                        cerr << "\n===END STATUS===\n";
+                    }
                         // no response needed
-                        break;
+                    break;
                     case WRITE:
                     {
                         cerr << "\n===WRITE===\n";
@@ -171,12 +175,20 @@ int main(int argc, char *argv[])
                     }
                     break;
                     case CLOSE:
+                    {
+                        cerr << "\n===CLOSE===\n";
+                        cerr << "\n===END CLOSE===\n";
+                    }
                         // TODO: find connection of request
                         // TODO: create and send request
-                        break; 
-                    default: 
+                    break; 
+                    default:
+                    {
+                        cerr << "\n===DEFAULT===\n";
+                        cerr << "\n===END DEFAULT===\n";
+                    } 
                         // TODO: responsd to request with
-                        break;
+                    break;
 
                 }
             }
