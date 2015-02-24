@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    cerr<<"STARTING..."<<endl;
+    cerr<<"STARTING...\n"<<endl;
 
     MinetSendToMonitor(MinetMonitoringEvent("tcp_module handling TCP traffic"));
 
@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
 
                 cerr << "Checksum is " << (tcph.IsCorrectChecksum(p) ? "VALID" : "INVALID");
 
+                cerr << "\n" <<endl;
                 // TODO: check for correct checksum
                 // TODO: find the info to send responses to (header info, sourceIP, etc.)
                 // TODO: build packet
