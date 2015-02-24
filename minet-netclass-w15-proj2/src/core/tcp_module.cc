@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
                 cerr << "HANDLING DATA FROM IP LAYER BELOW\n";
                 Packet p;
                 MinetReceive(mux,p);
-                unsigned tcphlen=TCPHeader::EstimateTCPHeaderLength(p);
+                unsigned char tcphlen=TCPHeader::EstimateTCPHeaderLength(p);
                 cerr << "estimated header len="<<tcphlen<<"\n";
                 p.ExtractHeaderFromPayload<TCPHeader>(tcphlen);
                 IPHeader ipl=p.FindHeader(Headers::IPHeader);
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
                 if (cs != clist.end())
                 {   
                     cerr << "Found matching connection\n";
-                    tcph.GetHeaderLen(char(tcphlen));
+                    tcph.GetHeaderLen(tcphlen);
                     tcphlen -= TCP_HEADER_BASE_LENGTH;
                     Buffer &data = p.GetPayload().ExtractFront(tcphlen);
                     SockRequestResponse write(WRITE, (*cs).connection, data, tcphlen, EOK);
