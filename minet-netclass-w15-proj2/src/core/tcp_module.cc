@@ -14,6 +14,7 @@
 #include <iostream>
 
 #include "Minet.h"
+#include "tcpstate.h"
 
 
 using std::cout;
@@ -24,6 +25,8 @@ using std::string;
 int main(int argc, char *argv[])
 {
     MinetHandle mux, sock;
+
+    ConnectionList<TCPState> clist;
 
     MinetInit(MINET_TCP_MODULE);
 
