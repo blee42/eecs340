@@ -91,9 +91,9 @@ int main(int argc, char *argv[])
                 if (cs != clist.end())
                 {   
                     cerr << "Found matching connection\n";
-                    tcph.GetLength(tcplen);
-                    tcplen -= TCP_HEADER_LENGTH;
-                    Buffer &data = p.GetPayLoad().ExtractFront(tcplen);
+                    tcph.GetHeaderLength(tcplen);
+                    tcphlen -= TCP_HEADER_BASE_LENGTH;
+                    Buffer &data = p.GetPayloadLoad().ExtractFront(tcphlen);
                     SockRequestResponse write(WRITE, (*cs).connection, data, tcplen, EOK);
 
                     MinetSend(sock, write);
