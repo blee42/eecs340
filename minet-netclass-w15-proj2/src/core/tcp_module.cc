@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
                         reply.bytes = 0;
                         reply.error = EOK;
                         MinetSend(sock, reply);
-                        
+                        cerr << "\n=== END ACCEPT===\n";
                     }
                     break;
                     case STATUS:
@@ -159,14 +159,17 @@ int main(int argc, char *argv[])
                         // push the TCP header behind the IP header
                         p.PushBackHeader(tcph);
                         MinetSend(mux, p);
-                            
+                        cerr << "\n===END WRITE===\n";
                     }
                     break;
                     case FORWARD:
+                    {
                         cerr << "\n===FORWARD===\n";
                         // TODO: find connection of request
                         // TODO: request response to that connection?
-                        break;
+                        cerr << "\n===END FORWARD===\n";
+                    }
+                    break;
                     case CLOSE:
                         // TODO: find connection of request
                         // TODO: create and send request
