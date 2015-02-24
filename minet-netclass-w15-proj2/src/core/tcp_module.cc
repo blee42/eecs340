@@ -42,6 +42,8 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    cerr<<"STARTING..."<<endl;
+
     MinetSendToMonitor(MinetMonitoringEvent("tcp_module handling TCP traffic"));
 
     MinetEvent event;
