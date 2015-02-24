@@ -68,6 +68,8 @@ int main(int argc, char *argv[])
                 IPHeader ipl=p.FindHeader(Headers::IPHeader);
                 TCPHeader tcph=p.FindHeader(Headers::TCPHeader);
 
+                MinetSendToMonitor(MinetMonitoringEvent("WHERE IS THIS PRINTED!"));
+
                 cerr << "TCP Packet: IP Header is "<<ipl<<" and " <<endl;
                 cerr << "TCP Header is "<<tcph << " and " <<endl;
                 cerr << "Checksum is " << (tcph.IsCorrectChecksum(p) ? "VALID" : "INVALID") <<endl;
