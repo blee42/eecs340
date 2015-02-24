@@ -42,8 +42,6 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    cerr<<"STARTING...\n"<<endl;
-
     MinetSendToMonitor(MinetMonitoringEvent("tcp_module handling TCP traffic"));
 
     MinetEvent event;
@@ -70,12 +68,10 @@ int main(int argc, char *argv[])
                 IPHeader ipl=p.FindHeader(Headers::IPHeader);
                 TCPHeader tcph=p.FindHeader(Headers::TCPHeader);
 
-                cerr << "TCP Packet: IP Header is "<<ipl<<" and ";
-                cerr << "TCP Header is "<<tcph << " and ";
+                cerr << "TCP Packet: IP Header is "<<ipl<<" and " <<endl;
+                cerr << "TCP Header is "<<tcph << " and " <<endl;
+                cerr << "Checksum is " << (tcph.IsCorrectChecksum(p) ? "VALID" : "INVALID") <<endl;
 
-                cerr << "Checksum is " << (tcph.IsCorrectChecksum(p) ? "VALID" : "INVALID");
-
-                cerr << "\n" <<endl;
                 // TODO: check for correct checksum
                 // TODO: find the info to send responses to (header info, sourceIP, etc.)
                 // TODO: build packet
