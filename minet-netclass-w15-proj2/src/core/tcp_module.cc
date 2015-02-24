@@ -87,6 +87,16 @@ int main(int argc, char *argv[])
                 tcph.GetDestPort(c.srcport);
                 tcph.GetSourcePort(c.destport);
 
+                unsigned char flag = 0;
+                tcph.GetFlags(flag);
+
+                if (IS_SYN(flag))
+                {
+                    TCPState tcpstate(100, LISTEN, 3);
+                    ConnectionToStateMapping<TCPState> m(c, Time(3), tcpstate, TIMER_START);
+                    clist.push_back(m);
+                }
+
                 // check if there is already a connection
                 ConnectionList<TCPState>::iterator cs = clist.FindMatching(c);
                 // if there is an open connection
