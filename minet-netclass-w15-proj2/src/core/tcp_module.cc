@@ -128,6 +128,7 @@ int main(int argc, char *argv[])
                         // no response needed
                         break;
                     case WRITE:
+                    {
                         unsigned bytes = MIN_MACRO(IP_PACKET_MAX_LENGTH-TCP_HEADER_MAX_LENGTH, s.data.GetSize());
                         // create the payload of the packet
                         Packet p(s.data.ExtractFront(bytes));
@@ -147,7 +148,8 @@ int main(int argc, char *argv[])
                         // push the TCP header behind the IP header
                         p.PushBackHeader(tcph);
                         MinetSend(mux, p);
-                        break;
+                        break;    
+                    }
                     case FORWARD:
                         // TODO: find connection of request
                         // TODO: request response to that connection?
