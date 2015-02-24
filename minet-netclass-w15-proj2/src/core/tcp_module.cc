@@ -68,15 +68,15 @@ int main(int argc, char *argv[])
                 cerr << "HANDLING DATA FROM IP LAYER BELOW\n";
                 Packet p;
                 MinetReceive(mux,p);
-                unsigned char tcphlen=TCPHeader::EstimateTCPHeaderLength(p);
+                unsigned tcphlen=TCPHeader::EstimateTCPHeaderLength(p);
                 cerr << "estimated header len="<<tcphlen<<"\n";
                 p.ExtractHeaderFromPayload<TCPHeader>(tcphlen);
                 IPHeader ipl=p.FindHeader(Headers::IPHeader);
                 TCPHeader tcph=p.FindHeader(Headers::TCPHeader);
 
-                cerr << "TCP Packet: IP Header is "<<ipl<<" and ";
-                cerr << "TCP Header is "<<tcph << " and ";
-                cerr << "Checksum is " << (tcph.IsCorrectChecksum(p) ? "VALID\n" : "INVALID\n");
+                cerr << "TCP Packet:\n IP Header is "<<ipl<<"\n";
+                cerr << "TCP Header is "<<tcph << "\n";
+                cerr << "Checksum is " << (tcph.IsCorrectChecksum(p) ? "VALID\n\n" : "INVALID\n\n");
 
                 Connection c;
                 ipl.GetDestIP(c.src);
