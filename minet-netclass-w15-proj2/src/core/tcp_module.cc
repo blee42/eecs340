@@ -78,6 +78,8 @@ int main(int argc, char *argv[])
                 cerr << "TCP Header is "<<tcph << "\n";
                 cerr << "Checksum is " << (tcph.IsCorrectChecksum(p) ? "VALID\n\n" : "INVALID\n\n");
 
+                cerr << "PACKET CONTENTS: " << p << "\n";
+
                 Connection c;
                 ipl.GetDestIP(c.src);
                 ipl.GetSourceIP(c.dest);
@@ -114,7 +116,7 @@ int main(int argc, char *argv[])
             //  Data from the Sockets layer above  //
             if (event.handle==sock) 
             {
-                cerr << "HANDLING DATA FROM SOCKETS LAYER ABOVE\n";
+                cerr << "\nHANDLING DATA FROM SOCKETS LAYER ABOVE\n";
                 SockRequestResponse s;
                 MinetReceive(sock,s);
                 cerr << "Received Socket Request:" << s << endl;
