@@ -42,6 +42,8 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    cerr << "BEGINNING TO HANDLE TCP.......\n";
+
     MinetSendToMonitor(MinetMonitoringEvent("tcp_module handling TCP traffic"));
 
     MinetEvent event;
@@ -60,19 +62,18 @@ int main(int argc, char *argv[])
             //  Data from the IP layer below  //
             if (event.handle==mux) 
             {
+                cerr << "HANDLING DATA FROM IP LAYER BELOW\n";
                 Packet p;
                 MinetReceive(mux,p);
                 unsigned tcphlen=TCPHeader::EstimateTCPHeaderLength(p);
-                cerr << "estimated header len="<<tcphlen<<"\n";
+                // cerr << "estimated header len="<<tcphlen<<"\n";
                 p.ExtractHeaderFromPayload<TCPHeader>(tcphlen);
                 IPHeader ipl=p.FindHeader(Headers::IPHeader);
                 TCPHeader tcph=p.FindHeader(Headers::TCPHeader);
 
-                MinetSendToMonitor(MinetMonitoringEvent("WHERE IS THIS PRINTED!"));
-
-                cerr << "TCP Packet: IP Header is "<<ipl<<" and " <<endl;
-                cerr << "TCP Header is "<<tcph << " and " <<endl;
-                cerr << "Checksum is " << (tcph.IsCorrectChecksum(p) ? "VALID" : "INVALID") <<endl;
+                // cerr << "TCP Packet: IP Header is "<<ipl<<" and ";
+                // cerr << "TCP Header is "<<tcph << " and ";
+                // cerr << "Checksum is " << (tcph.IsCorrectChecksum(p) ? "VALID" : "INVALID");
 
                 // TODO: check for correct checksum
                 // TODO: find the info to send responses to (header info, sourceIP, etc.)
