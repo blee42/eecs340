@@ -85,24 +85,24 @@ int main(int argc, char *argv[])
                 tcph.GetDestPort(c.srcport);
                 tcph.GetSourcePort(c.destport);
 
-                // // check if there is already a connection
-                // ConnectionList<TCPState>::iterator cs = clist.FindMatching(c);
-                // // if there is an open connection
-                // if (cs != clist.end())
-                // {   
-                //     cerr << "Found matching connection\n";
-                //     tcph.GetHeaderLen(tcphlen);
-                //     tcphlen -= TCP_HEADER_BASE_LENGTH;
-                //     Buffer &data = p.GetPayload().ExtractFront(tcphlen);
-                //     SockRequestResponse write(WRITE, (*cs).connection, data, tcphlen, EOK);
+                // check if there is already a connection
+                ConnectionList<TCPState>::iterator cs = clist.FindMatching(c);
+                // if there is an open connection
+                if (cs != clist.end())
+                {   
+                    cerr << "Found matching connection\n";
+                    tcph.GetHeaderLen((unsigned char)tcphlen);
+                    tcphlen -= TCP_HEADER_BASE_LENGTH;
+                    Buffer &data = p.GetPayload().ExtractFront(tcphlen);
+                    SockRequestResponse write(WRITE, (*cs).connection, data, tcphlen, EOK);
 
-                //     MinetSend(sock, write);
-                // }
-                // // else there is no open connection
-                // else
-                // {
-                //     cerr << "Could not find matching connection\n";
-                // }
+                    MinetSend(sock, write);
+                }
+                // else there is no open connection
+                else
+                {
+                    cerr << "Could not find matching connection\n";
+                }
 
                 // TODO: check for correct checksum
                 // TODO: find the info to send responses to (header info, sourceIP, etc.)
