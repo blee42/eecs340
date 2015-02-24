@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
             //  Data from the IP layer below  //
             if (event.handle==mux) 
             {
-                cerr << "HANDLING DATA FROM IP LAYER BELOW\n";
+                cerr << "\nHANDLING DATA FROM IP LAYER BELOW\n";
                 Packet p;
                 MinetReceive(mux,p);
                 unsigned tcphlen=TCPHeader::EstimateTCPHeaderLength(p);
@@ -124,6 +124,7 @@ int main(int argc, char *argv[])
                     case CONNECT:
                     case ACCEPT:
                     {
+                        cerr << "\n===ACCEPT===\n";
                         SockRequestResponse reply;
                         reply.type = STATUS;
                         reply.connection = s.connection;
@@ -138,6 +139,7 @@ int main(int argc, char *argv[])
                         break;
                     case WRITE:
                     {
+                        cerr << "\n===WRITE===\n";
                         unsigned bytes = MIN_MACRO(IP_PACKET_MAX_LENGTH-TCP_HEADER_MAX_LENGTH, s.data.GetSize());
                         // create the payload of the packet
                         Packet p(s.data.ExtractFront(bytes));
@@ -161,6 +163,7 @@ int main(int argc, char *argv[])
                     }
                     break;
                     case FORWARD:
+                        cerr << "\n===FORWARD===\n";
                         // TODO: find connection of request
                         // TODO: request response to that connection?
                         break;
