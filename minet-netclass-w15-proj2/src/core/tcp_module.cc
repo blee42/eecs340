@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 
                 cerr << "TCP Packet: IP Header is "<<ipl<<" and ";
                 cerr << "TCP Header is "<<tcph << " and ";
-                cerr << "Checksum is " << (tcph.IsCorrectChecksum(p) ? "VALID" : "INVALID");
+                cerr << "Checksum is " << (tcph.IsCorrectChecksum(p) ? "VALID\n" : "INVALID\n");
 
                 // Connection c;
                 // ipl.GetDestIP(c.src);
