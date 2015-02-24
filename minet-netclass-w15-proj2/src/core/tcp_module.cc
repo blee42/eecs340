@@ -66,14 +66,40 @@ int main(int argc, char *argv[])
                 Packet p;
                 MinetReceive(mux,p);
                 unsigned tcphlen=TCPHeader::EstimateTCPHeaderLength(p);
-                // cerr << "estimated header len="<<tcphlen<<"\n";
+                cerr << "estimated header len="<<tcphlen<<"\n";
                 p.ExtractHeaderFromPayload<TCPHeader>(tcphlen);
                 IPHeader ipl=p.FindHeader(Headers::IPHeader);
                 TCPHeader tcph=p.FindHeader(Headers::TCPHeader);
 
-                // cerr << "TCP Packet: IP Header is "<<ipl<<" and ";
-                // cerr << "TCP Header is "<<tcph << " and ";
-                // cerr << "Checksum is " << (tcph.IsCorrectChecksum(p) ? "VALID" : "INVALID");
+                cerr << "TCP Packet: IP Header is "<<ipl<<" and ";
+                cerr << "TCP Header is "<<tcph << " and ";
+                cerr << "Checksum is " << (tcph.IsCorrectChecksum(p) ? "VALID" : "INVALID");
+
+                Connection c;
+                ipl.GetDestIP(c.src);
+                ipl.GetSourceIP(c.dest);
+                ipl.GetProtocol(c.protocol);
+                tcph.GetDestPort(c.srcport);
+                tcph.GetSourcePort(c.destport);
+
+                // check if there is already a connection
+                ConnectionList<TCPState>::iterator cs = clist.FindMatching(c);
+                // if there is an open connection
+                if (cs != clist.end())
+                {   
+                    cerr << "Found matching connection\n";
+                    tcph.GetLength(tcplen);
+                    tcplen -= TCP_HEADER_LENGTH;
+                    Buffer &data = p.GetPayLoad().ExtractFront(tcplen);
+                    SockRequestResponse write(WRITE, (*cs).connection, data, tcplen, EOK);
+
+                    MinetSend(sock, write);
+                }
+                // else there is no open connection
+                else
+                {
+                    cerr << "Could not find matching connection\n";
+                }
 
                 // TODO: check for correct checksum
                 // TODO: find the info to send responses to (header info, sourceIP, etc.)
