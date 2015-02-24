@@ -86,6 +86,7 @@ fi
 
 
 run_module device_driver2
+sleep 1
 run_module ethernet_mux
 run_module arp_module \ $MINET_IPADDR \ $MINET_ETHERNETADDR
 run_module ip_module 
