@@ -114,6 +114,7 @@ int main(int argc, char *argv[])
             //  Data from the Sockets layer above  //
             if (event.handle==sock) 
             {
+                cerr << "HANDLING DATA FROM SOCKETS LAYER ABOVE\n";
                 SockRequestResponse s;
                 MinetReceive(sock,s);
                 cerr << "Received Socket Request:" << s << endl;
@@ -122,8 +123,16 @@ int main(int argc, char *argv[])
                 {
                     case CONNECT:
                     case ACCEPT:
-                        // TODO: create and send response that connection is ok
-                        break;
+                    {
+                        SockRequestResponse reply;
+                        reply.type = STATUS;
+                        reply.connection = s.connection;
+                        reply.buffer = 0;
+                        reply.error = EOK;
+                        MinetSend(sock, reply);
+                        
+                    }
+                    break;
                     case STATUS:
                         // no response needed
                         break;
@@ -148,8 +157,9 @@ int main(int argc, char *argv[])
                         // push the TCP header behind the IP header
                         p.PushBackHeader(tcph);
                         MinetSend(mux, p);
-                        break;    
+                            
                     }
+                    break;
                     case FORWARD:
                         // TODO: find connection of request
                         // TODO: request response to that connection?
