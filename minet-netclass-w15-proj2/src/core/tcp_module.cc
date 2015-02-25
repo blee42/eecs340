@@ -27,9 +27,9 @@ using std::cin;
 //              CONST & MACROS              //
 // ======================================== //
 // max number of tries 
-#define MAX_TRIES 3;
+#define MAX_TRIES 3
 // max segment size
-#define MSS 536;
+#define MSS 536
 
 // ======================================== //
 //                  HELPERS                 //
