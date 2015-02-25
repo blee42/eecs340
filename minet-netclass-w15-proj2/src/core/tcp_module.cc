@@ -129,6 +129,7 @@ int main(int argc, char *argv[])
         rec_tcph.GetDestPort(c.srcport);
         rec_tcph.GetSourcePort(c.destport);
 
+        // do we need to switch these as we send packets back and forth
         unsigned int rec_seq_n;
         rec_tcph.GetSeqNum(rec_seq_n);
         unsigned int ack_n = rec_seq_n + 1;
@@ -159,6 +160,8 @@ int main(int argc, char *argv[])
           // TODO: find the info to send responses to (header info, sourceIP, etc.)
           // TODO: build packet
           // TODO: send response packet
+          unsigned char send_flag;
+          SockRequestResponse response;
           switch(cs->state.GetState())
           {
             case LISTEN:
@@ -166,12 +169,12 @@ int main(int argc, char *argv[])
               cerr << "LISTEN STATE\n";
               if (IS_SYN(flag))
               {
-                SET_SYN(flag);
-                SET_ACK(flag);
-                Packet send_pack = MakePacket(Buffer(NULL, 0), c, rec_seq_n, ack_n, flag);
+                SET_SYN(send_flag);
+                SET_ACK(send_flag);
+                Packet send_pack = MakePacket(Buffer(NULL, 0), c, rec_seq_n, ack_n, send_flag);
                 MinetSend(mux, send_pack);
                 cs->state.SetState(SYN_RCVD);
-                rec_seq_n ++;
+                rec_seq_n++;
               }
             }
             break;
@@ -197,11 +200,40 @@ int main(int argc, char *argv[])
             case ESTABLISHED:
             {
               cerr << "ESTABLISHED STATE\n";
-              // may have other conditions?
+              // if the otherside is ready to close
               if (IS_FIN(flag))
               {
                 // send back ACK for the FIN
                 cs->state.SetState(CLOSE_WAIT);
+              }
+              // else otherside continues to send data
+              else
+              {
+                if (IS_ACK(flag))
+                {
+                  // set the states
+                }
+                if (IS_PSH(flag))
+                {
+                  // set window stuff
+
+                  // create response to send to sock
+                  response.type = WRITE;
+                  response.connection = c;
+                  
+                  // maybe get packet payload?
+                  // TODO fix this
+                  response.data = connection.data;
+                  response.bytes = data.length;
+                  
+                  response.error = EOK; 
+                  MinetSend(sock, response);
+
+                  SET_ACK(send_flag);
+                  Packet send_pack = MakePacket(Buffer(NULL, 0), c, rec_seq_n, ack_n, send_flag);
+                  MinetSend(mux, send_pack);
+                  rec_seq_n++;
+                }
               }
             }
             break;
@@ -285,13 +317,6 @@ int main(int argc, char *argv[])
             cerr << "\n=== END ACCEPT===\n";
           }
           break;
-          case STATUS:
-          {
-            cerr << "\n===STATUS===\n";
-            cerr << "\n===END STATUS===\n";
-          }
-            // no response needed
-          break;
           case WRITE:
           {
             // HAVE NOT TESTED
@@ -334,6 +359,13 @@ int main(int argc, char *argv[])
             // TODO: find connection of request
             // TODO: create and send request
           break; 
+          case STATUS:
+          {
+            cerr << "\n===STATUS===\n";
+            // no response needed
+            cerr << "\n===END STATUS===\n";
+          }
+          break;
           default:
           {
             cerr << "\n===DEFAULT===\n";
