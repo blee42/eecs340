@@ -1,3 +1,4 @@
+*.o
 *.sh
 minet-netclass-w15-proj2/bin/
 minet-netclass-w15-proj2/fifos/

@@ -88,6 +88,9 @@ int main(int argc, char *argv[])
                 tcph.GetDestPort(c.srcport);
                 tcph.GetSourcePort(c.destport);
 
+                unsigned char flag;
+                tcph.GetFlags(flag);
+                cerr << "FLAG: " << flag << endl;
                 // testing code
                 TCPState hardCodedState(1000, LISTEN, 2);
                 ConnectionToStateMapping<TCPState> hardCodedConnection(c, Time(3), hardCodedState, true);
