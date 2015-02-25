@@ -139,8 +139,11 @@ int main(int argc, char *argv[])
 
         // do we need to switch these as we send packets back and forth
         unsigned int rec_seq_n;
+        unsigned int rec_ack_n;
+        unsigned int send_ack_n;
         rec_tcp_h.GetSeqNum(rec_seq_n);
-        unsigned int ack_n = rec_seq_n + 1;
+        rec_tcp_h.GetAckNum(rec_ack_n)
+        send_ack_n = rec_seq_n + 1;
 
         unsigned char flag;
         rec_tcp_h.GetFlags(flag);
@@ -169,7 +172,7 @@ int main(int argc, char *argv[])
           // TODO: build packet
           // TODO: send response packet
           unsigned char send_flag;
-          SockRequestResponse response;
+          SockRequestResponse res;
           switch(cs->state.GetState())
           {
             case LISTEN:
@@ -180,10 +183,9 @@ int main(int argc, char *argv[])
               {
                 SET_SYN(send_flag);
                 SET_ACK(send_flag);
-                Packet send_pack = MakePacket(Buffer(NULL, 0), conn, rec_seq_n, ack_n, send_flag);
+                Packet send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag);
                 MinetSend(mux, send_pack);
                 cs->state.SetState(SYN_RCVD);
-                rec_seq_n++;
               }
             }
             break;
@@ -193,18 +195,34 @@ int main(int argc, char *argv[])
               if (IS_ACK(flag))
               {
                 cs->state.SetState(ESTABLISHED);
-                // send a WRITE in socket layer 
+                // create res to send to sock
+                res.type = WRITE;
+                res.connection = conn;
+                // TODO fix this
+                res.bytes = 0;
+                res.error = EOK;
+                MinetSend(sock, res);
               }
             }
             break;
             case SYN_SENT:
             {
               cerr << "SYN_SENT STATE\n";
-              // check that flag is syn and ack
-              // extract the seq and ack num
-              // chagne state to established
-              // send back an ack with ack_n = seq num + 1
-              // send a WRITE in socket layer 
+              if (IS_SYN(flag) && IS_ACK(flag))
+              {
+                SET_ACK(send_flag);
+                Packet send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag);
+                MinetSend(mux, send_pack);
+                cs->state.SetState(ESTABLISHED);
+
+                // create res to send to sock
+                res.type = WRITE;
+                res.connection = conn;
+                // TODO fix this
+                res.bytes = 0;
+                res.error = EOK;
+                MinetSend(sock, res);
+              }
             }
             break;
             case SYN_SENT1:
@@ -228,29 +246,28 @@ int main(int argc, char *argv[])
                 if (IS_ACK(flag))
                 {
                   // set the states
-                }
-                // if there is data
-                if (IS_PSH(flag))
-                {
-                  // set window stuff
+                  // if there is data
+                  if (IS_PSH(flag))
+                  {
+                    SET_ACK(send_flag);
+                    Packet send_pack = MakePacket(Buffer(NULL, 0), c, rec_ack_n, send_ack_n, send_flag);
+                    MinetSend(mux, send_pack);
 
-                  // create response to send to sock
-                  response.type = WRITE;
-                  response.connection = c;
-                  
-                  // maybe get packet payload?
-                  // TODO fix this
-                  response.data = connection.data;
-                  response.bytes = data.length;
-                  
-                  response.error = EOK;
-                  // send a WRITE in socket layer 
-                  MinetSend(sock, response);
+                    // set window stuff
 
-                  SET_ACK(send_flag);
-                  Packet send_pack = MakePacket(Buffer(NULL, 0), c, rec_seq_n, ack_n, send_flag);
-                  MinetSend(mux, send_pack);
-                  rec_seq_n++;
+                    // create res to send to sock
+                    res.type = WRITE;
+                    res.connection = conn;
+                    
+                    // maybe get packet payload?
+                    // TODO fix this
+                    // res.data = connection.data;
+                    // res.bytes = data.length;
+                    
+                    res.error = EOK;
+                    // send a WRITE in socket layer 
+                    MinetSend(sock, res);
+                  }
                 }
               }
             }
