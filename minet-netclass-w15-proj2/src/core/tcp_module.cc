@@ -370,21 +370,21 @@ int main(int argc, char *argv[])
           {
             // HAVE NOT TESTED
             cerr << "\n===WRITE===\n";
-            unsigned size = MIN_MACRO(IP_PACKET_MAX_LENGTH-TCP_HEADER_MAX_LENGTH, s.data.GetSize());
+            unsigned size = MIN_MACRO(IP_PACKET_MAX_LENGTH-TCP_HEADER_MAX_LENGTH, req.data.GetSize());
             // create the payload of the packet
-            Packet send_pack(s.data.ExtractFront(size));
+            Packet send_pack(req.data.ExtractFront(size));
             // make IP header because we need to do tcp checksum
             IPHeader send_ip_h;
             send_ip_h.SetProtocol(IP_PROTO_TCP);
-            send_ip_h.SetSourceIP(s.connection.src);
-            send_ip_h.SetDestIP(s.connection.dest);
+            send_ip_h.SetSourceIP(req.connection.src);
+            send_ip_h.SetDestIP(req.connection.dest);
             send_ip_h.SetTotalLength(size + TCP_HEADER_MAX_LENGTH + IP_HEADER_BASE_LENGTH);
             // push ip header onto packet
             send_pack.PushFrontHeader(send_ip_h);
             // make the TCP header.GetSeqNum
             TCPHeader send_tcp_h;
-            send_tcp_h.SetSourcePort(s.connection.srcport, send_pack);
-            send_tcp_h.SetDestPort(s.connection.destport, send_pack);
+            send_tcp_h.SetSourcePort(req.connection.srcport, send_pack);
+            send_tcp_h.SetDestPort(req.connection.destport, send_pack);
             send_tcp_h.SetHeaderLen(TCP_HEADER_MAX_LENGTH, send_pack);
             // push the TCP header behind the IP header
             send_pack.PushBackHeader(send_tcp_h);
