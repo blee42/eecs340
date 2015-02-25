@@ -353,7 +353,7 @@ int main(int argc, char *argv[])
 
             // unsigned int init_seq_n = rand();
             // TCPState accept_conn(rand(), LISTEN, MAX_TRIES);
-            TCPState accept_conn(0, 0, 0);
+            TCPState accept_conn(0, LISTEN, 0);
 
             // add window size - "N" value
             // may need to change timeout time
