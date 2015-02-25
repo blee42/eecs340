@@ -147,11 +147,6 @@ int main(int argc, char *argv[])
 
         unsigned char flag;
         rec_tcp_h.GetFlags(flag);
-
-        // testing code
-        TCPState hardCodedState(1000, LISTEN, 2);
-        ConnectionToStateMapping<TCPState> hardCodedConnection(conn, Time(3), hardCodedState, true);
-        clist.push_back(hardCodedConnection);
  
         // check if there is already a connection
         ConnectionList<TCPState>::iterator cs = clist.FindMatching(conn);
@@ -163,14 +158,7 @@ int main(int argc, char *argv[])
           tcphlen -= TCP_HEADER_MAX_LENGTH;
           Buffer &data = rec_pack.GetPayload().ExtractFront(tcphlen);
           cerr << "this is the data: " << data << "\n";
-          // SockRequestResponse write(WRITE, (*cs).connection, data, tcphlen, EOK);
 
-          // MinetSend(sock, write);
-
-          // TODO: check for correct checksum
-          // TODO: find the info to send responses to (header info, sourceIP, etc.)
-          // TODO: build packet
-          // TODO: send response packet
           unsigned char send_flag;
           SockRequestResponse res;
           switch(cs->state.GetState())
