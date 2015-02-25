@@ -341,10 +341,9 @@ int main(int argc, char *argv[])
 
             // unsigned int init_seq_n = rand();
             TCPState accept_conn(rand(), LISTEN, MAX_TRIES);
-
-            // add window size - "N" value
+            accept_conn.N = 0;
             // may need to change timeout time
-            ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(), accept_conn, true);
+            ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(3), accept_conn, false);
             clist.push_front(new_conn);
 
            
