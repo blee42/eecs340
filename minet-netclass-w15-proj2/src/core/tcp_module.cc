@@ -103,7 +103,8 @@ int main(int argc, char *argv[])
                     tcphlen -= TCP_HEADER_MAX_LENGTH;
                     Buffer &data = p.GetPayload().ExtractFront(tcphlen);
                     cerr << "this is the data: " << data << "\n";
-                    cin >> data;
+                    int comment;
+                    cin >> comment;
                     SockRequestResponse write(WRITE, (*cs).connection, data, tcphlen, EOK);
 
                     MinetSend(sock, write);
