@@ -29,7 +29,7 @@ using std::cin;
 Packet MakePacket(Buffer &data, Connection conn, unsigned int seq_n, unsigned int ack_n, unsigned char flag)
 {
   // make Packet
-  unsigned size = MIN_MACRO(IP_PACKET_MAX_LENGTH-TCP_HEADER_MAX_LENGTH, s.data.GetSize());
+  unsigned size = MIN_MACRO(IP_PACKET_MAX_LENGTH-TCP_HEADER_MAX_LENGTH, data.GetSize());
   Packet send_pack(data.ExtractFront(size));
   // make IP header
   IPHeader send_iph;
@@ -133,6 +133,9 @@ int main(int argc, char *argv[])
         rec_tcph.GetSeqNum(rec_seq_n);
         unsigned int ack_n = rec_seq_n + 1;
 
+        unsigned char flag;
+        rec_tcph.GetFlags(flag);
+
         // testing code
         TCPState hardCodedState(1000, LISTEN, 2);
         ConnectionToStateMapping<TCPState> hardCodedConnection(c, Time(3), hardCodedState, true);
@@ -144,9 +147,9 @@ int main(int argc, char *argv[])
         if (cs != clist.end())
         {   
           cerr << "Found matching connection\n";
-          tcph.GetHeaderLen((unsigned char&)tcphlen);
+          rec_tcph.GetHeaderLen((unsigned char&)tcphlen);
           tcphlen -= TCP_HEADER_MAX_LENGTH;
-          Buffer &data = p.GetPayload().ExtractFront(tcphlen);
+          Buffer &data = rec_pack.GetPayload().ExtractFront(tcphlen);
           cerr << "this is the data: " << data << "\n";
           int comment;
           cin >> comment;
@@ -229,9 +232,9 @@ int main(int argc, char *argv[])
               cerr << "CLOSING STATE\n";
             }
             break;
-            case LASK_ACK:
+            case LAST_ACK:
             {
-              cerr << "LASK_ACK STATE\n";
+              cerr << "LAST_ACK STATE\n";
               if (IS_ACK(flag))
               {
                 cs->state.SetState(CLOSED);
@@ -303,7 +306,7 @@ int main(int argc, char *argv[])
             send_iph.SetProtocol(IP_PROTO_TCP);
             send_iph.SetSourceIP(s.connection.src);
             send_iph.SetDestIP(s.connection.dest);
-            send_iph.SetTotalLength(bytes + TCP_HEADER_MAX_LENGTH + IP_HEADER_BASE_LENGTH);
+            send_iph.SetTotalLength(size + TCP_HEADER_MAX_LENGTH + IP_HEADER_BASE_LENGTH);
             // push ip header onto packet
             send_pack.PushFrontHeader(send_iph);
             // make the TCP header.GetSeqNum
