@@ -27,9 +27,9 @@ using std::cin;
 //              CONST & MACROS              //
 // ======================================== //
 // max number of tries 
-#define MAX_TRIES = 3;
+#define MAX_TRIES 3;
 // max segment size
-#define MSS = 536;
+#define MSS 536;
 
 // ======================================== //
 //                  HELPERS                 //
@@ -352,8 +352,8 @@ int main(int argc, char *argv[])
             cerr << "\n===ACCEPT===\n";
 
             // unsigned int init_seq_n = rand();
-            // TCPState accept_conn(rand(), LISTEN, MAX_TRIES);
-            TCPState accept_conn(0, LISTEN, 0);
+            TCPState accept_conn(rand(), LISTEN, MAX_TRIES);
+            // TCPState accept_conn(0, LISTEN, 0);
 
             // add window size - "N" value
             // may need to change timeout time
