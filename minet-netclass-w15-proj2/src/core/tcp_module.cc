@@ -344,7 +344,7 @@ int main(int argc, char *argv[])
 
             // add window size - "N" value
             // may need to change timeout time
-            ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(), accept_conn, false);
+            ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(), accept_conn, true);
             clist.push_front(new_conn);
 
            
