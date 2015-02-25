@@ -349,9 +349,9 @@ int main(int argc, char *argv[])
           {
             // passive open
             cerr << "\n===ACCEPT===\n";
-
+            TCPState accept_conn;
             // unsigned int init_seq_n = rand();
-            TCPState accept_conn(rand();, LISTEN, MAX_TRIES);
+            accept_conn(rand(), LISTEN, MAX_TRIES);
             // add window size - "N" value
             // may need to change timeout time
             ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(), accept_conn, false);
