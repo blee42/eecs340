@@ -26,7 +26,7 @@ using std::cin;
 // ======================================== //
 //                  HELPERS                 //
 // ======================================== //
-Packet MakePacket(Buffer &data, unsigned int seq_n, unsigned int ack_n, unsigned char flag)
+Packet MakePacket(Buffer &data, Connection conn, unsigned int seq_n, unsigned int ack_n, unsigned char flag)
 {
   // make Packet
   unsigned size = MIN_MACRO(IP_PACKET_MAX_LENGTH-TCP_HEADER_MAX_LENGTH, s.data.GetSize());
@@ -34,15 +34,15 @@ Packet MakePacket(Buffer &data, unsigned int seq_n, unsigned int ack_n, unsigned
   // make IP header
   IPHeader send_iph;
   send_iph.SetProtocol(IP_PROTO_TCP);
-  send_iph.SetSourceIP(s.connection.src);
-  send_iph.SetDestIP(s.connection.dest);
+  send_iph.SetSourceIP(conn.src);
+  send_iph.SetDestIP(conn.dest);
   send_iph.SetTotalLength(size + TCP_HEADER_MAX_LENGTH + IP_HEADER_BASE_LENGTH);
   // push ip header onto packet
   send_pack.PushFrontHeader(send_iph);
   // make the TCP header
   TCPHeader send_tcph;
-  send_tcph.SetSourcePort(s.connection.srcport, send_pack);
-  send_tcph.SetDestPort(s.connection.destport, send_pack);
+  send_tcph.SetSourcePort(conn.srcport, send_pack);
+  send_tcph.SetDestPort(conn.destport, send_pack);
   send_tcph.SetSeqNum(seq_n, send_pack);
 
   // check if we need to include an ack
@@ -133,69 +133,33 @@ int main(int argc, char *argv[])
         rec_tcph.GetSeqNum(rec_seq_n);
         unsigned int ack_n = rec_seq_n + 1;
 
-        // else if we received a valid event from Minet, do processing
-        else 
-        {
-            //  Data from the IP layer below  //
-            if (event.handle==mux) 
-            {
-                cerr << "\nHANDLING DATA FROM IP LAYER BELOW\n";
-                Packet p;
-                MinetReceive(mux,p);
-                unsigned tcphlen=TCPHeader::EstimateTCPHeaderLength(p);
-                cerr << "estimated header len="<<tcphlen<<"\n";
-                p.ExtractHeaderFromPayload<TCPHeader>(tcphlen);
-                IPHeader ipl=p.FindHeader(Headers::IPHeader);
-                TCPHeader tcph=p.FindHeader(Headers::TCPHeader);
+        // testing code
+        TCPState hardCodedState(1000, LISTEN, 2);
+        ConnectionToStateMapping<TCPState> hardCodedConnection(c, Time(3), hardCodedState, true);
+        clist.push_back(hardCodedConnection);
+ 
+        // check if there is already a connection
+        ConnectionList<TCPState>::iterator cs = clist.FindMatching(c);
+        // if there is an open connection
+        if (cs != clist.end())
+        {   
+          cerr << "Found matching connection\n";
+          tcph.GetHeaderLen((unsigned char&)tcphlen);
+          tcphlen -= TCP_HEADER_MAX_LENGTH;
+          Buffer &data = p.GetPayload().ExtractFront(tcphlen);
+          cerr << "this is the data: " << data << "\n";
+          int comment;
+          cin >> comment;
+          SockRequestResponse write(WRITE, (*cs).connection, data, tcphlen, EOK);
 
-                cerr << "TCP Packet:\n IP Header is "<<ipl<<"\n";
-                cerr << "TCP Header is "<<tcph << "\n";
-                cerr << "Checksum is " << (tcph.IsCorrectChecksum(p) ? "VALID\n\n" : "INVALID\n\n");
+          MinetSend(sock, write);
 
-                cerr << "PACKET CONTENTS: " << p << "\n";
-
-                Connection c;
-                ipl.GetDestIP(c.src);
-                ipl.GetSourceIP(c.dest);
-                ipl.GetProtocol(c.protocol);
-                tcph.GetDestPort(c.srcport);
-                tcph.GetSourcePort(c.destport);
-
-                unsigned char flag;
-                tcph.GetFlags(flag);
-                cerr << "FLAG: " << flag << endl;
-                // testing code
-                TCPState hardCodedState(1000, LISTEN, 2);
-                ConnectionToStateMapping<TCPState> hardCodedConnection(c, Time(3), hardCodedState, true);
-                clist.push_back(hardCodedConnection);
-
-                // check if there is already a connection
-                ConnectionList<TCPState>::iterator cs = clist.FindMatching(c);
-                // if there is an open connection
-                if (cs != clist.end())
-                {   
-                    cerr << "Found matching connection\n";
-                    tcph.GetHeaderLen((unsigned char&)tcphlen);
-                    tcphlen -= TCP_HEADER_MAX_LENGTH;
-                    Buffer &data = p.GetPayload().ExtractFront(tcphlen);
-                    cerr << "this is the data: " << data << "\n";
-                    int comment;
-                    cin >> comment;
-                    SockRequestResponse write(WRITE, (*cs).connection, data, tcphlen, EOK);
-
-                    MinetSend(sock, write);
-                }
-                // else there is no open connection
-                else
-                {
-                    cerr << "Could not find matching connection\n";
-                }
-
-                // TODO: check for correct checksum
-                // TODO: find the info to send responses to (header info, sourceIP, etc.)
-                // TODO: build packet
-                // TODO: send response packet
-            
+          // TODO: check for correct checksum
+          // TODO: find the info to send responses to (header info, sourceIP, etc.)
+          // TODO: build packet
+          // TODO: send response packet
+          switch(cs->state.GetState())
+          {
             case LISTEN:
             {
               cerr << "LISTEN STATE\n";
@@ -203,7 +167,7 @@ int main(int argc, char *argv[])
               {
                 SET_SYN(flag);
                 SET_ACK(flag);
-                Packet send_pack = MakePacket(Buffer(NULL, 0), rec_seq_n, ack_n, flag)
+                Packet send_pack = MakePacket(Buffer(NULL, 0), c, rec_seq_n, ack_n, flag)
                 MinetSend(mux, send_pack);
                 cs->state.SetState(SYN_RCVD);
                 rec_seq_n ++;
@@ -288,26 +252,12 @@ int main(int argc, char *argv[])
             default:
               break;
           }
-          rec_tcph.GetHeaderLen((unsigned char&)tcphlen);
-          tcphlen -= TCP_HEADER_MAX_LENGTH;
-          Buffer &data = rec_pack.GetPayload().ExtractFront(tcphlen);
-          cerr << "this is the data: " << data << "\n";
-          int comment;
-          cin >> comment;
-          SockRequestResponse write(WRITE, (*cs).connection, data, tcphlen, EOK);
-
-          MinetSend(sock, write);
         }
         // else there is no open connection
         else
         {
           cerr << "Could not find matching connection\n";
         }
-
-        // TODO: check for correct checksum
-        // TODO: find the info to send responses to (header info, sourceIP, etc.)
-        // TODO: build packet
-        // TODO: send response packet
 
       }
 
