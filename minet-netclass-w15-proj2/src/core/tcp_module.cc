@@ -99,8 +99,10 @@ int main(int argc, char *argv[])
                 {   
                     cerr << "Found matching connection\n";
                     tcph.GetHeaderLen((unsigned char&)tcphlen);
-                    tcphlen -= TCP_HEADER_BASE_LENGTH;
+                    tcphlen -= TCP_HEADER_MAX_LENGTH;
                     Buffer &data = p.GetPayload().ExtractFront(tcphlen);
+                    cerr << "this is the data: " << data << "\n";
+                    cin >> data;
                     SockRequestResponse write(WRITE, (*cs).connection, data, tcphlen, EOK);
 
                     MinetSend(sock, write);
