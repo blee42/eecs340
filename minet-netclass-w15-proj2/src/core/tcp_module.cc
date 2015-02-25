@@ -151,6 +151,7 @@ int main(int argc, char *argv[])
         // check if there is already a connection
         ConnectionList<TCPState>::iterator cs = clist.FindMatching(conn);
         // if there is an open connection
+        cerr << "\n clist: " << clist << endl;
         if (cs != clist.end())
         {   
           cerr << "Found matching connection\n";
