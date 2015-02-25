@@ -345,13 +345,13 @@ int main(int argc, char *argv[])
             cerr << "\n===CONNECT===\n";
             cerr << "\n===END CONNECT===\n";
           }
+          break;
           case ACCEPT:
           {
             // passive open
             cerr << "\n===ACCEPT===\n";
-            TCPState accept_conn;
             // unsigned int init_seq_n = rand();
-            accept_conn(rand(), LISTEN, MAX_TRIES);
+            TCPState accept_conn(rand(), LISTEN, MAX_TRIES);
             // add window size - "N" value
             // may need to change timeout time
             ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(), accept_conn, false);
