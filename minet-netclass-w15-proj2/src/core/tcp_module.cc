@@ -163,9 +163,9 @@ int main(int argc, char *argv[])
           tcphlen -= TCP_HEADER_MAX_LENGTH;
           Buffer &data = rec_pack.GetPayload().ExtractFront(tcphlen);
           cerr << "this is the data: " << data << "\n";
-          SockRequestResponse write(WRITE, (*cs).connection, data, tcphlen, EOK);
+          // SockRequestResponse write(WRITE, (*cs).connection, data, tcphlen, EOK);
 
-          MinetSend(sock, write);
+          // MinetSend(sock, write);
 
           // TODO: check for correct checksum
           // TODO: find the info to send responses to (header info, sourceIP, etc.)
@@ -353,7 +353,6 @@ int main(int argc, char *argv[])
 
             // unsigned int init_seq_n = rand();
             TCPState accept_conn(rand(), LISTEN, MAX_TRIES);
-            // TCPState accept_conn(0, LISTEN, 0);
 
             // add window size - "N" value
             // may need to change timeout time
