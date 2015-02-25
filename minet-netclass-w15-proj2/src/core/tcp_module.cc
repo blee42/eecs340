@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
         unsigned int rec_ack_n;
         unsigned int send_ack_n;
         rec_tcp_h.GetSeqNum(rec_seq_n);
-        rec_tcp_h.GetAckNum(rec_ack_n)
+        rec_tcp_h.GetAckNum(rec_ack_n);
         send_ack_n = rec_seq_n + 1;
 
         unsigned char flag;
@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
                   if (IS_PSH(flag))
                   {
                     SET_ACK(send_flag);
-                    Packet send_pack = MakePacket(Buffer(NULL, 0), c, rec_ack_n, send_ack_n, send_flag);
+                    Packet send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag);
                     MinetSend(mux, send_pack);
 
                     // set window stuff
@@ -335,8 +335,8 @@ int main(int argc, char *argv[])
         cerr << "\nHANDLING DATA FROM SOCKETS LAYER ABOVE\n";
         SockRequestResponse req;
         SockRequestResponse res;
-        MinetReceive(sock,s);
-        cerr << "Received Socket Request:" << s << endl;
+        MinetReceive(sock, req);
+        cerr << "Received Socket Request:" << req << endl;
 
         switch(req.type)
         {
@@ -350,11 +350,11 @@ int main(int argc, char *argv[])
             // passive open
             cerr << "\n===ACCEPT===\n";
 
-            unsigned int init_seq_n = rand();
-            TCPState accept_conn(init_seq_n, LISTEN, MAX_TRIES);
+            // unsigned int init_seq_n = rand();
+            TCPState accept_conn(rand(), LISTEN, MAX_TRIES);
             // add window size - "N" value
             // may need to change timeout time
-            ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(), accept_conn);
+            ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(), accept_conn, false);
             clist.push_back(new_conn);
 
            
