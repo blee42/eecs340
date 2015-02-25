@@ -26,7 +26,7 @@ using std::cin;
 // ======================================== //
 //                  HELPERS                 //
 // ======================================== //
-Packet MakePacket(Buffer &data, Connection conn, unsigned int seq_n, unsigned int ack_n, unsigned char flag)
+Packet MakePacket(Buffer data, Connection conn, unsigned int seq_n, unsigned int ack_n, unsigned char flag)
 {
   // make Packet
   unsigned size = MIN_MACRO(IP_PACKET_MAX_LENGTH-TCP_HEADER_MAX_LENGTH, data.GetSize());
@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
               {
                 SET_SYN(flag);
                 SET_ACK(flag);
-                Packet send_pack = MakePacket(Buffer(NULL, 0), c, rec_seq_n, ack_n, flag)
+                Packet send_pack = MakePacket(Buffer(NULL, 0), c, rec_seq_n, ack_n, flag);
                 MinetSend(mux, send_pack);
                 cs->state.SetState(SYN_RCVD);
                 rec_seq_n ++;
@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
               if (IS_FIN(flag))
               {
                 // send a fin ack back
-                cs->state.SetState(LASK_ACK);
+                cs->state.SetState(LAST_ACK);
               }
             }
             break;
