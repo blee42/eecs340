@@ -105,6 +105,7 @@ int main(int argc, char *argv[])
 
   while (MinetGetNextEvent(event, TIMEOUT) == 0) 
   {
+    cerr << "\n === EVENT START === \n";
     // Timeout
     if (event.eventtype == MinetEvent::Timeout)
     {
@@ -203,7 +204,7 @@ int main(int argc, char *argv[])
 
               SET_SYN(send_flag);
               SET_ACK(send_flag);
-              Packet send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, 0, send_flag); // ack
+              Packet send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag); // ack
               MinetSend(mux, send_pack);
             }
           }
