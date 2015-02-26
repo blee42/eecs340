@@ -54,6 +54,7 @@ Packet MakePacket(Buffer data, Connection conn, unsigned int seq_n, unsigned int
   send_tcph.SetDestPort(conn.destport, send_pack);
   send_tcph.SetHeaderLen(TCP_HEADER_MAX_LENGTH, send_pack);
   send_tcph.SetFlags(flag, send_pack);
+  send_tcph.SetWinSize(1, send_pack); // to fix
   send_tcph.SetSeqNum(seq_n, send_pack);
   if (IS_ACK(flag))
   {
@@ -172,7 +173,7 @@ int main(int argc, char *argv[])
         Buffer &data = rec_pack.GetPayload().ExtractFront(tcphlen);
         cerr << "this is the data: " << data << "\n";
 
-        unsigned char send_flag;
+        unsigned char send_flag = 0;
         SockRequestResponse res;
 
         switch(cs->state.GetState())
@@ -434,7 +435,7 @@ int main(int argc, char *argv[])
             res.connection = req.connection;
             MinetSend(sock, res);
 
-            unsigned char send_flag;
+            unsigned char send_flag = 0;
             SET_ACK(send_flag);
             // TODO: need to loop because write may need more than one packet
             // TODO: save seq and ack number with the state
