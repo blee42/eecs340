@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
 
   while (MinetGetNextEvent(event, TIMEOUT) == 0) 
   {
-    cerr << "\n === EVENT START === \n";
+    // cerr << "\n === EVENT START === \n";
     // Timeout
     if (event.eventtype == MinetEvent::Timeout)
     {
@@ -212,6 +212,9 @@ int main(int argc, char *argv[])
           case SYN_RCVD:
           {
             cerr << "\n=== MUX: SYN_RCVD STATE ===\n";
+            cerr << rec_flag << endl;
+            cerr << rec_ack_n << endl;
+            cerr << cs->state.GetLastSent() << endl;
             if (IS_ACK(rec_flag) && cs->state.GetLastSent() == rec_ack_n - 1)
             {
               cerr << "\n=== MUX: IS_ACK - SYN_RCVD STATE ===\n";
