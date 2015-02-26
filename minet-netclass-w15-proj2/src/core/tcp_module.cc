@@ -123,8 +123,8 @@ int main(int argc, char *argv[])
       IPHeader rec_ip_h = rec_pack.FindHeader(Headers::IPHeader);
       TCPHeader rec_tcp_h = rec_pack.FindHeader(Headers::TCPHeader);
 
-      cerr << "TCP Packet:\n IP Header is "<<rec_ip_h<<"\n";
-      cerr << "TCP Header is "<<rec_tcp_h << "\n";
+      cerr << "TCP Packet:\n IP Header is "<< rec_ip_h <<"\n";
+      cerr << "TCP Header is "<< rec_tcp_h << "\n";
       cerr << "Checksum is " << (rec_tcp_h.IsCorrectChecksum(rec_pack) ? "VALID\n\n" : "INVALID\n\n");
       cerr << "PACKET CONTENTS: " << rec_pack << "\n";
 
@@ -153,11 +153,12 @@ int main(int argc, char *argv[])
 
       unsigned char flag;
       rec_tcp_h.GetFlags(flag);
+      cerr << "FLAG: " << flag << endl;
 
       // Check for open connection
       ConnectionList<TCPState>::iterator cs = clist.FindMatching(conn);
+      cerr << "CLIST: " << clist << endl;
 
-      cerr << "\n clist: " << clist << endl;
       if (cs != clist.end() && rec_tcp_h.IsCorrectChecksum(rec_pack))
       {   
         cerr << "Found matching connection\n";
@@ -335,7 +336,10 @@ int main(int argc, char *argv[])
           }
           break;
           default:
+          {
+            cerr << "DEFAULTED STATE"
             break;
+          }
         }
       }
       // else there is no open connection
