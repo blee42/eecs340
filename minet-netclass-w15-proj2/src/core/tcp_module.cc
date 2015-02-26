@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
           case SYN_RCVD:
           {
             cerr << "SYN_RCVD STATE\n";
-            if (IS_ACK(flag) && cs->state.GetLastAcked == rec_ack_n - 1)
+            if (IS_ACK(flag) && cs->state.GetLastAcked() == rec_ack_n - 1)
             {
               cs->state.SetState(ESTABLISHED);
               cs->state.SetLastAcked(rec_ack_n); // -1?
