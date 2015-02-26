@@ -433,7 +433,7 @@ int main(int argc, char *argv[])
           {
             cerr << "\n===WRITE: CONNECTION FOUND===\n";
             // put data in buffer
-            Buffer send_buffer = (*cs).state.TCP_BUFFER_SIZE - (*cs).state.SendBuffer.GetSize();
+            size_t send_buffer_size = (*cs).state.TCP_BUFFER_SIZE - (*cs).state.SendBuffer.GetSize();
             // if there is more data than buffer space
             if (send_buffer < req.bytes)
             {
@@ -470,14 +470,14 @@ int main(int argc, char *argv[])
               // if MSS < rwnd < cwnd or MSS < cwnd < rwnd
               // MSS is the smallest
               // not sure why arithmetic shift?
-              if(((MSS < rwnd && rwnd << cwnd) || (MSS < cwnd && cwnd < rwnd)) && (n + MSS < GBN))
+              if(((MSS < rwnd && rwnd << cwnd) || (MSS < cwnd && cwnd < rwnd)) && (pack_n + MSS < GBN))
               {
                 data = (*cs).state.SendBuffer.Extract(pack_n, MSS);
                 // set new seq_n
                 (*cs).state.SetLastSent((*cs).state.GetLastSent() + MSS);
                 // move on to the next set of packets
                 pack_n = pack_n + MSS;
-                SET_ACK(flag);
+                SET_ACK(send_flag);
                 send_pack = MakePacket(data, (*cs).connection, (*cs).state.GetLastSent(), (*cs).state.GetLastRecvd() + 1, send_flag);
 
               }
@@ -491,7 +491,7 @@ int main(int argc, char *argv[])
                 (*cs).state.SetLastSent((*cs).state.GetLastSent() + cwnd);
                 // move on to the next set of packets
                 pack_n = pack_n + cwnd;
-                SET_ACK(flag);
+                SET_ACK(send_flag);
                 send_pack = MakePacket(data, (*cs).connection, (*cs).state.GetLastSent(), (*cs).state.GetLastRecvd() + 1, send_flag);
               }
 
@@ -503,7 +503,7 @@ int main(int argc, char *argv[])
                 // set new seq_n
                 (*cs).state.SetLastSent((*cs).state.GetLastSent() + rwnd);
                 pack_n = pack_n + cwnd;
-                SET_ACK(flag);
+                SET_ACK(send_flag);
                 send_pack = MakePacket(data, (*cs).connection, (*cs).state.GetLastSent(), (*cs).state.GetLastRecvd() + 1, send_flag);
               }
 
