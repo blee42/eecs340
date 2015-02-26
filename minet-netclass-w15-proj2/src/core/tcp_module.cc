@@ -47,14 +47,14 @@ Packet MakePacket(Buffer data, Connection conn, unsigned int seq_n, unsigned int
   send_ip_h.SetProtocol(IP_PROTO_TCP);
   send_ip_h.SetSourceIP(conn.src);
   send_ip_h.SetDestIP(conn.dest);
-  send_ip_h.SetTotalLength(size + TCP_HEADER_MAX_LENGTH + IP_HEADER_BASE_LENGTH);
+  send_ip_h.SetTotalLength(size + TCP_HEADER_BASE_LENGTH + IP_HEADER_BASE_LENGTH);
   send_pack.PushFrontHeader(send_ip_h);
 
   // Make and push TCP header
   TCPHeader send_tcp_h;
   send_tcp_h.SetSourcePort(conn.srcport, send_pack);
   send_tcp_h.SetDestPort(conn.destport, send_pack);
-  send_tcp_h.SetHeaderLen(TCP_HEADER_MAX_LENGTH, send_pack);
+  send_tcp_h.SetHeaderLen(TCP_HEADER_BASE_LENGTH/4, send_pack);
   send_tcp_h.SetFlags(flag, send_pack);
   send_tcp_h.SetWinSize(1, send_pack); // to fix
   send_tcp_h.SetSeqNum(seq_n, send_pack);
