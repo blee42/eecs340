@@ -337,9 +337,9 @@ int main(int argc, char *argv[])
           break;
           default:
           {
-            cerr << "DEFAULTED STATE"
-            break;
+            cerr << "DEFAULTED STATE\n";
           }
+          break;
         }
       }
       // else there is no open connection
@@ -351,7 +351,7 @@ int main(int argc, char *argv[])
     }
 
     //  Data from the Sockets layer above  //
-    else if (event.handle ==s ock) 
+    else if (event.handle == sock) 
     {
       cerr << "\nHANDLING DATA FROM SOCKETS LAYER ABOVE\n";
       SockRequestResponse req;
@@ -378,8 +378,8 @@ int main(int argc, char *argv[])
           MinetSend(sock, res);
 
           unsigned char send_flag;
-          SET_SYN(flag);
-          Packet send_pack = MakePacket(Buffer(NULL, 0), connect_conn, rand(), 0, send_flag); // not sure what the seq_n should be
+          SET_SYN(send_flag);
+          Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn, rand(), 0, send_flag); // not sure what the seq_n should be
           MinetSend(mux, send_pack);
 
           cerr << "\n===END CONNECT===\n";
@@ -427,13 +427,13 @@ int main(int argc, char *argv[])
             // TODO: need to loop because write may need more than one packet
             // TODO: save seq and ack number with the state
             // TODO: state.setlastsent - need to set this as getlastsent + mss
-            Packet send_pack = MakePacket(req.data, req.connection, , , send_flag);
+            // Packet send_pack = MakePacket(req.data, req.connection, , , send_flag);
             MinetSend(mux, send_pack);
           }
           else
           {
             cerr << "\n===WRITE: NO CONNECTION FOUND===\n";
-            res.connection = req.connection
+            res.connection = req.connection;
             res.type = STATUS;
             res.bytes = req.bytes;
             res.error = ENOMATCH;
