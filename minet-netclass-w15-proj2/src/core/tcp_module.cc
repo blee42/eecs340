@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
               send_seq_n = rand();
 
               cs->state.SetState(SYN_RCVD);
-              cs->state.SetLastAcked(rec_ack_n);
+              // cs->state.SetLastAcked(rec_ack_n);
               cs->state.SetLastRecvd(rec_seq_n);
               cs->state.SetLastSent(send_seq_n); // generate random SEQ # to send out
 
@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
           case SYN_RCVD:
           {
             cerr << "\n=== MUX: SYN_RCVD STATE ===\n";
-            if (IS_ACK(rec_flag) && cs->state.GetLastAcked() == rec_ack_n - 1)
+            if (IS_ACK(rec_flag) && cs->state.GetLastSent() == rec_ack_n - 1)
             {
               cs->state.SetState(ESTABLISHED);
               cs->state.SetLastAcked(rec_ack_n); // -1?
