@@ -212,9 +212,9 @@ int main(int argc, char *argv[])
           case SYN_RCVD:
           {
             cerr << "\n=== MUX: SYN_RCVD STATE ===\n";
-            cerr << rec_flag << endl;
-            cerr << rec_ack_n << endl;
-            cerr << cs->state.GetLastSent() << endl;
+            cerr << "rec_flag: " << rec_flag << endl;
+            cerr << "rec_ack_n: " << rec_ack_n << endl;
+            cerr << "get last sent: " << cs->state.GetLastSent() << endl;
             if (IS_ACK(rec_flag) && cs->state.GetLastSent() == rec_ack_n - 1)
             {
               cerr << "\n=== MUX: IS_ACK - SYN_RCVD STATE ===\n";
