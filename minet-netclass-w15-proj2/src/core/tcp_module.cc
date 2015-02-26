@@ -157,6 +157,7 @@ int main(int argc, char *argv[])
 
       // Check for open connection
       ConnectionList<TCPState>::iterator cs = clist.FindMatching(conn);
+      cerr << "CONN: " << conn << endl;
       cerr << "CLIST: " << clist << endl;
 
       if (cs != clist.end() && rec_tcp_h.IsCorrectChecksum(rec_pack))
