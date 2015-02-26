@@ -204,9 +204,16 @@ int main(int argc, char *argv[])
           case SYN_RCVD:
           {
             cerr << "SYN_RCVD STATE\n";
-            if (IS_ACK(flag))
+            if (IS_ACK(flag) && cs->state.GetLastAcked == rec_ack_n - 1)
             {
               cs->state.SetState(ESTABLISHED);
+              cs->state.SetLastAcked(rec_ack_n); // -1?
+              cs->state.SetLastRecvd(rec_seq_n); // okay think about all of this
+              cs->state.SetLastSent(send_seq_n);
+
+              // timer
+
+
               // create res to send to sock
               res.type = WRITE;
               res.connection = conn;
@@ -369,14 +376,8 @@ int main(int argc, char *argv[])
           TCPState connect_conn(rand(), LISTEN, MAX_TRIES);
           connect_conn.N = 0;
           // may need to change timeout time
-          ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(3), connect_conn, false);
+          ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(), connect_conn, false);
           clist.push_front(new_conn);
-
-          TCPState connect_conn2(rand(), LISTEN, MAX_TRIES);
-          connect_conn2.N = 0;
-          // may need to change timeout time
-          ConnectionToStateMapping<TCPState> new_conn2(req.connection, Time(3), connect_conn2, false);
-          clist.push_front(new_conn2);
          
           res.type = STATUS;
           res.connection = req.connection;
@@ -401,7 +402,7 @@ int main(int argc, char *argv[])
           TCPState accept_conn(rand(), LISTEN, MAX_TRIES);
           accept_conn.N = 0; // set window size to something
           // may need to change timeout time
-          ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(3), accept_conn, false);
+          ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(), accept_conn, false);
           clist.push_front(new_conn);
          
           res.type = STATUS;
