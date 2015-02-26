@@ -379,7 +379,7 @@ int main(int argc, char *argv[])
 
           unsigned char send_flag;
           SET_SYN(send_flag);
-          Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn, rand(), 0, send_flag); // not sure what the seq_n should be
+          Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, rand(), 0, send_flag); // not sure what the seq_n should be
           MinetSend(mux, send_pack);
 
           cerr << "\n===END CONNECT===\n";
