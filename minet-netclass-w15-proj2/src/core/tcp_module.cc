@@ -156,8 +156,8 @@ int main(int argc, char *argv[])
       cerr << "FLAG: " << flag << endl;
 
       // Check for open connection
-      // ConnectionList<TCPState>::iterator cs = clist.FindMatching(conn);
-      ConnectionList<TCPState>::iterator cs = clist.FindMatchingSource(conn);
+      ConnectionList<TCPState>::iterator cs = clist.FindMatching(conn);
+      // ConnectionList<TCPState>::iterator cs = clist.FindMatchingSource(conn);
       cerr << "CONN: " << conn << endl;
       cerr << "CLIST: " << clist << endl;
 
