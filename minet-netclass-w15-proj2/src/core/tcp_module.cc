@@ -31,6 +31,7 @@ using std::cin;
 #define MSS 536
 #define TIMEOUT 10
 #define GBN MSS*5
+#define RTT 5
 
 // ======================================== //
 //                  HELPERS                 //
@@ -201,6 +202,8 @@ int main(int argc, char *argv[])
               cs->state.SetLastSent(send_seq_n); // generate random SEQ # to send out
 
               // timer?
+              cs->bTmrActive = true;
+              cs->timeout = Time()+RTT;
 
               SET_SYN(send_flag);
               SET_ACK(send_flag);
