@@ -435,11 +435,11 @@ int main(int argc, char *argv[])
             // put data in buffer
             size_t send_buffer_size = (*cs).state.TCP_BUFFER_SIZE - (*cs).state.SendBuffer.GetSize();
             // if there is more data than buffer space
-            if (send_buffer < req.bytes)
+            if (send_buffer_size < req.bytes)
             {
-              (*cs).state.SendBuffer.AddBack(req.data.ExtractFront(send_buffer));
+              (*cs).state.SendBuffer.AddBack(req.data.ExtractFront(send_buffer_size));
 
-              res.bytes = send_buffer;
+              res.bytes = send_buffer_size;
               res.error = EBUF_SPACE;
             }
             // else there is no overflow
@@ -497,9 +497,9 @@ int main(int argc, char *argv[])
 
               // else if rwnd < MSS < cwnd or rwnd < cwnd < MSS
               // rwnd is hte smallest
-              else if (pack_n + rwnd < GBN())
+              else if (pack_n + rwnd < GBN)
               {
-                data = (*cs).state.SendBuffer(pack_n, rwnd);
+                data = (*cs).state.SendBuffer.Extract(pack_n, rwnd);
                 // set new seq_n
                 (*cs).state.SetLastSent((*cs).state.GetLastSent() + rwnd);
                 pack_n = pack_n + cwnd;
