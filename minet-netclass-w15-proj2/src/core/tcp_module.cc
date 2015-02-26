@@ -62,6 +62,8 @@ Packet MakePacket(Buffer data, Connection conn, unsigned int seq_n, unsigned int
   send_tcph.RecomputeChecksum(send_pack);
   send_pack.PushBackHeader(send_tcph);
 
+  cerr << "PACKET:\n" << send_pack << endl;
+
   return send_pack;
 }
 
@@ -153,8 +155,8 @@ int main(int argc, char *argv[])
       rec_tcp_h.GetAckNum(rec_ack_n);
       send_ack_n = rec_seq_n + 1;
 
-      unsigned char flag;
-      rec_tcp_h.GetFlags(flag);
+      unsigned char rec_flag;
+      rec_tcp_h.GetFlags(rec_flag);
 
       // Check for open connection
       ConnectionList<TCPState>::iterator cs = clist.FindMatching(conn);
@@ -184,7 +186,7 @@ int main(int argc, char *argv[])
           {
             cerr << "LISTEN STATE\n";
             // coming from ACCEPT in socket layer
-            if (IS_SYN(flag))
+            if (IS_SYN(rec_flag))
             {
               cerr << "LISTEN STATE: SYN\n";
               send_seq_n = rand();
@@ -200,14 +202,13 @@ int main(int argc, char *argv[])
               SET_ACK(send_flag);
               Packet send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag);
               MinetSend(mux, send_pack);
-
             }
           }
           break;
           case SYN_RCVD:
           {
             cerr << "SYN_RCVD STATE\n";
-            if (IS_ACK(flag) && cs->state.GetLastAcked() == rec_ack_n - 1)
+            if (IS_ACK(rec_flag) && cs->state.GetLastAcked() == rec_ack_n - 1)
             {
               cs->state.SetState(ESTABLISHED);
               cs->state.SetLastAcked(rec_ack_n); // -1?
@@ -230,7 +231,7 @@ int main(int argc, char *argv[])
           case SYN_SENT:
           {
             cerr << "SYN_SENT STATE\n";
-            if (IS_SYN(flag) && IS_ACK(flag))
+            if (IS_SYN(rec_flag) && IS_ACK(rec_flag))
             {
               send_seq_n = cs->state.GetLastSent() + 1;
 
@@ -264,7 +265,7 @@ int main(int argc, char *argv[])
           {
             cerr << "ESTABLISHED STATE\n";
             // if the otherside is ready to close
-            if (IS_FIN(flag))
+            if (IS_FIN(rec_flag))
             {
               // send back ACK for the FIN
               cs->state.SetState(CLOSE_WAIT);
@@ -272,11 +273,11 @@ int main(int argc, char *argv[])
             // else otherside continues to send data
             else
             {
-              if (IS_ACK(flag))
+              if (IS_ACK(rec_flag))
               {
                 // set the states
                 // if there is data
-                if (IS_PSH(flag))
+                if (IS_PSH(rec_flag))
                 {
                   SET_ACK(send_flag);
                   Packet send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag);
@@ -309,7 +310,7 @@ int main(int argc, char *argv[])
           case CLOSE_WAIT:
           {
             cerr << "CLOSE_WAIT STATE\n";
-            if (IS_FIN(flag))
+            if (IS_FIN(rec_flag))
             {
               // send a fin ack back
               cs->state.SetState(LAST_ACK);
@@ -329,7 +330,7 @@ int main(int argc, char *argv[])
           case LAST_ACK:
           {
             cerr << "LAST_ACK STATE\n";
-            if (IS_ACK(flag))
+            if (IS_ACK(rec_flag))
             {
               cs->state.SetState(CLOSED);
             }
