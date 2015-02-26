@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 
   MinetEvent event;
 
-  while (MinetGetNextEvent(event) ==0 ) 
+  while (MinetGetNextEvent(event, TIMEOUT) == 0) 
   {
     // Timeout
     if (event.eventtype == MinetEvent::Timeout)
@@ -112,23 +112,25 @@ int main(int argc, char *argv[])
     else if (event.handle == mux) 
     {
       cerr << "\nHANDLING DATA FROM IP LAYER BELOW\n";
+
       Packet rec_pack;
       MinetReceive(mux, rec_pack);
+      
       unsigned tcphlen = TCPHeader::EstimateTCPHeaderLength(rec_pack);
-      cerr << "estimated header len=" << tcphlen << "\n";
       rec_pack.ExtractHeaderFromPayload<TCPHeader>(tcphlen);
+      cerr << "estimated header len=" << tcphlen << "\n";
+
       IPHeader rec_ip_h = rec_pack.FindHeader(Headers::IPHeader);
       TCPHeader rec_tcp_h = rec_pack.FindHeader(Headers::TCPHeader);
 
       cerr << "TCP Packet:\n IP Header is "<<rec_ip_h<<"\n";
       cerr << "TCP Header is "<<rec_tcp_h << "\n";
       cerr << "Checksum is " << (rec_tcp_h.IsCorrectChecksum(rec_pack) ? "VALID\n\n" : "INVALID\n\n");
-
       cerr << "PACKET CONTENTS: " << rec_pack << "\n";
 
       // REMOVED HARDCODED PACKET AND NO LONGER WORKS
 
-      // Unpacking useful data
+      // Unpack useful data
       Connection conn;
       rec_ip_h.GetDestIP(conn.src);
       rec_ip_h.GetSourceIP(conn.dest);
@@ -136,10 +138,15 @@ int main(int argc, char *argv[])
       rec_tcp_h.GetDestPort(conn.srcport);
       rec_tcp_h.GetSourcePort(conn.destport);
 
+      // Get window size
+      unsigned short rwnd;
+      rec_tcp_h.GetWinSize(rwnd);
+
       // do we need to switch these as we send packets back and forth
       unsigned int rec_seq_n;
       unsigned int rec_ack_n;
       unsigned int send_ack_n;
+      unsigned int send_seq_n;
       rec_tcp_h.GetSeqNum(rec_seq_n);
       rec_tcp_h.GetAckNum(rec_ack_n);
       send_ack_n = rec_seq_n + 1;
@@ -147,11 +154,11 @@ int main(int argc, char *argv[])
       unsigned char flag;
       rec_tcp_h.GetFlags(flag);
 
-      // check if there is already a connection
+      // Check for open connection
       ConnectionList<TCPState>::iterator cs = clist.FindMatching(conn);
-      // if there is an open connection
+
       cerr << "\n clist: " << clist << endl;
-      if (cs != clist.end())
+      if (cs != clist.end() && rec_tcp_h.IsCorrectChecksum(rec_pack))
       {   
         cerr << "Found matching connection\n";
         rec_tcp_h.GetHeaderLen((unsigned char&)tcphlen);
@@ -164,17 +171,31 @@ int main(int argc, char *argv[])
 
         switch(cs->state.GetState())
         {
+          case CLOSED:
+          {
+            cerr << "CLOSED STATE\n";
+          }
+          break;
           case LISTEN:
           {
             cerr << "LISTEN STATE\n";
             // coming from ACCEPT in socket layer
             if (IS_SYN(flag))
             {
+              send_seq_n = rand();
+
+              cs->state.SetState(SYN_RCVD);
+              cs->state.SetLastAcked(rec_ack_n);
+              cs->state.SetLastRecvd(rec_seq_n);
+              cs->state.SetLastSent(send_seq_n); // generate random SEQ # to send out
+
+              // timer?
+
               SET_SYN(send_flag);
               SET_ACK(send_flag);
-              Packet send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag);
+              Packet send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag);
               MinetSend(mux, send_pack);
-              cs->state.SetState(SYN_RCVD);
+
             }
           }
           break;
@@ -199,10 +220,17 @@ int main(int argc, char *argv[])
             cerr << "SYN_SENT STATE\n";
             if (IS_SYN(flag) && IS_ACK(flag))
             {
+              send_seq_n = cs->state.GetLastSent() + 1;
+
+              cs->state.SetState(ESTABLISHED);
+              cs->state.SetLastAcked(rec_ack_n);
+              cs->state.SetLastRecvd(rec_seq_n);
+              cs->state.SetLastSent(send_seq_n);
+
+
               SET_ACK(send_flag);
               Packet send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag);
               MinetSend(mux, send_pack);
-              cs->state.SetState(ESTABLISHED);
 
               // create res to send to sock
               res.type = WRITE;
