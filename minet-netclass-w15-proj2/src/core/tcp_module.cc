@@ -52,12 +52,14 @@ Packet MakePacket(Buffer data, Connection conn, unsigned int seq_n, unsigned int
   TCPHeader send_tcph;
   send_tcph.SetSourcePort(conn.srcport, send_pack);
   send_tcph.SetDestPort(conn.destport, send_pack);
-  send_tcph.SetSeqNum(seq_n, send_pack);
   send_tcph.SetHeaderLen(TCP_HEADER_MAX_LENGTH, send_pack);
+  send_tcph.SetFlags(flag, send_pack);
+  send_tcph.SetSeqNum(seq_n, send_pack);
   if (IS_ACK(flag))
   {
     send_tcph.SetAckNum(ack_n, send_pack);
   }
+  send_tcph.RecomputeChecksum(send_pack);
   send_pack.PushBackHeader(send_tcph);
 
   return send_pack;
@@ -153,13 +155,12 @@ int main(int argc, char *argv[])
 
       unsigned char flag;
       rec_tcp_h.GetFlags(flag);
-      cerr << "FLAG: " << flag << endl;
 
       // Check for open connection
       ConnectionList<TCPState>::iterator cs = clist.FindMatching(conn);
       // ConnectionList<TCPState>::iterator cs = clist.FindMatchingSource(conn);
-      cerr << "CONN: " << conn << endl;
-      cerr << "CLIST: " << clist << endl;
+      // cerr << "CONN: " << conn << endl;
+      // cerr << "CLIST: " << clist << endl;
 
       if (cs != clist.end() && rec_tcp_h.IsCorrectChecksum(rec_pack))
       {   
