@@ -30,6 +30,7 @@ using std::cin;
 #define MAX_TRIES 3
 #define MSS 536
 #define TIMEOUT 10
+#define GBN MSS*5
 
 // ======================================== //
 //                  HELPERS                 //
@@ -371,6 +372,8 @@ int main(int argc, char *argv[])
       SockRequestResponse req;
       SockRequestResponse res;
       MinetReceive(sock, req);
+      Packet send_pack;
+      unsigned char send_flag;
       cerr << "Received Socket Request:" << req << endl;
 
       switch(req.type)
@@ -391,7 +394,6 @@ int main(int argc, char *argv[])
           res.error = EOK;
           MinetSend(sock, res);
 
-          unsigned char send_flag;
           SET_SYN(send_flag);
           Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, rand(), 0, send_flag); // not sure what the seq_n should be
           MinetSend(mux, send_pack);
@@ -428,21 +430,90 @@ int main(int argc, char *argv[])
           if (cs != clist.end() && cs->state.GetState() == ESTABLISHED)
           {
             cerr << "\n=== SOCK: WRITE: CONNECTION FOUND ===\n";
-            // any chance of too much data?
-            // put data into a buffer to send to sock layer
-            res.bytes = req.bytes;
-            res.error = EOK;
+            // put data in buffer
+            size_t send_buffer_size = (*cs).state.TCP_BUFFER_SIZE - (*cs).state.SendBuffer.GetSize();
+            // if there is more data than buffer space
+            if (send_buffer_size < req.bytes)
+            {
+              (*cs).state.SendBuffer.AddBack(req.data.ExtractFront(send_buffer_size));
+
+              res.bytes = send_buffer_size;
+              res.error = EBUF_SPACE;
+            }
+            // else there is no overflow
+            else
+            {
+              (*cs).state.SendBuffer.AddBack(req.data);
+
+              res.bytes = req.bytes;
+              res.error = EOK;
+            }
+            
             res.type = STATUS;
             res.connection = req.connection;
             MinetSend(sock, res);
 
-            unsigned char send_flag = 0;
-            SET_ACK(send_flag);
+            // send data from buffer using "Go Back N"
+            unsigned int pack_n = (*cs).state.GetN(); // number of packets waiting to be sent???
+            unsigned int rwnd = (*cs).state.GetRwnd(); // receiver congestion window
+            size_t cwnd = (*cs).state.SendBuffer.GetSize(); // sender congestion window
+
+            // iterate through all the packets
+            while(pack_n < GBN)
+            {
+              Buffer data;
+              rwnd = rwnd - pack_n;
+              cwnd = cwnd - pack_n;
+
+              // if MSS < rwnd < cwnd or MSS < cwnd < rwnd
+              // MSS is the smallest
+              // not sure why arithmetic shift?
+              if(((MSS < rwnd && rwnd << cwnd) || (MSS < cwnd && cwnd < rwnd)) && (pack_n + MSS < GBN))
+              {
+                data = (*cs).state.SendBuffer.Extract(pack_n, MSS);
+                // set new seq_n
+                (*cs).state.SetLastSent((*cs).state.GetLastSent() + MSS);
+                // move on to the next set of packets
+                pack_n = pack_n + MSS;
+                SET_ACK(send_flag);
+                send_pack = MakePacket(data, (*cs).connection, (*cs).state.GetLastSent(), (*cs).state.GetLastRecvd() + 1, send_flag);
+
+              }
+
+              // else if cwnd < MSS < rwnd or cwnd < rwnd < MSS
+              // cwnd is the smallest
+              else if (((cwnd < MSS && MSS << rwnd) || (cwnd < rwnd && rwnd < MSS)) && (pack_n + cwnd < GBN))
+              {
+                data = (*cs).state.SendBuffer.Extract(pack_n, cwnd);
+                // set new seq_n
+                (*cs).state.SetLastSent((*cs).state.GetLastSent() + cwnd);
+                // move on to the next set of packets
+                pack_n = pack_n + cwnd;
+                SET_ACK(send_flag);
+                send_pack = MakePacket(data, (*cs).connection, (*cs).state.GetLastSent(), (*cs).state.GetLastRecvd() + 1, send_flag);
+              }
+
+              // else if rwnd < MSS < cwnd or rwnd < cwnd < MSS
+              // rwnd is hte smallest
+              else if (pack_n + rwnd < GBN)
+              {
+                data = (*cs).state.SendBuffer.Extract(pack_n, rwnd);
+                // set new seq_n
+                (*cs).state.SetLastSent((*cs).state.GetLastSent() + rwnd);
+                pack_n = pack_n + cwnd;
+                SET_ACK(send_flag);
+                send_pack = MakePacket(data, (*cs).connection, (*cs).state.GetLastSent(), (*cs).state.GetLastRecvd() + 1, send_flag);
+              }
+
+              MinetSend(mux, send_pack);
+              // set timeout
+            }
+
+            (*cs).state.N = pack_n;
+
             // TODO: need to loop because write may need more than one packet
             // TODO: save seq and ack number with the state
             // TODO: state.setlastsent - need to set this as getlastsent + mss
-            // Packet send_pack = MakePacket(req.data, req.connection, , , send_flag);
-            // MinetSend(mux, send_pack);
           }
           else
           {
