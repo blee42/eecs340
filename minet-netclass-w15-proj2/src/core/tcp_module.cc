@@ -431,11 +431,11 @@ int main(int argc, char *argv[])
           {
             cerr << "\n=== SOCK: WRITE: CONNECTION FOUND ===\n";
             // put data in buffer
-            size_t send_buffer_size = (*cs).state.TCP_BUFFER_SIZE - (*cs).state.SendBuffer.GetSize();
+            size_t send_buffer_size = cs->state.TCP_BUFFER_SIZE - cs->state.SendBuffer.GetSize();
             // if there is more data than buffer space
             if (send_buffer_size < req.bytes)
             {
-              (*cs).state.SendBuffer.AddBack(req.data.ExtractFront(send_buffer_size));
+              cs->state.SendBuffer.AddBack(req.data.ExtractFront(send_buffer_size));
 
               res.bytes = send_buffer_size;
               res.error = EBUF_SPACE;
@@ -443,7 +443,7 @@ int main(int argc, char *argv[])
             // else there is no overflow
             else
             {
-              (*cs).state.SendBuffer.AddBack(req.data);
+              cs->state.SendBuffer.AddBack(req.data);
 
               res.bytes = req.bytes;
               res.error = EOK;
@@ -454,62 +454,62 @@ int main(int argc, char *argv[])
             MinetSend(sock, res);
 
             // send data from buffer using "Go Back N"
-            unsigned int pack_n = (*cs).state.GetN(); // number of packets waiting to be sent???
-            unsigned int rwnd = (*cs).state.GetRwnd(); // receiver congestion window
-            size_t cwnd = (*cs).state.SendBuffer.GetSize(); // sender congestion window
+            unsigned int win_size = cs->state.GetN(); // window size
+            unsigned int rwnd = cs->state.GetRwnd(); // receiver congestion window
+            size_t cwnd = cs->state.SendBuffer.GetSize(); // sender congestion window
 
             // iterate through all the packets
-            while(pack_n < GBN)
+            while(win_size < GBN)
             {
               Buffer data;
-              rwnd = rwnd - pack_n;
-              cwnd = cwnd - pack_n;
+              rwnd = rwnd - win_size;
+              cwnd = cwnd - win_size;
 
               // if MSS < rwnd < cwnd or MSS < cwnd < rwnd
               // MSS is the smallest
               // not sure why arithmetic shift?
-              if(((MSS < rwnd && rwnd << cwnd) || (MSS < cwnd && cwnd < rwnd)) && (pack_n + MSS < GBN))
+              if(((MSS < rwnd && rwnd << cwnd) || (MSS < cwnd && cwnd < rwnd)) && (win_size + MSS < GBN))
               {
-                data = (*cs).state.SendBuffer.Extract(pack_n, MSS);
+                data = cs->state.SendBuffer.Extract(win_size, MSS);
                 // set new seq_n
-                (*cs).state.SetLastSent((*cs).state.GetLastSent() + MSS);
+                cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
                 // move on to the next set of packets
-                pack_n = pack_n + MSS;
+                win_size = win_size + MSS;
                 SET_ACK(send_flag);
-                send_pack = MakePacket(data, (*cs).connection, (*cs).state.GetLastSent(), (*cs).state.GetLastRecvd() + 1, send_flag);
+                send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, send_flag);
 
               }
 
               // else if cwnd < MSS < rwnd or cwnd < rwnd < MSS
               // cwnd is the smallest
-              else if (((cwnd < MSS && MSS << rwnd) || (cwnd < rwnd && rwnd < MSS)) && (pack_n + cwnd < GBN))
+              else if (((cwnd < MSS && MSS << rwnd) || (cwnd < rwnd && rwnd < MSS)) && (win_size + cwnd < GBN))
               {
-                data = (*cs).state.SendBuffer.Extract(pack_n, cwnd);
+                data = cs->state.SendBuffer.Extract(win_size, cwnd);
                 // set new seq_n
-                (*cs).state.SetLastSent((*cs).state.GetLastSent() + cwnd);
+                cs->state.SetLastSent(cs->state.GetLastSent() + cwnd);
                 // move on to the next set of packets
-                pack_n = pack_n + cwnd;
+                win_size = win_size + cwnd;
                 SET_ACK(send_flag);
-                send_pack = MakePacket(data, (*cs).connection, (*cs).state.GetLastSent(), (*cs).state.GetLastRecvd() + 1, send_flag);
+                send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, send_flag);
               }
 
               // else if rwnd < MSS < cwnd or rwnd < cwnd < MSS
               // rwnd is hte smallest
-              else if (pack_n + rwnd < GBN)
+              else if (win_size + rwnd < GBN)
               {
-                data = (*cs).state.SendBuffer.Extract(pack_n, rwnd);
+                data = cs->state.SendBuffer.Extract(win_size, rwnd);
                 // set new seq_n
-                (*cs).state.SetLastSent((*cs).state.GetLastSent() + rwnd);
-                pack_n = pack_n + cwnd;
+                cs->state.SetLastSent(cs->state.GetLastSent() + rwnd);
+                win_size = win_size + cwnd;
                 SET_ACK(send_flag);
-                send_pack = MakePacket(data, (*cs).connection, (*cs).state.GetLastSent(), (*cs).state.GetLastRecvd() + 1, send_flag);
+                send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, send_flag);
               }
 
               MinetSend(mux, send_pack);
               // set timeout
             }
 
-            (*cs).state.N = pack_n;
+            cs->state.N = win_size;
 
             // TODO: need to loop because write may need more than one packet
             // TODO: save seq and ack number with the state
@@ -546,7 +546,7 @@ int main(int argc, char *argv[])
         case STATUS:
         {
           cerr << "\n=== SOCK: STATUS ===\n";
-          // no response needed
+          
           cerr << "\n=== SOCK: END STATUS ===\n";
         }
         break;
