@@ -372,10 +372,10 @@ int main(int argc, char *argv[])
           ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(3), connect_conn, false);
           clist.push_front(new_conn);
 
-          TCPState connect_conn(rand(), LISTEN, MAX_TRIES);
+          connect_conn(rand(), LISTEN, MAX_TRIES);
           connect_conn.N = 0;
           // may need to change timeout time
-          ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(3), connect_conn, false);
+          new_conn(req.connection, Time(3), connect_conn, false);
           clist.push_front(new_conn);
          
           res.type = STATUS;
