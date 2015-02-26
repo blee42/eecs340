@@ -428,7 +428,7 @@ int main(int argc, char *argv[])
             // TODO: save seq and ack number with the state
             // TODO: state.setlastsent - need to set this as getlastsent + mss
             // Packet send_pack = MakePacket(req.data, req.connection, , , send_flag);
-            MinetSend(mux, send_pack);
+            // MinetSend(mux, send_pack);
           }
           else
           {
