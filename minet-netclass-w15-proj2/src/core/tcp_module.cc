@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
               send_seq_n = rand();
 
               cs->state.SetState(SYN_RCVD);
-              // cs->state.SetLastAcked(rec_ack_n);
+              cs->state.SetLastAcked(rec_ack_n);
               cs->state.SetLastRecvd(rec_seq_n);
               cs->state.SetLastSent(send_seq_n); // generate random SEQ # to send out
 
