@@ -129,6 +129,8 @@ int main(int argc, char *argv[])
 
         cerr << "PACKET CONTENTS: " << rec_pack << "\n";
 
+        // REMOVED HARDCODED PACKET AND NO LONGER WORKS
+
         // Unpacking useful data
         Connection conn;
         rec_ip_h.GetDestIP(conn.src);
@@ -332,6 +334,24 @@ int main(int argc, char *argv[])
           case CONNECT:
           {
             cerr << "\n===CONNECT===\n";
+
+            TCPState connect_conn(rand(), LISTEN, MAX_TRIES);
+            connect_conn.N = 0;
+            // may need to change timeout time
+            ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(3), connect_conn, false);
+            clist.push_front(new_conn);
+           
+            res.type = STATUS;
+            res.connection = req.connection;
+            res.bytes = 0;
+            res.error = EOK;
+            MinetSend(sock, res);
+
+            unsigned char send_flag;
+            SET_SYN(flag);
+            Packet send_pack = MakePacket(Buffer(NULL, 0), connect_conn, rand(), 0, send_flag); // not sure what the seq_n should be
+            MinetSend(mux, send_pack);
+
             cerr << "\n===END CONNECT===\n";
           }
           break;
@@ -346,39 +366,32 @@ int main(int argc, char *argv[])
             // may need to change timeout time
             ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(3), accept_conn, false);
             clist.push_front(new_conn);
-
            
             res.type = STATUS;
             res.connection = req.connection;
             res.bytes = 0;
             res.error = EOK;
             MinetSend(sock, res);
-            cerr << "\n=== END ACCEPT===\n";
+
+            cerr << "\n===END ACCEPT===\n";
           }
           break;
           case WRITE:
           {
-            // HAVE NOT TESTED
             cerr << "\n===WRITE===\n";
-            unsigned size = MIN_MACRO(IP_PACKET_MAX_LENGTH-TCP_HEADER_MAX_LENGTH, req.data.GetSize());
-            // create the payload of the packet
-            Packet send_pack(req.data.ExtractFront(size));
-            // make IP header because we need to do tcp checksum
-            IPHeader send_ip_h;
-            send_ip_h.SetProtocol(IP_PROTO_TCP);
-            send_ip_h.SetSourceIP(req.connection.src);
-            send_ip_h.SetDestIP(req.connection.dest);
-            send_ip_h.SetTotalLength(size + TCP_HEADER_MAX_LENGTH + IP_HEADER_BASE_LENGTH);
-            // push ip header onto packet
-            send_pack.PushFrontHeader(send_ip_h);
-            // make the TCP header.GetSeqNum
-            TCPHeader send_tcp_h;
-            send_tcp_h.SetSourcePort(req.connection.srcport, send_pack);
-            send_tcp_h.SetDestPort(req.connection.destport, send_pack);
-            send_tcp_h.SetHeaderLen(TCP_HEADER_MAX_LENGTH, send_pack);
-            // push the TCP header behind the IP header
-            send_pack.PushBackHeader(send_tcp_h);
-            MinetSend(mux, send_pack);
+
+            ConnectionList<TCPState>::iterator cs = clist.FindMatching(req.connection);
+            if (cs != clist.end() && cs->state.GetState() == ESTABLISHED)
+            {
+              unsigned char send_flag;
+              SET_ACK(send_flag);
+              // TODO: need to loop because write may need more than one packet
+              // TODO: save seq and ack number with the state
+              // TODO: state.setlastsent - need to set this as getlastsent + mss
+              Packet send_pack = MakePacket(req.data, req.connection, , , send_flag);
+              MinetSend(mux, send_pack);
+            }
+            
             cerr << "\n===END WRITE===\n";
           }
           break;
