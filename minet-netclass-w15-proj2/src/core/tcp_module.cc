@@ -54,7 +54,7 @@ Packet MakePacket(Buffer data, Connection conn, unsigned int seq_n, unsigned int
   TCPHeader send_tcp_h;
   send_tcp_h.SetSourcePort(conn.srcport, send_pack);
   send_tcp_h.SetDestPort(conn.destport, send_pack);
-  send_tcp_h.SetHeaderLen(TCP_HEADER_BASE_LENGTH/4, send_pack);
+  send_tcp_h.SetHeaderLen(TCP_HEADER_BASE_LENGTH/4n, send_pack);
   send_tcp_h.SetFlags(flag, send_pack);
   send_tcp_h.SetWinSize(1, send_pack); // to fix
   send_tcp_h.SetSeqNum(seq_n, send_pack);
@@ -180,6 +180,7 @@ int main(int argc, char *argv[])
 
         unsigned char send_flag = 0;
         SockRequestResponse res;
+        Packet send_pack;
 
         switch(cs->state.GetState())
         {
@@ -207,7 +208,7 @@ int main(int argc, char *argv[])
 
               SET_SYN(send_flag);
               SET_ACK(send_flag);
-              Packet send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag); // ack
+              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag); // ack
               MinetSend(mux, send_pack);
             }
           }
@@ -252,7 +253,7 @@ int main(int argc, char *argv[])
 
 
               SET_ACK(send_flag);
-              Packet send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag);
+              send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag);
               MinetSend(mux, send_pack);
 
               // create res to send to sock
@@ -277,8 +278,16 @@ int main(int argc, char *argv[])
             // if the otherside is ready to close
             if (IS_FIN(rec_flag))
             {
-              // send back ACK for the FIN
+              send_seq_n = cs->state.GetLastSent() + 1;
+
               cs->state.SetState(CLOSE_WAIT);
+              cs->state.SetLastSent(send_seq_n);
+              cs->state.SetLastRecvd(rec_seq_n);
+              cs->state.SetLastAcked(rec_ack_n);
+
+              SET_ACK(send_flag);
+              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag);
+              MinetSend(mux, send_pack);
             }
             // else otherside continues to send data
             else
@@ -290,7 +299,7 @@ int main(int argc, char *argv[])
                 if (IS_PSH(rec_flag))
                 {
                   SET_ACK(send_flag);
-                  Packet send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag);
+                  send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag);
                   MinetSend(mux, send_pack);
 
                   // set window stuff
