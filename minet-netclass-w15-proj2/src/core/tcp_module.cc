@@ -183,16 +183,15 @@ int main(int argc, char *argv[])
         {
           case CLOSED:
           {
-            cerr << "CLOSED STATE\n";
+            cerr << "CLOSEDMUX:  STATE\n";
           }
           break;
           case LISTEN:
           {
-            cerr << "LISTEN STATE\n";
+            cerr << "\n=== MUX: LISTEN STATE ===\n";
             // coming from ACCEPT in socket layer
             if (IS_SYN(rec_flag))
             {
-              cerr << "LISTEN STATE: SYN\n";
               send_seq_n = rand();
 
               cs->state.SetState(SYN_RCVD);
@@ -211,7 +210,7 @@ int main(int argc, char *argv[])
           break;
           case SYN_RCVD:
           {
-            cerr << "SYN_RCVD STATE\n";
+            cerr << "\n=== MUX: SYN_RCVD STATE ===\n";
             if (IS_ACK(rec_flag) && cs->state.GetLastAcked() == rec_ack_n - 1)
             {
               cs->state.SetState(ESTABLISHED);
@@ -225,7 +224,6 @@ int main(int argc, char *argv[])
               // create res to send to sock
               res.type = WRITE;
               res.connection = conn;
-              // TODO fix this
               res.bytes = 0;
               res.error = EOK;
               MinetSend(sock, res);
@@ -234,7 +232,7 @@ int main(int argc, char *argv[])
           break;
           case SYN_SENT:
           {
-            cerr << "SYN_SENT STATE\n";
+            cerr << "\n=== MUX: SYN_SENT STATE ===\n";
             if (IS_SYN(rec_flag) && IS_ACK(rec_flag))
             {
               send_seq_n = cs->state.GetLastSent() + 1;
@@ -261,13 +259,13 @@ int main(int argc, char *argv[])
           break;
           case SYN_SENT1:
           {
-            cerr << "SYN_SENT1 STATE\n";
+            cerr << "\n=== MUX: SYN_SENT1 STATE ===\n";
             // may not need this
           }
           break;
           case ESTABLISHED:
           {
-            cerr << "ESTABLISHED STATE\n";
+            cerr << "\n=== MUX: ESTABLISHED STATE ===\n";
             // if the otherside is ready to close
             if (IS_FIN(rec_flag))
             {
@@ -308,12 +306,12 @@ int main(int argc, char *argv[])
           break;
           case SEND_DATA:
           {
-            cerr << "SEND_DATA STATE\n";
+            cerr << "\n=== MUX: SEND_DATA STATE ===\n";
           }
           break;
           case CLOSE_WAIT:
           {
-            cerr << "CLOSE_WAIT STATE\n";
+            cerr << "\n=== MUX: CLOSE_WAIT STATE ===\n";
             if (IS_FIN(rec_flag))
             {
               // send a fin ack back
@@ -323,17 +321,17 @@ int main(int argc, char *argv[])
           break;
           case FIN_WAIT1:
           {
-            cerr << "FIN_WAIT1 STATE\n";
+            cerr << "\n=== MUX: FIN_WAIT1 STATE ===\n";
           }
           break;
           case CLOSING:
           {
-            cerr << "CLOSING STATE\n";
+            cerr << "\n=== MUX: CLOSING STATE ===\n";
           }
           break;
           case LAST_ACK:
           {
-            cerr << "LAST_ACK STATE\n";
+            cerr << "\n=== MUX: LAST_ACK STATE ===\n";
             if (IS_ACK(rec_flag))
             {
               cs->state.SetState(CLOSED);
@@ -342,18 +340,18 @@ int main(int argc, char *argv[])
           break;
           case FIN_WAIT2:
           {
-            cerr << "FIN_WAIT2 STATE\n";
+            cerr << "\n=== MUX: FIN_WAIT2 STATE ===\n";
             // 
           }
           break;
           case TIME_WAIT:
           {
-            cerr << "TIME_WAIT STATE\n";
+            cerr << "\n=== MUX: TIME_WAIT STATE ===\n";
           }
           break;
           default:
           {
-            cerr << "DEFAULTED STATE\n";
+            cerr << "\n=== MUX: DEFAULTED STATE ===\n";
           }
           break;
         }
@@ -379,7 +377,7 @@ int main(int argc, char *argv[])
       {
         case CONNECT:
         {
-          cerr << "\n===CONNECT===\n";
+          cerr << "\n=== SOCK: CONNECT ===\n";
 
           TCPState connect_conn(rand(), LISTEN, MAX_TRIES);
           connect_conn.N = 0;
@@ -398,13 +396,13 @@ int main(int argc, char *argv[])
           Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, rand(), 0, send_flag); // not sure what the seq_n should be
           MinetSend(mux, send_pack);
 
-          cerr << "\n===END CONNECT===\n";
+          cerr << "\n=== SOCK: END CONNECT ===\n";
         }
         break;
         case ACCEPT:
         {
           // passive open
-          cerr << "\n===ACCEPT===\n";
+          cerr << "\n=== SOCK: ACCEPT ===\n";
 
           // unsigned int init_seq_n = rand();
           TCPState accept_conn(rand(), LISTEN, MAX_TRIES);
@@ -419,17 +417,17 @@ int main(int argc, char *argv[])
           res.error = EOK;
           MinetSend(sock, res);
 
-          cerr << "\n===END ACCEPT===\n";
+          cerr << "\n=== SOCK: END ACCEPT ===\n";
         }
         break;
         case WRITE:
         {
-          cerr << "\n===WRITE===\n";
+          cerr << "\n=== SOCK: WRITE ===\n";
 
           ConnectionList<TCPState>::iterator cs = clist.FindMatching(req.connection);
           if (cs != clist.end() && cs->state.GetState() == ESTABLISHED)
           {
-            cerr << "\n===WRITE: CONNECTION FOUND===\n";
+            cerr << "\n=== SOCK: WRITE: CONNECTION FOUND ===\n";
             // any chance of too much data?
             // put data into a buffer to send to sock layer
             res.bytes = req.bytes;
@@ -448,43 +446,43 @@ int main(int argc, char *argv[])
           }
           else
           {
-            cerr << "\n===WRITE: NO CONNECTION FOUND===\n";
+            cerr << "\n=== SOCK: WRITE: NO CONNECTION FOUND ===\n";
             res.connection = req.connection;
             res.type = STATUS;
             res.bytes = req.bytes;
             res.error = ENOMATCH;
           }
           
-          cerr << "\n===END WRITE===\n";
+          cerr << "\n=== SOCK: END WRITE ===\n";
         }
         break;
         case FORWARD:
         {
-          cerr << "\n===FORWARD===\n";
+          cerr << "\n=== SOCK: FORWARD ===\n";
           // TODO: find connection of request
           // TODO: request response to that connection?
-          cerr << "\n===END FORWARD===\n";
+          cerr << "\n=== SOCK: END FORWARD ===\n";
         }
         break;
         case CLOSE:
         {
-          cerr << "\n===CLOSE===\n";
-          cerr << "\n===END CLOSE===\n";
+          cerr << "\n=== SOCK: CLOSE ===\n";
+          cerr << "\n=== SOCK: END CLOSE ===\n";
         }
           // TODO: find connection of request
           // TODO: create and send request
         break; 
         case STATUS:
         {
-          cerr << "\n===STATUS===\n";
+          cerr << "\n=== SOCK: STATUS ===\n";
           // no response needed
-          cerr << "\n===END STATUS===\n";
+          cerr << "\n=== SOCK: END STATUS ===\n";
         }
         break;
         default:
         {
-          cerr << "\n===DEFAULT===\n";
-          cerr << "\n===END DEFAULT===\n";
+          cerr << "\n=== SOCK: DEFAULT ===\n";
+          cerr << "\n=== SOCK: END DEFAULT ===\n";
         } 
           // TODO: responsd to request with
         break;
