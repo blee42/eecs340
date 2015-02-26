@@ -185,6 +185,7 @@ int main(int argc, char *argv[])
             // coming from ACCEPT in socket layer
             if (IS_SYN(flag))
             {
+              cerr << "LISTEN STATE: SYN\n";
               send_seq_n = rand();
 
               cs->state.SetState(SYN_RCVD);
