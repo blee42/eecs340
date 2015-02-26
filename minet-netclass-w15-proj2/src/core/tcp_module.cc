@@ -41,28 +41,30 @@ Packet MakePacket(Buffer data, Connection conn, unsigned int seq_n, unsigned int
   Packet send_pack(data.ExtractFront(size));
 
   // Make and push IP header
-  IPHeader send_iph;
-  send_iph.SetProtocol(IP_PROTO_TCP);
-  send_iph.SetSourceIP(conn.src);
-  send_iph.SetDestIP(conn.dest);
-  send_iph.SetTotalLength(size + TCP_HEADER_MAX_LENGTH + IP_HEADER_BASE_LENGTH);
-  send_pack.PushFrontHeader(send_iph);
+  IPHeader send_ip_h;
+  send_ip_h.SetProtocol(IP_PROTO_TCP);
+  send_ip_h.SetSourceIP(conn.src);
+  send_ip_h.SetDestIP(conn.dest);
+  send_ip_h.SetTotalLength(size + TCP_HEADER_MAX_LENGTH + IP_HEADER_BASE_LENGTH);
+  send_pack.PushFrontHeader(send_ip_h);
 
   // Make and push TCP header
-  TCPHeader send_tcph;
-  send_tcph.SetSourcePort(conn.srcport, send_pack);
-  send_tcph.SetDestPort(conn.destport, send_pack);
-  send_tcph.SetHeaderLen(TCP_HEADER_MAX_LENGTH, send_pack);
-  send_tcph.SetFlags(flag, send_pack);
-  send_tcph.SetWinSize(1, send_pack); // to fix
-  send_tcph.SetSeqNum(seq_n, send_pack);
+  TCPHeader send_tcp_h;
+  send_tcp_h.SetSourcePort(conn.srcport, send_pack);
+  send_tcp_h.SetDestPort(conn.destport, send_pack);
+  send_tcp_h.SetHeaderLen(TCP_HEADER_MAX_LENGTH, send_pack);
+  send_tcp_h.SetFlags(flag, send_pack);
+  send_tcp_h.SetWinSize(1, send_pack); // to fix
+  send_tcp_h.SetSeqNum(seq_n, send_pack);
   if (IS_ACK(flag))
   {
-    send_tcph.SetAckNum(ack_n, send_pack);
+    send_tcp_h.SetAckNum(ack_n, send_pack);
   }
-  send_tcph.RecomputeChecksum(send_pack);
-  send_pack.PushBackHeader(send_tcph);
+  send_tcp_h.RecomputeChecksum(send_pack);
+  send_pack.PushBackHeader(send_tcp_h);
 
+  cerr << "TCP Packet:\n IP Header is "<< send_ip_h <<"\n";
+  cerr << "TCP Header is "<< send_tcp_h << "\n";
   cerr << "PACKET:\n" << send_pack << endl;
 
   return send_pack;
@@ -201,7 +203,7 @@ int main(int argc, char *argv[])
 
               SET_SYN(send_flag);
               SET_ACK(send_flag);
-              Packet send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag);
+              Packet send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, 0, send_flag); // ack
               MinetSend(mux, send_pack);
             }
           }
