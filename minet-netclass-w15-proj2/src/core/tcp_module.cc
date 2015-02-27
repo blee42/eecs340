@@ -315,22 +315,85 @@ int main(int argc, char *argv[])
                     cs->state.SetLastRecvd(rec_seq_n + data.GetSize()); // maybe -1
                   }
 
+                  // send ACK flag packet to mux
                   SET_ACK(send_flag);
                   send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag);
                   MinetSend(mux, send_pack);
 
-                  // set window stuff
-
-                  // create res to send to sock
+                  // send WRITE packet to sock 
                   res.type = WRITE;
                   res.connection = conn;
                   res.data = cs->state.RecvBuffer;
                   res.bytes = cs->state.RecvBuffer.GetSize();
                   res.error = EOK;
-                  // send a WRITE in socket layer 
                   MinetSend(sock, res);
+                  
                   cs->state.SetLastSent(cs->state.GetLastSent() + 1);
-                }
+
+                  // send some of the infromation in the buffer
+                  // if there is overflow in the send buffer
+                  if (cs->state.SendBuffer.GetSize() - cs->state.GetN() > 0)
+                  {
+                    // GO BACK N REPEATED THREE TIMES - MAKE OWN FUNCTION
+                    // send data from buffer using "Go Back N"
+                    unsigned int win_size = cs->state.GetN(); // window size (STILL THINK THIS IS THE PACKETS)
+                    unsigned int rwnd = cs->state.GetRwnd(); // receiver congestion window
+                    size_t cwnd = cs->state.SendBuffer.GetSize(); // sender congestion window
+
+                    // iterate through all the packets
+                    while(win_size < GBN)
+                    {
+                      Buffer data;
+                      rwnd = rwnd - win_size;
+                      cwnd = cwnd - win_size;
+
+                      // if MSS < rwnd < cwnd or MSS < cwnd < rwnd
+                      // MSS is the smallest
+                      // not sure why arithmetic shift?
+                      if(((MSS < rwnd && rwnd << cwnd) || (MSS < cwnd && cwnd < rwnd)) && (win_size + MSS < GBN))
+                      {
+                        data = cs->state.SendBuffer.Extract(win_size, MSS);
+                        // set new seq_n
+                        cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
+                        // move on to the next set of packets
+                        win_size = win_size + MSS;
+                        SET_ACK(send_flag);
+                        send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, send_flag);
+
+                      }
+
+                      // else if cwnd < MSS < rwnd or cwnd < rwnd < MSS
+                      // cwnd is the smallest
+                      else if (((cwnd < MSS && MSS << rwnd) || (cwnd < rwnd && rwnd < MSS)) && (win_size + cwnd < GBN))
+                      {
+                        data = cs->state.SendBuffer.Extract(win_size, cwnd);
+                        // set new seq_n
+                        cs->state.SetLastSent(cs->state.GetLastSent() + cwnd);
+                        // move on to the next set of packets
+                        win_size = win_size + cwnd;
+                        SET_ACK(send_flag);
+                        send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, send_flag);
+                      }
+
+                      // else if rwnd < MSS < cwnd or rwnd < cwnd < MSS
+                      // rwnd is hte smallest
+                      else if (win_size + rwnd < GBN)
+                      {
+                        data = cs->state.SendBuffer.Extract(win_size, rwnd);
+                        // set new seq_n
+                        cs->state.SetLastSent(cs->state.GetLastSent() + rwnd);
+                        win_size = win_size + cwnd;
+                        SET_ACK(send_flag);
+                        send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, send_flag);
+                      }
+
+                      MinetSend(mux, send_pack);
+                      // set timeout
+                    }
+
+                    cs->state.N = win_size;
+                  }
+
               }
             }
           }
