@@ -476,7 +476,7 @@ int main(int argc, char *argv[])
           cerr << "\n=== SOCK: CONNECT ===\n";
 
           TCPState connect_conn(rand(), LISTEN, MAX_TRIES);
-          connect_conn.N = 0;
+          connect_conn.N = 5; // TODO: what should this be set to?
           // may need to change timeout time
           ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(), connect_conn, false);
           clist.push_front(new_conn);
@@ -501,7 +501,7 @@ int main(int argc, char *argv[])
 
           // unsigned int init_seq_n = rand();
           TCPState accept_conn(rand(), LISTEN, MAX_TRIES);
-          accept_conn.N = 0; // set window size to something
+          accept_conn.N = 5; // set window size to something
           // may need to change timeout time
           ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(), accept_conn, false);
           clist.push_front(new_conn);
