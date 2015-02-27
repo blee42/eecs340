@@ -1,0 +1,128 @@
+Calling MinetInit() for module MINET_TCP_MODULE
+        In MinetInit(): Opening fifo as write-only: ./fifos/tcp2mon
+        In MinetInit(): Connected to monitor successfully.
+Returning from MinetInit() for module MINET_TCP_MODULE
+Calling MinetConnect() for module MINET_IP_MUX
+        In MinetConnect(): fifoto=./fifos/tcp2ipmux, fifofrom=./fifos/ipmux2tcp
+        In MinetConnect(): returned from open()
+Calling MinetAccept() for module MINET_SOCK_MODULE
+        In MinetAccept(): fifoto=./fifos/tcp2sock, fifofrom=./fifos/sock2tcp
+        In MinetAccept(): returned from open()
+
+BEGINNING TO HANDLE TCP.......
+
+HANDLING DATA FROM SOCKETS LAYER ABOVE
+Received Socket Request:SockRequestResponse(type=ACCEPT, connection=Connection(src=IPAddress(10.10.49.60):5005, dest=IPAddress(0.0.0.0):0, protocol=6), data=Buffer(size=0, data=, text=""), bytes=0, error=0)
+
+=== SOCK: ACCEPT ===
+
+=== SOCK: END ACCEPT ===
+
+HANDLING DATA FROM IP LAYER BELOW
+estimated header len=40
+TCP Packet:
+ IP Header is IPHeader( version=4, hlen=5 (20), tos=0, len=60, id=19520, flags=2(DO NOT FRAGMENT NO MORE FRAGMENTS), fragoff=0, ttl=64, proto=6(TCP), checksum=10733(valid), computedchecksum=0, src=IPAddress(129.105.7.224), dst=IPAddress(10.10.49.60)noopts )
+TCP Header is TCPHeader(srcport=47504, destport=5005, seqnum=1184358333, acknum=0, hlen=10(40 bytes), flags=2( SYN ), winsize=14600, checksum=49259, urgentptr=0 HAS OPTIONS)
+Checksum is VALID
+
+PACKET CONTENTS: Packet(headers={TaggedBuffer(tag=EthernetHeader, Buffer(size=14, data=782BCBAF1EA6782BCB9E6C9B0800, text="x+....x+..l...")TaggedBuffer(tag=IPHeader, Buffer(size=20, data=4500003C4C404000400629ED816907E00A0A313C, text="E..<L@@.@.)..i....1<")TaggedBuffer(tag=TCPHeader, Buffer(size=40, data=B990138D4697DFBD00000000A0023908C06B0000020405B40402080A028D93FD0000000001030307, text="....F.........9..k......................")}, payload=Buffer(size=0, data=, text=""), trailers={})
+Found matching connection
+this is the data: Buffer(size=0, data=, text="")
+
+=== MUX: LISTEN STATE ===
+TCP Packet:
+ IP Header is IPHeader( version=4, hlen=5 (20), tos=0, len=40, id=0, flags=2(DO NOT FRAGMENT NO MORE FRAGMENTS), fragoff=0, ttl=64, proto=6(TCP), checksum=30273 (valid), computedchecksum=0, src=IPAddress(10.10.49.60), dst=IPAddress(129.105.7.224)noopts )
+TCP Header is TCPHeader(srcport=5005, destport=47504, seqnum=846930886, acknum=1184358334, hlen=5(20 bytes), flags=18( ACK  SYN ), winsize=1, checksum=41357, urgentptr=0)
+PACKET:
+Packet(headers={TaggedBuffer(tag=IPHeader, Buffer(size=20, data=4500002800004000400676410A0A313C816907E0, text="E..(..@.@.vA..1<.i..")TaggedBuffer(tag=TCPHeader, Buffer(size=20, data=138DB990327B23C64697DFBE50120001A18D0000, text="....2{#.F...P.......")}, payload=Buffer(size=0, data=, text=""), trailers={})
+
+HANDLING DATA FROM IP LAYER BELOW
+estimated header len=20
+TCP Packet:
+ IP Header is IPHeader( version=4, hlen=5 (20), tos=0, len=40, id=19521, flags=2(DO NOT FRAGMENT NO MORE FRAGMENTS), fragoff=0, ttl=64, proto=6(TCP), checksum=10752(valid), computedchecksum=0, src=IPAddress(129.105.7.224), dst=IPAddress(10.10.49.60)noopts )
+TCP Header is TCPHeader(srcport=47504, destport=5005, seqnum=1184358334, acknum=846930887, hlen=5(20 bytes), flags=16( ACK ), winsize=14600, checksum=26759, urgentptr=0)
+Checksum is VALID
+
+PACKET CONTENTS: Packet(headers={TaggedBuffer(tag=EthernetHeader, Buffer(size=14, data=782BCBAF1EA6782BCB9E6C9B0800, text="x+....x+..l...")TaggedBuffer(tag=IPHeader, Buffer(size=20, data=450000284C41400040062A00816907E00A0A313C, text="E..(LA@.@.*..i....1<")TaggedBuffer(tag=TCPHeader, Buffer(size=20, data=B990138D4697DFBE327B23C75010390868870000, text="....F...2{#.P.9.h...")}, payload=Buffer(size=6, data=000000000000, text="......"), trailers={})
+Found matching connection
+this is the data: Buffer(size=6, data=000000000000, text="......")
+
+=== MUX: SYN_RCVD STATE ===
+rec_flag: 
+rec_ack_n: 846930887
+get last sent: 846930886
+
+=== MUX: IS_ACK - SYN_RCVD STATE ===
+
+HANDLING DATA FROM SOCKETS LAYER ABOVE
+Received Socket Request:SockRequestResponse(type=STATUS, connection=Connection(src=IPAddress(10.10.49.60):5005, dest=IPAddress(129.105.7.224):47504, protocol=6), data=Buffer(size=0, data=, text=""), bytes=0, error=0)
+
+=== SOCK: STATUS ===
+=== SOCK: END STATUS ===
+
+HANDLING DATA FROM IP LAYER BELOW
+estimated header len=20
+TCP Packet:
+ IP Header is IPHeader( version=4, hlen=5 (20), tos=0, len=41, id=19522, flags=2(DO NOT FRAGMENT NO MORE FRAGMENTS), fragoff=0, ttl=64, proto=6(TCP), checksum=10750(valid), computedchecksum=0, src=IPAddress(129.105.7.224), dst=IPAddress(10.10.49.60)noopts )
+TCP Header is TCPHeader(srcport=47504, destport=5005, seqnum=1184358334, acknum=846930887, hlen=5(20 bytes), flags=24( ACK  PSH ), winsize=14600, checksum=126, urgentptr=0)
+Checksum is VALID
+
+PACKET CONTENTS: Packet(headers={TaggedBuffer(tag=EthernetHeader, Buffer(size=14, data=782BCBAF1EA6782BCB9E6C9B0800, text="x+....x+..l...")TaggedBuffer(tag=IPHeader, Buffer(size=20, data=450000294C424000400629FE816907E00A0A313C, text="E..)LB@.@.)..i....1<")TaggedBuffer(tag=TCPHeader, Buffer(size=20, data=B990138D4697DFBE327B23C750183908007E0000, text="....F...2{#.P.9..~..")}, payload=Buffer(size=6, data=680000000000, text="h....."), trailers={})
+Found matching connection
+this is the data: Buffer(size=6, data=680000000000, text="h.....")
+
+=== MUX: ESTABLISHED STATE ===
+TCP Packet:
+ IP Header is IPHeader( version=4, hlen=5 (20), tos=0, len=40, id=1, flags=2(DO NOT FRAGMENT NO MORE FRAGMENTS), fragoff=0, ttl=64, proto=6(TCP), checksum=30272(valid), computedchecksum=0, src=IPAddress(10.10.49.60), dst=IPAddress(129.105.7.224)noopts )
+TCP Header is TCPHeader(srcport=5005, destport=47504, seqnum=846930887, acknum=1184358335, hlen=5(20 bytes), flags=16( ACK ), winsize=1, checksum=41357, urgentptr=0)
+PACKET:
+Packet(headers={TaggedBuffer(tag=IPHeader, Buffer(size=20, data=4500002800014000400676400A0A313C816907E0, text="E..(..@.@.v@..1<.i..")TaggedBuffer(tag=TCPHeader, Buffer(size=20, data=138DB990327B23C74697DFBF50100001A18D0000, text="....2{#.F...P.......")}, payload=Buffer(size=0, data=, text=""), trailers={})
+
+HANDLING DATA FROM SOCKETS LAYER ABOVE
+Received Socket Request:SockRequestResponse(type=STATUS, connection=Connection(src=IPAddress(10.10.49.60):5005, dest=IPAddress(129.105.7.224):47504, protocol=6), data=Buffer(size=0, data=, text=""), bytes=0, error=0)
+
+=== SOCK: STATUS ===
+=== SOCK: END CLOSE ===
+
+HANDLING DATA FROM SOCKETS LAYER ABOVE
+Received Socket Request:SockRequestResponse(type=CLOSE, connection=Connection(src=IPAddress(10.10.49.60):5005, dest=IPAddress(0.0.0.0):0, protocol=6), data=Buffer(size=0, data=, text=""), bytes=0, error=0)
+
+=== SOCK: CLOSE ===
+
+=== SOCK: END CLOSE ===
+
+HANDLING DATA FROM IP LAYER BELOW
+estimated header len=20
+TCP Packet:
+ IP Header is IPHeader( version=4, hlen=5 (20), tos=0, len=41, id=19523, flags=2(DO NOT FRAGMENT NO MORE FRAGMENTS), fragoff=0, ttl=64, proto=6(TCP), checksum=10749(valid), computedchecksum=0, src=IPAddress(129.105.7.224), dst=IPAddress(10.10.49.60)noopts )
+TCP Header is TCPHeader(srcport=47504, destport=5005, seqnum=1184358335, acknum=846930887, hlen=5(20 bytes), flags=24( ACK  PSH ), winsize=14600, checksum=65404, urgentptr=0)
+Checksum is VALID
+
+PACKET CONTENTS: Packet(headers={TaggedBuffer(tag=EthernetHeader, Buffer(size=14, data=782BCBAF1EA6782BCB9E6C9B0800, text="x+....x+..l...")TaggedBuffer(tag=IPHeader, Buffer(size=20, data=450000294C434000400629FD816907E00A0A313C, text="E..)LC@.@.)..i....1<")TaggedBuffer(tag=TCPHeader, Buffer(size=20, data=B990138D4697DFBF327B23C750183908FF7C0000, text="....F...2{#.P.9..|..")}, payload=Buffer(size=6, data=690000000000, text="i....."), trailers={})
+Found matching connection
+this is the data: Buffer(size=6, data=690000000000, text="i.....")
+
+=== MUX: ESTABLISHED STATE ===
+TCP Packet:
+ IP Header is IPHeader( version=4, hlen=5 (20), tos=0, len=40, id=2, flags=2(DO NOT FRAGMENT NO MORE FRAGMENTS), fragoff=0, ttl=64, proto=6(TCP), checksum=30271(valid), computedchecksum=0, src=IPAddress(10.10.49.60), dst=IPAddress(129.105.7.224)noopts )
+TCP Header is TCPHeader(srcport=5005, destport=47504, seqnum=846930887, acknum=1184358336, hlen=5(20 bytes), flags=16( ACK ), winsize=1, checksum=41356, urgentptr=0)
+PACKET:
+Packet(headers={TaggedBuffer(tag=IPHeader, Buffer(size=20, data=45000028000240004006763F0A0A313C816907E0, text="E..(..@.@.v?..1<.i..")TaggedBuffer(tag=TCPHeader, Buffer(size=20, data=138DB990327B23C74697DFC050100001A18C0000, text="....2{#.F...P.......")}, payload=Buffer(size=0, data=, text=""), trailers={})
+
+HANDLING DATA FROM IP LAYER BELOW
+estimated header len=20
+TCP Packet:
+ IP Header is IPHeader( version=4, hlen=5 (20), tos=0, len=41, id=19524, flags=2(DO NOT FRAGMENT NO MORE FRAGMENTS), fragoff=0, ttl=64, proto=6(TCP), checksum=10748(valid), computedchecksum=0, src=IPAddress(129.105.7.224), dst=IPAddress(10.10.49.60)noopts )
+TCP Header is TCPHeader(srcport=47504, destport=5005, seqnum=1184358336, acknum=846930887, hlen=5(20 bytes), flags=24( ACK  PSH ), winsize=14600, checksum=24188, urgentptr=0)
+Checksum is VALID
+
+PACKET CONTENTS: Packet(headers={TaggedBuffer(tag=EthernetHeader, Buffer(size=14, data=782BCBAF1EA6782BCB9E6C9B0800, text="x+....x+..l...")TaggedBuffer(tag=IPHeader, Buffer(size=20, data=450000294C444000400629FC816907E00A0A313C, text="E..)LD@.@.)..i....1<")TaggedBuffer(tag=TCPHeader, Buffer(size=20, data=B990138D4697DFC0327B23C7501839085E7C0000, text="....F...2{#.P.9.^|..")}, payload=Buffer(size=6, data=0A0000000000, text="......"), trailers={})
+Found matching connection
+this is the data: Buffer(size=6, data=0A0000000000, text="......")
+
+=== MUX: ESTABLISHED STATE ===
+TCP Packet:
+ IP Header is IPHeader( version=4, hlen=5 (20), tos=0, len=40, id=3, flags=2(DO NOT FRAGMENT NO MORE FRAGMENTS), fragoff=0, ttl=64, proto=6(TCP), checksum=30270(valid), computedchecksum=0, src=IPAddress(10.10.49.60), dst=IPAddress(129.105.7.224)noopts )
+TCP Header is TCPHeader(srcport=5005, destport=47504, seqnum=846930887, acknum=1184358337, hlen=5(20 bytes), flags=16( ACK ), winsize=1, checksum=41355, urgentptr=0)
+PACKET:
+Packet(headers={TaggedBuffer(tag=IPHeader, Buffer(size=20, data=45000028000340004006763E0A0A313C816907E0, text="E..(..@.@.v>..1<.i..")TaggedBuffer(tag=TCPHeader, Buffer(size=20, data=138DB990327B23C74697DFC150100001A18B0000, text="....2{#.F...P.......")}, payload=Buffer(size=0, data=, text=""), trailers={})
