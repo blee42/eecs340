@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
               send_seq_n = rand();
 
               cs->state.SetState(SYN_RCVD);
-              cs->state.SetLastAcked(rec_ack_n);
+              // cs->state.SetLastAcked(rec_ack_n);
               cs->state.SetLastRecvd(rec_seq_n);
               cs->state.SetLastSent(send_seq_n); // generate random SEQ # to send out
 
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
             {
               cerr << "\n=== MUX: IS_ACK - SYN_RCVD STATE ===\n";
               cs->state.SetState(ESTABLISHED);
-              cs->state.SetLastAcked(rec_ack_n); // -1?
+              // cs->state.SetLastAcked(rec_ack_n); // -1?
               cs->state.SetLastRecvd(rec_seq_n); // okay think about all of this
               cs->state.SetLastSent(send_seq_n);
 
@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
               send_seq_n = cs->state.GetLastSent() + 1;
 
               cs->state.SetState(ESTABLISHED);
-              cs->state.SetLastAcked(rec_ack_n);
+              // cs->state.SetLastAcked(rec_ack_n);
               cs->state.SetLastRecvd(rec_seq_n);
               cs->state.SetLastSent(send_seq_n);
 
@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
               cs->state.SetState(CLOSE_WAIT);
               cs->state.SetLastSent(send_seq_n);
               cs->state.SetLastRecvd(rec_seq_n);
-              cs->state.SetLastAcked(rec_ack_n);
+              // cs->state.SetLastAcked(rec_ack_n);
 
               SET_ACK(send_flag);
               send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag);
@@ -294,7 +294,12 @@ int main(int argc, char *argv[])
             {
               if (IS_ACK(rec_flag))
               {
-                // set the states
+                // clears the buffer - maybe -1?
+                cs->state.SendBuffer.Erase(0, rec_ack_n - cs->state.GetLastAcked());
+
+                cs->state.SetLastAcked(rec_ack_n);
+                cs->state.SetLastRecvd(rec_seq_n);
+  
                 // if there is data
                 if (IS_PSH(rec_flag))
                 {
