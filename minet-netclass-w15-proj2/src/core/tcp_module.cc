@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
         cerr << "Found matching connection\n";
         rec_tcp_h.GetHeaderLen((unsigned char&)tcphlen);
         tcphlen -= TCP_HEADER_MAX_LENGTH;
-        Buffer &data = rec_pack.GetPayload().ExtractFront(tcphlen);
+        Buffer data = rec_pack.GetPayload().ExtractFront(tcphlen);
         cerr << "this is the data: " << data << "\n";
 
         unsigned char send_flag = 0;
@@ -303,6 +303,19 @@ int main(int argc, char *argv[])
                 // if there is data
                 if (IS_PSH(rec_flag))
                 {
+                  // if there is overflow of the recieved data
+                  if (cs->state.RecvBuffer.GetSize() < data.GetSize()) 
+                  {
+                    cs->state.RecvBuffer.AddBack(data.ExtractFront(cs->state.RecvBuffer.GetSize()));
+                    cs->state.SetLastRecvd(rec_seq_n + cs->state.RecvBuffer.GetSize()); // maybe -1
+                  }
+                  // else there is no overflow
+                  else
+                  {
+                    cs->state.RecvBuffer.AddBack(data);
+                    cs->state.SetLastRecvd(rec_seq_n + data.GetSize()); // maybe -1
+                  }
+
                   SET_ACK(send_flag);
                   send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag);
                   MinetSend(mux, send_pack);
@@ -312,15 +325,12 @@ int main(int argc, char *argv[])
                   // create res to send to sock
                   res.type = WRITE;
                   res.connection = conn;
-                  
-                  // maybe get packet payload?
-                  // TODO fix this
-                  // res.data = connection.data;
-                  // res.bytes = data.length;
-                  
+                  res.data = cs->state.RecvBuffer;
+                  res.bytes = cs->state.RecvBuffer.GetSize();
                   res.error = EOK;
                   // send a WRITE in socket layer 
                   MinetSend(sock, res);
+                  cs->state.SetLastSent(cs->state.GetLastSent() + 1);
                 }
               }
             }
