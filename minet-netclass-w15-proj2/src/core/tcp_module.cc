@@ -393,7 +393,7 @@ int main(int argc, char *argv[])
 
                     cs->state.N = win_size;
                   }
-
+                }
               }
             }
           }
