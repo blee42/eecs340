@@ -611,6 +611,7 @@ int main(int argc, char *argv[])
               // not sure why arithmetic shift?
               if(((MSS < rwnd && rwnd << cwnd) || (MSS < cwnd && cwnd < rwnd)) && (win_size + MSS < GBN))
               {
+                cerr << "MSS is the smallest" << endl;
                 data = cs->state.SendBuffer.Extract(win_size, MSS);
                 // set new seq_n
                 cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
@@ -625,6 +626,7 @@ int main(int argc, char *argv[])
               // cwnd is the smallest
               else if (((cwnd < MSS && MSS << rwnd) || (cwnd < rwnd && rwnd < MSS)) && (win_size + cwnd < GBN))
               {
+                cerr << "CWND is the smallest" << endl;
                 data = cs->state.SendBuffer.Extract(win_size, cwnd);
                 // set new seq_n
                 cs->state.SetLastSent(cs->state.GetLastSent() + cwnd);
@@ -635,9 +637,10 @@ int main(int argc, char *argv[])
               }
 
               // else if rwnd < MSS < cwnd or rwnd < cwnd < MSS
-              // rwnd is hte smallest
+              // rwnd is the smallest
               else if (win_size + rwnd < GBN)
               {
+                cerr << "RWND is the smallest" << endl;
                 data = cs->state.SendBuffer.Extract(win_size, rwnd);
                 // set new seq_n
                 cs->state.SetLastSent(cs->state.GetLastSent() + rwnd);
