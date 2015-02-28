@@ -679,6 +679,7 @@ int main(int argc, char *argv[])
           ConnectionList<TCPState>::iterator cs = clist.FindMatching(req.connection);
           if (cs->state.GetState() == ESTABLISHED)
           {
+            cerr << req.bytes << "out of " << cs->state.RecvBuffer.GetSize() << "read" << endl;
             // if all data read
             if (req.bytes == cs->state.RecvBuffer.GetSize())
             {
