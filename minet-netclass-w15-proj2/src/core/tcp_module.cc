@@ -56,7 +56,7 @@ Packet MakePacket(Buffer data, Connection conn, unsigned int seq_n, unsigned int
   send_tcp_h.SetDestPort(conn.destport, send_pack);
   send_tcp_h.SetHeaderLen(TCP_HEADER_BASE_LENGTH/4, send_pack);
   send_tcp_h.SetFlags(flag, send_pack);
-  send_tcp_h.SetWinSize(10, send_pack); // to fix
+  send_tcp_h.SetWinSize(TCP_BUFFER_SIZ, send_pack); // to fix
   send_tcp_h.SetSeqNum(seq_n, send_pack);
   if (IS_ACK(flag))
   {
@@ -351,7 +351,7 @@ int main(int argc, char *argv[])
                   {
                     // GO BACK N REPEATED THREE TIMES - MAKE OWN FUNCTION
                     // send data from buffer using "Go Back N"
-                    unsigned int win_size = cs->state.GetN(); // window size (STILL THINK THIS IS THE PACKETS)
+                    unsigned int win_size = cs->state.GetN(); // window size
                     unsigned int rwnd = cs->state.GetRwnd(); // receiver congestion window
                     size_t cwnd = cs->state.SendBuffer.GetSize(); // sender congestion window
 
@@ -397,7 +397,7 @@ int main(int argc, char *argv[])
                         data = cs->state.SendBuffer.Extract(win_size, rwnd);
                         // set new seq_n
                         cs->state.SetLastSent(cs->state.GetLastSent() + rwnd);
-                        win_size = win_size + cwnd;
+                        win_size = win_size + rwnd;
                         SET_ACK(send_flag);
                         send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, send_flag);
                       }
