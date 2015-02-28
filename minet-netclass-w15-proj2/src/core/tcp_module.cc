@@ -299,7 +299,7 @@ int main(int argc, char *argv[])
               if (IS_ACK(rec_flag))
               {
                 // clears the buffer - maybe -1?
-                cs->state.SendBuffer.Erase(0, rec_ack_n - cs->state.GetLastAcked());
+                cs->state.SendBuffer.Erase(0, rec_ack_n - cs->state.GetLastAcked() - 1);
 
                 cs->state.SetLastAcked(rec_ack_n);
                 cs->state.SetLastRecvd(rec_seq_n);
@@ -311,7 +311,7 @@ int main(int argc, char *argv[])
                   if (cs->state.RecvBuffer.GetSize() < data.GetSize()) 
                   {
                     cs->state.RecvBuffer.AddBack(data.ExtractFront(cs->state.RecvBuffer.GetSize()));
-                    cs->state.SetLastRecvd(rec_seq_n + cs->state.RecvBuffer.GetSize()); // maybe -1
+                    cs->state.SetLastRecvd(rec_seq_n + cs->state.RecvBuffer.GetSize() - 1); // maybe -1
                   }
                   // else there is no overflow
                   else
