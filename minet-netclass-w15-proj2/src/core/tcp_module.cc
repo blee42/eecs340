@@ -312,10 +312,11 @@ int main(int argc, char *argv[])
                   cs->state.RecvBuffer.Print(cerr);
                   cerr << endl;
                   // if there is overflow of the recieved data
-                  if (cs->state.RecvBuffer.GetSize() < data.GetSize()) 
+                  size_t available_size = cs->state.TCP_BUFFER_SIZE - cs->state.RecvBuffer.GetSize();
+                  if (available_size < data.GetSize()) 
                   {
-                    cs->state.RecvBuffer.AddBack(data.ExtractFront(cs->state.RecvBuffer.GetSize()));
-                    cs->state.SetLastRecvd(rec_seq_n + cs->state.RecvBuffer.GetSize() - 1); // maybe -1
+                    cs->state.RecvBuffer.AddBack(data.ExtractFront(available_size));
+                    cs->state.SetLastRecvd(rec_seq_n + available_size - 1); // maybe -1
                   }
                   // else there is no overflow
                   else
