@@ -1,0 +1,91 @@
+Calling MinetInit() for module MINET_TCP_MODULE
+        In MinetInit(): Opening fifo as write-only: ./fifos/tcp2mon
+        In MinetInit(): Connected to monitor successfully.
+Returning from MinetInit() for module MINET_TCP_MODULE
+Calling MinetConnect() for module MINET_IP_MUX
+        In MinetConnect(): fifoto=./fifos/tcp2ipmux, fifofrom=./fifos/ipmux2tcp
+        In MinetConnect(): returned from open()
+Calling MinetAccept() for module MINET_SOCK_MODULE
+        In MinetAccept(): fifoto=./fifos/tcp2sock, fifofrom=./fifos/sock2tcp
+        In MinetAccept(): returned from open()
+
+BEGINNING TO HANDLE TCP.......
+
+ === SOCK LAYER START === 
+Received Socket Request:SockRequestResponse(type=ACCEPT, connection=Connection(src=IPAddress(10.10.49.60):5001, dest=IPAddress(0.0.0.0):0, protocol=6), data=Buffer(size=0, data=, text=""), bytes=0, error=0)
+
+=== SOCK: ACCEPT ===
+
+=== SOCK: END ACCEPT ===
+
+ === SOCK LAYER DONE === 
+
+ === IP LAYER START === 
+estimated header len=40
+TCP Packet:
+ IP Header is IPHeader( version=4, hlen=5 (20), tos=0, len=60, id=46051, flags=2(DO NOT FRAGMENT NO MORE FRAGMENTS), fragoff=0, ttl=64, proto=6(TCP), checksum=49737(valid), computedchecksum=0, src=IPAddress(129.105.7.224), dst=IPAddress(10.10.49.60)noopts )
+TCP Header is TCPHeader(srcport=45148, destport=5001, seqnum=1670884917, acknum=0, hlen=10(40 bytes), flags=2( SYN ), winsize=14600, checksum=22160, urgentptr=0 HAS OPTIONS)
+Checksum is VALID
+
+PACKET CONTENTS: Packet(headers={TaggedBuffer(tag=EthernetHeader, Buffer(size=14, data=782BCBAF1EA6782BCB9E6C9B0800, text="x+....x+..l...")TaggedBuffer(tag=IPHeader, Buffer(size=20, data=4500003CB3E340004006C249816907E00A0A313C, text="E..<..@.@..I.i....1<")TaggedBuffer(tag=TCPHeader, Buffer(size=40, data=B05C13896397AE3500000000A002390856900000020405B40402080A00501DD60000000001030307, text=".\..c..5......9.V............P..........")}, payload=Buffer(size=0, data=, text=""), trailers={})
+Found matching connection
+this is the data: Buffer(size=0, data=, text="")
+
+=== MUX: LISTEN STATE ===
+TCP Packet:
+ IP Header is IPHeader( version=4, hlen=5 (20), tos=0, len=40, id=0, flags=2(DO NOT FRAGMENT NO MORE FRAGMENTS), fragoff=0, ttl=64, proto=6(TCP), checksum=30273(valid), computedchecksum=0, src=IPAddress(10.10.49.60), dst=IPAddress(129.105.7.224)noopts )
+TCP Header is TCPHeader(srcport=5001, destport=45148, seqnum=846930886, acknum=1670884918, hlen=5(20 bytes), flags=18( ACK  SYN ), winsize=1, checksum=48973, urgentptr=0)
+PACKET:
+Packet(headers={TaggedBuffer(tag=IPHeader, Buffer(size=20, data=4500002800004000400676410A0A313C816907E0, text="E..(..@.@.vA..1<.i..")TaggedBuffer(tag=TCPHeader, Buffer(size=20, data=1389B05C327B23C66397AE3650120001BF4D0000, text="...\2{#.c..6P....M..")}, payload=Buffer(size=0, data=, text=""), trailers={})
+
+ === IP LAYER DONE === 
+
+ === IP LAYER START === 
+estimated header len=20
+TCP Packet:
+ IP Header is IPHeader( version=4, hlen=5 (20), tos=0, len=40, id=46052, flags=2(DO NOT FRAGMENT NO MORE FRAGMENTS), fragoff=0, ttl=64, proto=6(TCP), checksum=49756(valid), computedchecksum=0, src=IPAddress(129.105.7.224), dst=IPAddress(10.10.49.60)noopts )
+TCP Header is TCPHeader(srcport=45148, destport=5001, seqnum=1670884918, acknum=846930887, hlen=5(20 bytes), flags=16( ACK ), winsize=14600, checksum=34375, urgentptr=0)
+Checksum is VALID
+
+PACKET CONTENTS: Packet(headers={TaggedBuffer(tag=EthernetHeader, Buffer(size=14, data=782BCBAF1EA6782BCB9E6C9B0800, text="x+....x+..l...")TaggedBuffer(tag=IPHeader, Buffer(size=20, data=45000028B3E440004006C25C816907E00A0A313C, text="E..(..@.@..\.i....1<")TaggedBuffer(tag=TCPHeader, Buffer(size=20, data=B05C13896397AE36327B23C75010390886470000, text=".\..c..62{#.P.9..G..")}, payload=Buffer(size=6, data=000000000000, text="......"), trailers={})
+Found matching connection
+this is the data: Buffer(size=6, data=000000000000, text="......")
+
+=== MUX: SYN_RCVD STATE ===
+rec_flag: 
+rec_ack_n: 846930887
+get last sent: 846930886
+
+ === IP LAYER DONE === 
+
+ === SOCK LAYER START === 
+Received Socket Request:SockRequestResponse(type=STATUS, connection=Connection(src=IPAddress(10.10.49.60):5001, dest=IPAddress(129.105.7.224):45148, protocol=6), data=Buffer(size=0, data=, text=""), bytes=0, error=0)
+
+=== SOCK: STATUS ===
+
+=== SOCK: END STATUS ===
+
+ === SOCK LAYER DONE === 
+
+ === IP LAYER START === 
+estimated header len=20
+TCP Packet:
+ IP Header is IPHeader( version=4, hlen=5 (20), tos=0, len=41, id=46053, flags=2(DO NOT FRAGMENT NO MORE FRAGMENTS), fragoff=0, ttl=64, proto=6(TCP), checksum=49754(valid), computedchecksum=0, src=IPAddress(129.105.7.224), dst=IPAddress(10.10.49.60)noopts )
+TCP Header is TCPHeader(srcport=45148, destport=5001, seqnum=1670884918, acknum=846930887, hlen=5(20 bytes), flags=24( ACK  PSH ), winsize=14600, checksum=7742, urgentptr=0)
+Checksum is VALID
+
+PACKET CONTENTS: Packet(headers={TaggedBuffer(tag=EthernetHeader, Buffer(size=14, data=782BCBAF1EA6782BCB9E6C9B0800, text="x+....x+..l...")TaggedBuffer(tag=IPHeader, Buffer(size=20, data=45000029B3E540004006C25A816907E00A0A313C, text="E..)..@.@..Z.i....1<")TaggedBuffer(tag=TCPHeader, Buffer(size=20, data=B05C13896397AE36327B23C7501839081E3E0000, text=".\..c..62{#.P.9..>..")}, payload=Buffer(size=6, data=680000000000, text="h....."), trailers={})
+Found matching connection
+this is the data: Buffer(size=6, data=680000000000, text="h.....")
+
+=== MUX: ESTABLISHED STATE ===
+TCP Packet:
+ IP Header is IPHeader( version=4, hlen=5 (20), tos=0, len=40, id=1, flags=2(DO NOT FRAGMENT NO MORE FRAGMENTS), fragoff=0, ttl=64, proto=6(TCP), checksum=30272(valid), computedchecksum=0, src=IPAddress(10.10.49.60), dst=IPAddress(129.105.7.224)noopts )
+TCP Header is TCPHeader(srcport=5001, destport=45148, seqnum=846930887, acknum=1670884919, hlen=5(20 bytes), flags=16( ACK ), winsize=1, checksum=48973, urgentptr=0)
+PACKET:
+Packet(headers={TaggedBuffer(tag=IPHeader, Buffer(size=20, data=4500002800014000400676400A0A313C816907E0, text="E..(..@.@.v@..1<.i..")TaggedBuffer(tag=TCPHeader, Buffer(size=20, data=1389B05C327B23C76397AE3750100001BF4D0000, text="...\2{#.c..7P....M..")}, payload=Buffer(size=0, data=, text=""), trailers={})
+terminate called after throwing an instance of 'std::out_of_range'
+  what():  basic_string::substr
+
+====> Module is dying due to SIGABRT <====
+Hit enter to continue
