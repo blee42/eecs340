@@ -56,7 +56,7 @@ Packet MakePacket(Buffer data, Connection conn, unsigned int seq_n, unsigned int
   send_tcp_h.SetDestPort(conn.destport, send_pack);
   send_tcp_h.SetHeaderLen(TCP_HEADER_BASE_LENGTH/4, send_pack);
   send_tcp_h.SetFlags(flag, send_pack);
-  send_tcp_h.SetWinSize(TCP_BUFFER_SIZ, send_pack); // to fix
+  send_tcp_h.SetWinSize(10, send_pack); // to fix
   send_tcp_h.SetSeqNum(seq_n, send_pack);
   if (IS_ACK(flag))
   {
