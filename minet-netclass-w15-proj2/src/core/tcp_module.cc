@@ -307,6 +307,10 @@ int main(int argc, char *argv[])
                 // if there is data
                 if (IS_PSH(rec_flag))
                 {
+                  cerr << "BEFORE" << endl;
+                  cerr << "receiver buffer: \n"
+                  cs->state.RecvBuffer.Print(cerr);
+                  cerr << endl;
                   // if there is overflow of the recieved data
                   if (cs->state.RecvBuffer.GetSize() < data.GetSize()) 
                   {
@@ -319,6 +323,11 @@ int main(int argc, char *argv[])
                     cs->state.RecvBuffer.AddBack(data);
                     cs->state.SetLastRecvd(rec_seq_n + data.GetSize() - 1); // maybe -1
                   }
+
+                  cerr << "AFTER" << endl;
+                  cerr << "receiver buffer: \n"
+                  cs->state.RecvBuffer.Print(cerr);
+                  cerr << endl;
 
                   // send ACK flag packet to mux
                   SET_ACK(send_flag);
@@ -679,7 +688,7 @@ int main(int argc, char *argv[])
           ConnectionList<TCPState>::iterator cs = clist.FindMatching(req.connection);
           if (cs->state.GetState() == ESTABLISHED)
           {
-            cerr << req.bytes << "out of " << cs->state.RecvBuffer.GetSize() << "read" << endl;
+            cerr << req.bytes << " out of " << cs->state.RecvBuffer.GetSize() << " read" << endl;
             // if all data read
             if (req.bytes == cs->state.RecvBuffer.GetSize())
             {
