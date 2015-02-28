@@ -279,6 +279,8 @@ int main(int argc, char *argv[])
             // if the otherside is ready to close
             if (IS_FIN(rec_flag))
             {
+              int i;
+              cin >> i; 
               send_seq_n = cs->state.GetLastSent() + 1;
 
               cs->state.SetState(CLOSE_WAIT);
