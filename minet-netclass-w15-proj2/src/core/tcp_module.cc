@@ -228,7 +228,8 @@ int main(int argc, char *argv[])
               cs->state.SetLastSent(send_seq_n);
 
               // timer
-
+              cs->bTmrActive = false;
+              cs->state.SetTimerTries(MAX_TRIES);
 
               // create res to send to sock
               res.type = WRITE;
