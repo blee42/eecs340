@@ -176,7 +176,8 @@ int main(int argc, char *argv[])
         rec_tcp_h.GetHeaderLen((unsigned char&)tcphlen);
         tcphlen -= TCP_HEADER_MAX_LENGTH;
         Buffer data = rec_pack.GetPayload().ExtractFront(tcphlen);
-        cerr << "this is the data: " << data << "\n";
+        data.Print(cerr);
+        cerr << endl;
 
         unsigned char send_flag = 0;
         SockRequestResponse res;
