@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
 
                   // send ACK flag packet to mux
                   SET_ACK(send_flag);
-                  send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag);
+                  send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n+1, send_ack_n, send_flag);
                   MinetSend(mux, send_pack);
 
                   // send WRITE packet to sock 
