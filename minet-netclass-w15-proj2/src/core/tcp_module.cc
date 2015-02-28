@@ -316,14 +316,14 @@ int main(int argc, char *argv[])
                   if (available_size < data.GetSize()) 
                   {
                     cs->state.RecvBuffer.AddBack(data.ExtractFront(available_size));
-                    send_seq_n = rec_seq_n + available_size - 1;
+                    send_seq_n = cs->state.GetLastSent() + available_size - 1;
                     cs->state.SetLastRecvd(send_seq_n); // maybe -1
                   }
                   // else there is no overflow
                   else
                   {
                     cs->state.RecvBuffer.AddBack(data);
-                    send_seq_n = rec_seq_n + data.GetSize() - 1;
+                    send_seq_n = cs->state.GetLastSent() + data.GetSize() - 1;
                     cs->state.SetLastRecvd(send_seq_n); // maybe -1
                   }
 
