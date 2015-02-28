@@ -308,7 +308,7 @@ int main(int argc, char *argv[])
                 if (IS_PSH(rec_flag))
                 {
                   cerr << "BEFORE" << endl;
-                  cerr << "receiver buffer: \n"
+                  cerr << "receiver buffer: \n";
                   cs->state.RecvBuffer.Print(cerr);
                   cerr << endl;
                   // if there is overflow of the recieved data
@@ -325,7 +325,7 @@ int main(int argc, char *argv[])
                   }
 
                   cerr << "AFTER" << endl;
-                  cerr << "receiver buffer: \n"
+                  cerr << "receiver buffer: \n";
                   cs->state.RecvBuffer.Print(cerr);
                   cerr << endl;
 
