@@ -641,7 +641,7 @@ int main(int argc, char *argv[])
                 data = cs->state.SendBuffer.Extract(win_size, rwnd);
                 // set new seq_n
                 cs->state.SetLastSent(cs->state.GetLastSent() + rwnd);
-                win_size = win_size + cwnd;
+                win_size = win_size + rwnd;
                 SET_ACK(send_flag);
                 send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, send_flag);
               }
