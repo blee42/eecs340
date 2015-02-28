@@ -676,6 +676,7 @@ int main(int argc, char *argv[])
         case STATUS:
         {
           cerr << "\n=== SOCK: STATUS ===\n";
+          ConnectionList<TCPState>::iterator cs = clist.FindMatching(req.connection);
           if (cs->state == ESTABLISHED)
           {
             // if all data read
