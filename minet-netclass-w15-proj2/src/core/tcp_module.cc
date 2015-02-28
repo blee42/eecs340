@@ -677,7 +677,7 @@ int main(int argc, char *argv[])
         {
           cerr << "\n=== SOCK: STATUS ===\n";
           ConnectionList<TCPState>::iterator cs = clist.FindMatching(req.connection);
-          if (cs->state == ESTABLISHED)
+          if (cs->state.GetState() == ESTABLISHED)
           {
             // if all data read
             if (req.bytes == cs->state.RecvBuffer.GetSize())
