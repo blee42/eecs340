@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
               // cs->state.SetLastAcked(rec_ack_n);
 
               SET_ACK(send_flag);
-              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, RECV_BUF_SIZE(cs->state) send_flag);
+              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, RECV_BUF_SIZE(cs->state), send_flag);
               MinetSend(mux, send_pack);
             }
             // else otherside continues to send data
@@ -340,7 +340,7 @@ int main(int argc, char *argv[])
 
                   // send ACK flag packet to mux
                   SET_ACK(send_flag);
-                  send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n + 1, RECV_BUF_SIZE(cs->state) send_flag);
+                  send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n + 1, RECV_BUF_SIZE(cs->state), send_flag);
                   MinetSend(mux, send_pack);
 
                   // send WRITE packet to sock 
@@ -543,7 +543,7 @@ int main(int argc, char *argv[])
           MinetSend(sock, res);
 
           SET_SYN(send_flag);
-          Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, rand(), 0, SEND_BUF_SIZE(new_conn->state),send_flag); // not sure what the seq_n should be
+          Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, rand(), 0, SEND_BUF_SIZE(new_conn.state),send_flag); // not sure what the seq_n should be
           MinetSend(mux, send_pack);
 
           cerr << "\n=== SOCK: END CONNECT ===\n";
