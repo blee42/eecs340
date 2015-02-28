@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
     //  Data from the IP layer below  //
     else if (event.handle == mux) 
     {
-      cerr << "\nHANDLING DATA FROM IP LAYER BELOW\n";
+      cerr << "\n === IP LAYER START === \n";
 
       Packet rec_pack;
       MinetReceive(mux, rec_pack);
@@ -252,7 +252,8 @@ int main(int argc, char *argv[])
 
 
               SET_ACK(send_flag);
-              send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag);
+              // send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag); // ??
+              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag);
               MinetSend(mux, send_pack);
 
               // create res to send to sock
@@ -409,13 +410,45 @@ int main(int argc, char *argv[])
             if (IS_FIN(rec_flag))
             {
               // send a fin ack back
+              send_seq_n = cs->state.GetLastSent() + 1;
+
               cs->state.SetState(LAST_ACK);
+              cs->state.SetLastRecvd(rec_seq_n);
+              cs->state.SetLastSent(send_seq_n);
+
+              // timeout stuff
+
+              SET_FIN(send_flag);
+              // send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag); // ??
+              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag);
+              MinetSend(mux, send_pack);
             }
           }
           break;
           case FIN_WAIT1:
           {
             cerr << "\n=== MUX: FIN_WAIT1 STATE ===\n";
+            if (IS_FIN(rec_flag))
+            {
+              send_seq_n = cs->state.GetLastSent() + 1;
+
+              cs->state.SetState(CLOSING);
+              cs->state.SetLastRecvd(rec_seq_n);
+              cs->state.SetLastSent(send_seq_n);
+
+              // set timeout
+              SET_FIN(send_flag);
+              SET_ACK(send_flag);
+              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag);
+              MinetSend(mux, send_pack);
+            }
+            else if (IS_ACK(rec_flag))
+            {
+
+              cs->state.SetState(FIN_WAIT2);
+
+
+            }
           }
           break;
           case CLOSING:
@@ -428,6 +461,7 @@ int main(int argc, char *argv[])
             cerr << "\n=== MUX: LAST_ACK STATE ===\n";
             if (IS_ACK(rec_flag))
             {
+              // set anything last things?
               cs->state.SetState(CLOSED);
             }
           }
@@ -455,13 +489,13 @@ int main(int argc, char *argv[])
       {
         cerr << "Could not find matching connection\n";
       }
-
+      cerr << "\n === IP LAYER DONE === \n";
     }
 
     //  Data from the Sockets layer above  //
     else if (event.handle == sock) 
     {
-      cerr << "\nHANDLING DATA FROM SOCKETS LAYER ABOVE\n";
+      cerr << "\n === SOCK LAYER START === \n";
       SockRequestResponse req;
       SockRequestResponse res;
       MinetReceive(sock, req);
@@ -623,8 +657,7 @@ int main(int argc, char *argv[])
         case FORWARD:
         {
           cerr << "\n=== SOCK: FORWARD ===\n";
-          // TODO: find connection of request
-          // TODO: request response to that connection?
+          // do nothing?
           cerr << "\n=== SOCK: END FORWARD ===\n";
         }
         break;
@@ -652,6 +685,9 @@ int main(int argc, char *argv[])
         break;
 
       }
+
+      cerr << "\n === SOCK LAYER DONE === \n";
+
     }
   }
   return 0;
