@@ -675,7 +675,27 @@ int main(int argc, char *argv[])
         case STATUS:
         {
           cerr << "\n=== SOCK: STATUS ===\n";
-          
+          if (cs->state == ESTABLISHED)
+          {
+            // if all data read
+            if (req.bytes == cs->state.RecvBuffer.GetSize())
+            {
+              cs->state.RecvBuffer.Clear();
+            }
+            // if some data still in buffer
+            else
+            {
+              cs->state.RecvBuffer.Erase(0, req.bytes);
+
+              res.type = WRITE;
+              res.connection = req.connection;
+              res.data = cs->state.RecvBuffer;
+              res.bytes = cs->state.RecvBuffer.GetSize();
+              res.error = EOK;
+
+              MinetSend(sock, res);
+            }
+          }
           cerr << "\n=== SOCK: END STATUS ===\n";
         }
         break;
