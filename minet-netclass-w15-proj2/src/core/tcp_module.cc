@@ -317,7 +317,7 @@ int main(int argc, char *argv[])
                   else
                   {
                     cs->state.RecvBuffer.AddBack(data);
-                    cs->state.SetLastRecvd(rec_seq_n + data.GetSize()); // maybe -1
+                    cs->state.SetLastRecvd(rec_seq_n + data.GetSize() - 1); // maybe -1
                   }
 
                   // send ACK flag packet to mux
