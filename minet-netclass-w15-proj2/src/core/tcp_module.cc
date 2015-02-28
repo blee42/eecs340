@@ -33,6 +33,9 @@ using std::cin;
 #define GBN MSS*5
 #define RTT 5
 
+#define RECV_BUF_SIZE(state) (state.TCP_BUFFER_SIZE - state.RecvBuffer.GetSize())
+#define SEND_BUF_SIZE(state) (state.TCP_BUFFER_SIZE - state.SendBuffer.GetSize())
+
 // ======================================== //
 //                  HELPERS                 //
 // ======================================== //
@@ -209,7 +212,7 @@ int main(int argc, char *argv[])
 
               SET_SYN(send_flag);
               SET_ACK(send_flag);
-              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag); // ack
+              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, RECV_BUF_SIZE(cs->state), send_flag); // ack
               MinetSend(mux, send_pack);
             }
           }
@@ -255,7 +258,7 @@ int main(int argc, char *argv[])
 
               SET_ACK(send_flag);
               // send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag); // ??
-              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag);
+              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, SEND_BUF_SIZE(cs->state), send_flag);
               MinetSend(mux, send_pack);
 
               // create res to send to sock
@@ -290,7 +293,7 @@ int main(int argc, char *argv[])
               // cs->state.SetLastAcked(rec_ack_n);
 
               SET_ACK(send_flag);
-              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag);
+              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, RECV_BUF_SIZE(cs->state) send_flag);
               MinetSend(mux, send_pack);
             }
             // else otherside continues to send data
@@ -312,11 +315,11 @@ int main(int argc, char *argv[])
                   cs->state.RecvBuffer.Print(cerr);
                   cerr << endl;
                   // if there is overflow of the recieved data
-                  size_t available_size = cs->state.TCP_BUFFER_SIZE - cs->state.RecvBuffer.GetSize();
-                  if (available_size < data.GetSize()) 
+                  size_t recv_buf_size = RECV_BUF_SIZE(cs->state);
+                  if (recv_buf_size < data.GetSize()) 
                   {
-                    cs->state.RecvBuffer.AddBack(data.ExtractFront(available_size));
-                    send_ack_n = cs->state.GetLastSent() + available_size - 1;
+                    cs->state.RecvBuffer.AddBack(data.ExtractFront(recv_buf_size));
+                    send_ack_n = cs->state.GetLastSent() + recv_buf_size - 1;
                     cs->state.SetLastRecvd(send_ack_n); // maybe -1
                   }
                   // else there is no overflow
@@ -337,7 +340,7 @@ int main(int argc, char *argv[])
 
                   // send ACK flag packet to mux
                   SET_ACK(send_flag);
-                  send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n + 1, send_flag);
+                  send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n + 1, RECV_BUF_SIZE(cs->state) send_flag);
                   MinetSend(mux, send_pack);
 
                   // send WRITE packet to sock 
@@ -377,7 +380,7 @@ int main(int argc, char *argv[])
                         // move on to the next set of packets
                         win_size = win_size + MSS;
                         SET_ACK(send_flag);
-                        send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, send_flag);
+                        send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
 
                       }
 
@@ -391,7 +394,7 @@ int main(int argc, char *argv[])
                         // move on to the next set of packets
                         win_size = win_size + cwnd;
                         SET_ACK(send_flag);
-                        send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, send_flag);
+                        send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
                       }
 
                       // else if rwnd < MSS < cwnd or rwnd < cwnd < MSS
@@ -403,7 +406,7 @@ int main(int argc, char *argv[])
                         cs->state.SetLastSent(cs->state.GetLastSent() + rwnd);
                         win_size = win_size + rwnd;
                         SET_ACK(send_flag);
-                        send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, send_flag);
+                        send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
                       }
 
                       MinetSend(mux, send_pack);
@@ -438,7 +441,7 @@ int main(int argc, char *argv[])
 
               SET_FIN(send_flag);
               // send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag); // ??
-              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag);
+              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, RECV_BUF_SIZE(cs->state), send_flag);
               MinetSend(mux, send_pack);
             }
           }
@@ -457,7 +460,7 @@ int main(int argc, char *argv[])
               // set timeout
               SET_FIN(send_flag);
               SET_ACK(send_flag);
-              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag);
+              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, SEND_BUF_SIZE(cs->state), send_flag);
               MinetSend(mux, send_pack);
             }
             else if (IS_ACK(rec_flag))
@@ -540,7 +543,7 @@ int main(int argc, char *argv[])
           MinetSend(sock, res);
 
           SET_SYN(send_flag);
-          Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, rand(), 0, send_flag); // not sure what the seq_n should be
+          Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, rand(), 0, SEND_BUF_SIZE(new_conn->state),send_flag); // not sure what the seq_n should be
           MinetSend(mux, send_pack);
 
           cerr << "\n=== SOCK: END CONNECT ===\n";
@@ -622,7 +625,7 @@ int main(int argc, char *argv[])
                 // move on to the next set of packets
                 win_size = win_size + MSS;
                 SET_ACK(send_flag);
-                send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, send_flag);
+                send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
 
               }
 
@@ -637,7 +640,7 @@ int main(int argc, char *argv[])
                 // move on to the next set of packets
                 win_size = win_size + cwnd;
                 SET_ACK(send_flag);
-                send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, send_flag);
+                send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
               }
 
               // else if rwnd < MSS < cwnd or rwnd < cwnd < MSS
@@ -650,7 +653,7 @@ int main(int argc, char *argv[])
                 cs->state.SetLastSent(cs->state.GetLastSent() + rwnd);
                 win_size = win_size + rwnd;
                 SET_ACK(send_flag);
-                send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, send_flag);
+                send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
               }
 
               MinetSend(mux, send_pack);
