@@ -316,16 +316,19 @@ int main(int argc, char *argv[])
                   if (available_size < data.GetSize()) 
                   {
                     cs->state.RecvBuffer.AddBack(data.ExtractFront(available_size));
-                    send_seq_n = cs->state.GetLastSent() + available_size - 1;
-                    cs->state.SetLastRecvd(send_seq_n); // maybe -1
+                    send_ack_n = cs->state.GetLastSent() + available_size - 1;
+                    cs->state.SetLastRecvd(send_ack_n); // maybe -1
                   }
                   // else there is no overflow
                   else
                   {
                     cs->state.RecvBuffer.AddBack(data);
-                    send_seq_n = cs->state.GetLastSent() + data.GetSize() - 1;
-                    cs->state.SetLastRecvd(send_seq_n); // maybe -1
+                    send_ack_n = cs->state.GetLastSent() + data.GetSize() - 1;
+                    cs->state.SetLastRecvd(send_ack_n); // maybe -1
                   }
+
+                  send_seq_n = cs->state.GetLastSent() + 1;
+                  cs->state.SetLastSent(send_seq_n);
 
                   cerr << "AFTER" << endl;
                   cerr << "receiver buffer: \n";
@@ -334,7 +337,7 @@ int main(int argc, char *argv[])
 
                   // send ACK flag packet to mux
                   SET_ACK(send_flag);
-                  send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n+1, send_ack_n, send_flag);
+                  send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n + 1, send_flag);
                   MinetSend(mux, send_pack);
 
                   // send WRITE packet to sock 
@@ -345,7 +348,6 @@ int main(int argc, char *argv[])
                   res.error = EOK;
                   MinetSend(sock, res);
                   
-                  cs->state.SetLastSent(cs->state.GetLastSent() + 1);
 
                   // send some of the infromation in the buffer
                   // if there is overflow in the send buffer
