@@ -22,6 +22,7 @@ using std::endl;
 using std::cerr;
 using std::string;
 using std::cin;
+using std::min;
 
 // ======================================== //
 //              CONST & MACROS              //
