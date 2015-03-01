@@ -491,7 +491,7 @@ int main(int argc, char *argv[])
             // else otherside continues to send data
             else
             {
-              if (IS_ACK(rec_flag) && cs->state.GetLastRecvd() < rec_seq_n)
+              if (IS_ACK(rec_flag))
               {
                 cerr << "ACK flagged.\n";
                 // if there is data
@@ -542,7 +542,7 @@ int main(int argc, char *argv[])
                   res.error = EOK;
                   MinetSend(sock, res);
                 }
-                else
+                else if (cs->state.GetLastRecvd() < rec_seq_n)
                 {
                   cerr << "Not PSH flagged.\n";
                   cs->state.SendBuffer.Erase(0, rec_ack_n - cs->state.GetLastAcked() - 1);
@@ -624,6 +624,10 @@ int main(int argc, char *argv[])
                     cs->state.N = inflight_n;
                   }
                   
+                }
+                else
+                {
+                  cerr << "Got a stray packet. \n";
                 }
               }
             }
