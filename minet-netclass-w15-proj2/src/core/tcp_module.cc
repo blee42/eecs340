@@ -275,6 +275,8 @@ int main(int argc, char *argv[])
           case SYN_SENT:
           {
             cerr << "\n=== MUX: SYN_SENT STATE ===\n";
+            cerr << "rec_ack_n: " << rec_ack_n << endl;
+            cerr << "lasat_sent: " << cs->state.GetLastSent() << endl;
             if (IS_SYN(rec_flag) && IS_ACK(rec_flag) && rec_ack_n == cs->state.GetLastSent() + 1)
             {
               send_seq_n = cs->state.GetLastSent() + 1;
@@ -283,9 +285,6 @@ int main(int argc, char *argv[])
               cs->state.SetLastAcked(rec_ack_n - 1);
               cs->state.SetLastRecvd(rec_seq_n);
               cs->state.SetLastSent(send_seq_n);
-
-              cerr << "Last acked: " << rec_ack_n - 1 << endl;
-
 
               SET_ACK(send_flag);
               // send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag); // ??
