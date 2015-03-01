@@ -69,6 +69,7 @@ Packet MakePacket(Buffer data, Connection conn, unsigned int seq_n, unsigned int
   send_tcp_h.RecomputeChecksum(send_pack);
   send_pack.PushBackHeader(send_tcp_h);
 
+  cerr << "== MAKING PACKET ==" << endl;
   cerr << "TCP Packet:\n IP Header is "<< send_ip_h <<"\n";
   cerr << "TCP Header is "<< send_tcp_h << "\n";
   cerr << "PACKET:\n" << send_pack << endl;
@@ -220,6 +221,7 @@ int main(int argc, char *argv[])
             if (IS_SYN(rec_flag))
             {
               send_seq_n = rand();
+              cerr << "generated seq: " << send_seq_n << endl;
 
               cs->state.SetState(SYN_RCVD);
               // cs->state.SetLastAcked(rec_ack_n);
@@ -273,7 +275,7 @@ int main(int argc, char *argv[])
           case SYN_SENT:
           {
             cerr << "\n=== MUX: SYN_SENT STATE ===\n";
-            if (IS_SYN(rec_flag) && IS_ACK(rec_flag))
+            if (IS_SYN(rec_flag) && IS_ACK(rec_flag) && rec_ack_n == cs->state.GetLastSent() + 1)
             {
               send_seq_n = cs->state.GetLastSent() + 1;
 
@@ -582,7 +584,9 @@ int main(int argc, char *argv[])
           MinetSend(sock, res);
 
           unsigned int init_seq = rand();
-          new_conn.state.SetLastAcked(init_seq);
+          new_conn.state.SetLastSent(init_seq);
+
+          cerr << "Last Acked: " << new_conn.state.GetLastAcked() << endl;
 
           SET_SYN(send_flag);
           Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, init_seq, 0, SEND_BUF_SIZE(new_conn.state), send_flag); // not sure what the seq_n should be
