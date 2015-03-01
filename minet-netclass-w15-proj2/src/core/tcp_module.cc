@@ -159,8 +159,8 @@ int main(int argc, char *argv[])
 
       cerr << "TCP Packet:\n IP Header is "<< rec_ip_h <<"\n";
       cerr << "TCP Header is "<< rec_tcp_h << "\n";
-      cerr << "Checksum is " << (rec_tcp_h.IsCorrectChecksum(rec_pack) ? "VALID\n\n" : "INVALID\n\n");
-      cerr << "PACKET CONTENTS: " << rec_pack << "\n";
+      // cerr << "Checksum is " << (rec_tcp_h.IsCorrectChecksum(rec_pack) ? "VALID\n\n" : "INVALID\n\n");
+      cerr << "Packet Contents: " << rec_pack << "\n";
 
       // REMOVED HARDCODED PACKET AND NO LONGER WORKS
 
@@ -211,6 +211,10 @@ int main(int argc, char *argv[])
         SockRequestResponse res;
         Packet send_pack;
 
+        cerr << "Last Acked: " << cs->state.GetLastAcked() << endl;
+        cerr << "Last Sent: " << cs->state.GetLastSent() << endl;
+        cerr << "Last Recv: " << cs->State.GetLastRecvd() << endl;
+
 
         switch(cs->state.GetState())
         {
@@ -249,8 +253,8 @@ int main(int argc, char *argv[])
           case SYN_RCVD:
           {
             cerr << "\n=== MUX: SYN_RCVD STATE ===\n";
-            cerr << "rec_ack_n: " << rec_ack_n << endl;
-            cerr << "get last sent: " << cs->state.GetLastSent() << endl;
+            // cerr << "rec_ack_n: " << rec_ack_n << endl;
+            // cerr << "get last sent: " << cs->state.GetLastSent() << endl;
             // if (IS_SYN(rec_flag))
             // {
             //   // SET_SYN(send_flag);
@@ -328,6 +332,7 @@ int main(int argc, char *argv[])
             // }
             if (IS_FIN(rec_flag))
             {
+              cerr << "FIN flagged.\n";
               int i;
               cin >> i; 
               send_seq_n = cs->state.GetLastSent() + 1;
@@ -346,35 +351,38 @@ int main(int argc, char *argv[])
             // else otherside continues to send data
             else
             {
-              if (IS_ACK(rec_flag))
+              if (IS_ACK(rec_flag) && cs->state.GetLastRecvd() <= rec_seq_n)
               {
+                cerr << "ACK flagged.\n";
                 // if there is data
                 if (IS_PSH(rec_flag))
                 {
-                  cerr << "BEFORE" << endl;
-                  cerr << "receiver buffer: \n";
-                  cs->state.RecvBuffer.Print(cerr);
-                  cerr << endl;
+                  cerr << "PSH flagged.\n";
+                  // cerr << "BEFORE" << endl;
+                  // cerr << "receiver buffer: \n";
+                  // cs->state.RecvBuffer.Print(cerr);
+                  // cerr << endl;
+                  cerr << "RecvB: " << cs->state.GetLastRecvd() << endl;
                   // if there is overflow of the recieved data
                   size_t recv_buf_size = RECV_BUF_SIZE(cs->state);
                   if (recv_buf_size < data.GetSize()) 
                   {
                     cs->state.RecvBuffer.AddBack(data.ExtractFront(recv_buf_size));
-                    // send_ack_n = rec_seq_n + recv_buf_size - 1;
-                    // cs->state.SetLastRecvd(send_ack_n); // maybe -1
+                    send_ack_n = rec_seq_n + recv_buf_size - 1;
+                    cs->state.SetLastRecvd(send_ack_n); // maybe -1
                   }
                   // else there is no overflow
                   else
                   {
                     cs->state.RecvBuffer.AddBack(data);
-                    // send_ack_n = rec_seq_n + data.GetSize() - 1;
+                    send_ack_n = rec_seq_n + data.GetSize() - 1;
+                    cs->state.SetLastRecvd(send_ack_n); // maybe -1
                   }
 
-                  cs->state.SetLastRecvd(send_ack_n); // maybe -1
+                  cerr << "RecvA: " << cs->state.GetLastRecvd() << endl;
+
                   send_seq_n = cs->state.GetLastSent() + 1;
-                  cerr << "SET1: " << cs->state.GetLastSent() << endl;
                   cs->state.SetLastSent(send_seq_n);
-                  cerr << "SET2: " << cs->state.GetLastSent() << endl;
 
                   cerr << "AFTER" << endl;
                   cerr << "receiver buffer: \n";
@@ -383,7 +391,7 @@ int main(int argc, char *argv[])
 
                   // send ACK flag packet to mux
                   SET_ACK(send_flag);
-                  send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, RECV_BUF_SIZE(cs->state), send_flag);
+                  send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n + 1, RECV_BUF_SIZE(cs->state), send_flag);
                   MinetSend(mux, send_pack);
 
                   // send WRITE packet to sock 
@@ -396,9 +404,9 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
+                  cerr << "Not PSH flagged.\n";
                   cs->state.SendBuffer.Erase(0, rec_ack_n - cs->state.GetLastAcked() - 1);
 
-                  cerr << "MINUS: " << rec_ack_n - cs->state.GetLastAcked() - 1 << endl;
                   cs->state.N = cs->state.N - (rec_ack_n - cs->state.GetLastAcked() - 1);
                   cerr << "N after: " << cs->state.N << endl;
 
@@ -697,7 +705,7 @@ int main(int argc, char *argv[])
                 data = cs->state.SendBuffer.Extract(inflight_n, MSS);
                 // set new seq_n
                 cerr << "SET1: " << cs->state.GetLastSent() << endl;
-                // cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
+                cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
                 cerr << "SET2: " << cs->state.GetLastSent() << endl;
                 // move on to the next set of packets
                 inflight_n = inflight_n + MSS;
@@ -714,7 +722,7 @@ int main(int argc, char *argv[])
                 data = cs->state.SendBuffer.Extract(inflight_n, min((int)rwnd, (int)cwnd));
                 // set new seq_n
                 cerr << "SET1: " << cs->state.GetLastSent() << endl;
-                // cs->state.SetLastSent(cs->state.GetLastSent() + min((int)rwnd, (int)cwnd));
+                cs->state.SetLastSent(cs->state.GetLastSent() + min((int)rwnd, (int)cwnd));
                 cerr << "SET2: " << cs->state.GetLastSent() << endl;
                 // move on to the next set of packets
                 inflight_n = inflight_n + min((int)rwnd, (int)cwnd);
@@ -723,8 +731,6 @@ int main(int argc, char *argv[])
                 SET_PSH(send_flag);
                 send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
               }
-
-              cs->state.SetLastSent(cs->state.GetLastSent() + 1);
 
               MinetSend(mux, send_pack);
 
