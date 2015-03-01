@@ -404,7 +404,7 @@ int main(int argc, char *argv[])
             {
               cs->state.SetState(ESTABLISHED);
               // cs->state.SetLastAcked(rec_ack_n); // -1?
-              cs->state.SetLastRecvd(rec_seq_n - 1);
+              cs->state.SetLastRecvd(rec_seq_n - 1); // next will have same seq num
               cerr << "SET1: " << cs->state.GetLastSent() << endl;
               cs->state.SetLastSent(send_seq_n);
 
@@ -433,7 +433,7 @@ int main(int argc, char *argv[])
 
               cs->state.SetState(ESTABLISHED);
               cs->state.SetLastAcked(rec_ack_n - 1);
-              cs->state.SetLastRecvd(rec_seq_n);
+              cs->state.SetLastRecvd(rec_seq_n - 1); // first data will be the same as this
               cs->state.SetLastSent(send_seq_n);
 
               cerr << "Last Acked: " << cs->state.GetLastAcked() << endl;
@@ -494,9 +494,11 @@ int main(int argc, char *argv[])
               {
                 cerr << "ACK flagged.\n";
                 // if there is data
-                if (IS_PSH(rec_flag))
+
+                // if (IS_PSH(rec_flag)) // not right?
+                if (data.GetSize() > 0)
                 {
-                  cerr << "PSH flagged.\n";
+                  cerr << "Has data..\n";
                   // cerr << "BEFORE" << endl;
                   // cerr << "receiver buffer: \n";
                   // cs->state.RecvBuffer.Print(cerr);
@@ -830,6 +832,7 @@ int main(int argc, char *argv[])
             cerr << "inflight_n: " << inflight_n << endl;
             cerr << "rwnd: " << rwnd << endl;
             cerr << "cwnd: " << cwnd << endl;
+            cerr << "last SENT: " << cs->state.GetLastSent() << endl;
             cerr << "last ACKED: " << cs->state.GetLastAcked() << endl;
             
 
@@ -845,15 +848,16 @@ int main(int argc, char *argv[])
                 cerr << "space in rwnd and cwnd" << endl;
                 data = cs->state.SendBuffer.Extract(inflight_n, MSS);
                 // set new seq_n
-                cerr << "SET1: " << cs->state.GetLastSent() << endl;
-                cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
-                cerr << "SET2: " << cs->state.GetLastSent() << endl;
                 // move on to the next set of packets
                 inflight_n = inflight_n + MSS;
                 CLR_SYN(send_flag);
                 SET_ACK(send_flag);
                 SET_PSH(send_flag);
                 send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
+
+                cerr << "SET1: " << cs->state.GetLastSent() << endl;
+                cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
+                cerr << "SET2: " << cs->state.GetLastSent() << endl;
               }
 
               // else space in cwnd or rwnd
@@ -862,13 +866,13 @@ int main(int argc, char *argv[])
                 cerr << "space in either or" << endl;
                 data = cs->state.SendBuffer.Extract(inflight_n, min((int)rwnd, (int)cwnd));
                 // set new seq_n
-                cs->state.SetLastSent(cs->state.GetLastSent() + min((int)rwnd, (int)cwnd));
                 // move on to the next set of packets
                 inflight_n = inflight_n + min((int)rwnd, (int)cwnd);
                 CLR_SYN(send_flag);
                 SET_ACK(send_flag);
                 SET_PSH(send_flag);
                 send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
+                cs->state.SetLastSent(cs->state.GetLastSent() + min((int)rwnd, (int)cwnd));
               }
 
               MinetSend(mux, send_pack);
