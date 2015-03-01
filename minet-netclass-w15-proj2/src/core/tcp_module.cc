@@ -552,19 +552,19 @@ int main(int argc, char *argv[])
           TCPState connect_conn(rand(), SYN_SENT, MAX_TRIES);
           connect_conn.N = 0; // TODO: what should this be set to?
           // may need to change timeout time
-          ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(), connect_conn, false);
+          ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(), connect_conn, true);
           clist.push_front(new_conn);
          
           res.type = STATUS;
-          res.bytes = 0;
-          res.error = EOK;
+          // res.bytes = 0;
+          // res.error = EOK;
           MinetSend(sock, res);
 
           SET_SYN(send_flag);
           Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, rand(), 0, SEND_BUF_SIZE(new_conn.state), send_flag); // not sure what the seq_n should be
           MinetSend(mux, send_pack);
-          send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, rand(), 0, SEND_BUF_SIZE(new_conn.state), send_flag); // not sure what the seq_n should be
-          MinetSend(mux, send_pack);
+          // send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, rand(), 0, SEND_BUF_SIZE(new_conn.state), send_flag); // not sure what the seq_n should be
+          // MinetSend(mux, send_pack);
 
           cerr << "\n=== SOCK: END CONNECT ===\n";
         }
