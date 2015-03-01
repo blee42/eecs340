@@ -360,17 +360,17 @@ int main(int argc, char *argv[])
                   if (recv_buf_size < data.GetSize()) 
                   {
                     cs->state.RecvBuffer.AddBack(data.ExtractFront(recv_buf_size));
-                    send_ack_n = rec_seq_n + recv_buf_size - 1;
-                    cs->state.SetLastRecvd(send_ack_n); // maybe -1
+                    // send_ack_n = rec_seq_n + recv_buf_size - 1;
+                    // cs->state.SetLastRecvd(send_ack_n); // maybe -1
                   }
                   // else there is no overflow
                   else
                   {
                     cs->state.RecvBuffer.AddBack(data);
-                    send_ack_n = rec_seq_n + data.GetSize() - 1;
-                    cs->state.SetLastRecvd(send_ack_n); // maybe -1
+                    // send_ack_n = rec_seq_n + data.GetSize() - 1;
                   }
 
+                  cs->state.SetLastRecvd(send_ack_n); // maybe -1
                   send_seq_n = cs->state.GetLastSent() + 1;
                   cerr << "SET1: " << cs->state.GetLastSent() << endl;
                   cs->state.SetLastSent(send_seq_n);
