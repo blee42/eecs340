@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
     {
       cerr << "\nHIT A TIMEOUT............\n";
       // check all connections in connection list
-      for (ConnectionList<TCPState>::iterator cs = clist.begin(); cs != clist:end(); cs++)
+      for (ConnectionList<TCPState>::iterator cs = clist.begin(); cs != clist.end(); cs++)
       {
         // check for closed connections
         if (cs->state.GetState() == CLOSED)
