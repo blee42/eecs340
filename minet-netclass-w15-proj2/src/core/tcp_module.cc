@@ -383,7 +383,7 @@ int main(int argc, char *argv[])
                   cs->state.SetLastAcked(rec_ack_n);
                   cs->state.SetLastRecvd(rec_seq_n);
 
-                  cs->state.N -= (rec_ack_n - cs->state.GetLastAcked() - 1);
+                  cs->state.N = cs->state.GetN() - (rec_ack_n - cs->state.GetLastAcked() - 1);
 
                   cerr << "SEND BUF:";
                   cs->state.SendBuffer.Print(cerr);
@@ -649,9 +649,10 @@ int main(int argc, char *argv[])
             size_t cwnd = cs->state.SendBuffer.GetSize(); // sender congestion window
 
             cerr << "\n outside of gbn loop\n";
-            cerr << "\n inflight_n: " << inflight_n << endl;
-            cerr << "\n rwnd: " << rwnd << endl;
-            cerr << "\n cwnd: " << cwnd << endl;
+            cerr << "inflight_n: " << inflight_n << endl;
+            cerr << "rwnd: " << rwnd << endl;
+            cerr << "cwnd: " << cwnd << endl;
+            cerr << "last ACKED: " << cs->state.GetLastAcked() << endl;
             
 
             // iterate through all the packets
