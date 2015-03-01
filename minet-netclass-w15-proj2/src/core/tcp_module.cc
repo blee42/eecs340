@@ -554,7 +554,6 @@ int main(int argc, char *argv[])
           // may need to change timeout time
           ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(), connect_conn, false);
           clist.push_front(new_conn);
-          clist.push_front(new_conn);
          
           res.type = STATUS;
           res.bytes = 0;
@@ -562,6 +561,8 @@ int main(int argc, char *argv[])
           MinetSend(sock, res);
 
           SET_SYN(send_flag);
+          Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, rand(), 0, SEND_BUF_SIZE(new_conn.state), send_flag); // not sure what the seq_n should be
+          MinetSend(mux, send_pack);
           Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, rand(), 0, SEND_BUF_SIZE(new_conn.state), send_flag); // not sure what the seq_n should be
           MinetSend(mux, send_pack);
 
