@@ -676,11 +676,11 @@ int main(int argc, char *argv[])
               else
               {
                 cerr << "space in either or" << endl;
-                data = cs->state.SendBuffer.Extract(inflight_n, min(rwnd, cwnd));
+                data = cs->state.SendBuffer.Extract(inflight_n, min((int)rwnd, (int)cwnd));
                 // set new seq_n
-                cs->state.SetLastSent(cs->state.GetLastSent() + min(rwnd, cwnd));
+                cs->state.SetLastSent(cs->state.GetLastSent() + min((int)rwnd, (int)cwnd));
                 // move on to the next set of packets
-                inflight_n = inflight_n + min(rwnd, cwnd);
+                inflight_n = inflight_n + min((int)rwnd, (int)cwnd);
                 CLR_SYN(send_flag);
                 SET_ACK(send_flag);
                 SET_PSH(send_flag);
