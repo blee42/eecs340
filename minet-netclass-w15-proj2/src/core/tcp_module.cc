@@ -10,8 +10,8 @@
 #include <fcntl.h>
 #include <errno.h>
 
-
 #include <iostream>
+#include <algorithm>
 
 #include "Minet.h"
 #include "tcpstate.h"
