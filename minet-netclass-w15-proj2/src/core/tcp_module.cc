@@ -698,6 +698,7 @@ int main(int argc, char *argv[])
 
               MinetSend(mux, send_pack);
               // set timeout
+              send_flag = 0;
             }
 
             cs->state.N = win_size;
