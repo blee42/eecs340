@@ -594,7 +594,7 @@ int main(int argc, char *argv[])
         {
           cerr << "\n=== SOCK: CONNECT ===\n";
 
-          init_seq = rand();
+          unsigned int init_seq = rand();
           TCPState connect_conn(init_seq, SYN_SENT, MAX_TRIES);
           connect_conn.N = 0; // TODO: what should this be set to?
           // may need to change timeout time
