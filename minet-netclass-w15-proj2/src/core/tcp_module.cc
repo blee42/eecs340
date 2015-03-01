@@ -641,7 +641,7 @@ int main(int argc, char *argv[])
             Buffer data;
             while(inflight_n < GBN && (rwnd > 0) && (cwnd > 0))
             {
-              cerr << "packet: " << cs->state.Print() << endl;
+              cerr << "packet: " << cs.Print() << endl;
               // if MSS < rwnd and MSS < cwnd
               // space in rwnd and cwnd
               if(MSS < rwnd && MSS < cwnd)
