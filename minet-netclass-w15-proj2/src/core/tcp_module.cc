@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
               send_seq_n = cs->state.GetLastSent() + 1;
 
               cs->state.SetState(ESTABLISHED);
-              // cs->state.SetLastAcked(rec_ack_n);
+              cs->state.SetLastAcked(rec_ack_n - 1);
               cs->state.SetLastRecvd(rec_seq_n);
               cs->state.SetLastSent(send_seq_n);
 
@@ -332,12 +332,6 @@ int main(int argc, char *argv[])
             {
               if (IS_ACK(rec_flag))
               {
-                // clears the buffer - maybe -1?
-                cs->state.SendBuffer.Erase(0, rec_ack_n - cs->state.GetLastAcked() - 1);
-
-                cs->state.SetLastAcked(rec_ack_n);
-                cs->state.SetLastRecvd(rec_seq_n);
-  
                 // if there is data
                 if (IS_PSH(rec_flag))
                 {
@@ -381,8 +375,20 @@ int main(int argc, char *argv[])
                   res.bytes = cs->state.RecvBuffer.GetSize();
                   res.error = EOK;
                   MinetSend(sock, res);
-                  
+                }
+                else
+                {
+                  cs->state.SendBuffer.Erase(0, rec_ack_n - cs->state.GetLastAcked() - 1);
 
+                  cs->state.SetLastAcked(rec_ack_n);
+                  cs->state.SetLastRecvd(rec_seq_n);
+
+                  cs->state.N -= (rec_ack_n - cs->state.GetLastAcked() -1)
+
+                  cerr << "SEND BUF:";
+                  cs->state.SendBuffer.Print(cerr);
+                  cerr << endl;
+  
                   // send some of the infromation in the buffer
                   // if there is overflow in the send buffer
                   if (cs->state.SendBuffer.GetSize() - cs->state.GetN() > 0)
@@ -441,6 +447,7 @@ int main(int argc, char *argv[])
 
                     cs->state.N = inflight_n;
                   }
+                  
                 }
               }
             }
@@ -569,8 +576,11 @@ int main(int argc, char *argv[])
           // res.error = EOK;
           MinetSend(sock, res);
 
+          unsigned int init_seq = rand();
+          new_conn.state.SetLastAcked(init_seq);
+
           SET_SYN(send_flag);
-          Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, rand(), 0, SEND_BUF_SIZE(new_conn.state), send_flag); // not sure what the seq_n should be
+          Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, init_seq, 0, SEND_BUF_SIZE(new_conn.state), send_flag); // not sure what the seq_n should be
           MinetSend(mux, send_pack);
           sleep(1);
           MinetSend(mux, send_pack);
@@ -609,8 +619,6 @@ int main(int argc, char *argv[])
             cerr << "\n=== SOCK: WRITE: CONNECTION FOUND ===\n";
             // put data in buffer
             size_t send_buffer_size = SEND_BUF_SIZE(cs->state);
-            cs->state.SendBuffer.Print(cerr);
-            cerr << endl;
             // if there is more data than buffer space
             if (send_buffer_size < req.bytes)
             {
@@ -628,6 +636,9 @@ int main(int argc, char *argv[])
               res.error = EOK;
             }
             
+            cs->state.SendBuffer.Print(cerr);
+            cerr << endl;
+
             res.type = STATUS;
             res.connection = req.connection;
             MinetSend(sock, res);
