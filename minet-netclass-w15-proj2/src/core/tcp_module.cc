@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
               send_seq_n = cs->state.GetLastSent() + 1;
 
               cs->state.SetState(ESTABLISHED);
-              cs->state.SetLastAcked(rec_ack_n - 1);
+              cs->state.SetLastAcked(rec_ack_n);
               cs->state.SetLastRecvd(rec_seq_n);
               cerr << "SET1: " << cs->state.GetLastSent() << endl;
               cs->state.SetLastSent(send_seq_n);
