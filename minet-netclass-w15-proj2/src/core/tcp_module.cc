@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
 
               // timer?
               cs->bTmrActive = true;
-              cs->timeout = Time()+RTT;
+              cs->timeout = Time() + RTT;
 
               SET_SYN(send_flag);
               SET_ACK(send_flag);
@@ -239,9 +239,16 @@ int main(int argc, char *argv[])
           case SYN_RCVD:
           {
             cerr << "\n=== MUX: SYN_RCVD STATE ===\n";
-            cerr << "rec_flag: " << rec_flag << endl;
             cerr << "rec_ack_n: " << rec_ack_n << endl;
             cerr << "get last sent: " << cs->state.GetLastSent() << endl;
+            if (IS_SYN(rec_flag))
+            {
+              // SET_SYN(send_flag);
+              // SET_ACK(send_flag);
+              // send_pack = MakePacket(Buffer(NULL, 0), conn, cs->state.GetLastSent(), cs->state.GetLastRecvd()+1, RECV_BUF_SIZE(cs->state), send_flag);
+              // MinetSend(mux, send_pack);
+              cs->state.SetState(LISTEN);
+            }
             if (IS_ACK(rec_flag) && cs->state.GetLastSent() == rec_ack_n - 1)
             {
               cs->state.SetState(ESTABLISHED);
@@ -300,6 +307,10 @@ int main(int argc, char *argv[])
           {
             cerr << "\n=== MUX: ESTABLISHED STATE ===\n";
             // if the otherside is ready to close
+            // if (IS_SYN(rec_flag))
+            // {
+            //   cs->state.SetState(LISTEN);
+            // }
             if (IS_FIN(rec_flag))
             {
               int i;
@@ -515,6 +526,8 @@ int main(int argc, char *argv[])
           case TIME_WAIT:
           {
             cerr << "\n=== MUX: TIME_WAIT STATE ===\n";
+            cs->timeout = Time() + 30;
+            cs->state.SetState(CLOSED);
           }
           break;
           default:
