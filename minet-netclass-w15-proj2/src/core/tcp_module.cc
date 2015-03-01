@@ -563,7 +563,6 @@ int main(int argc, char *argv[])
           SET_SYN(send_flag);
           Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, rand(), 0, SEND_BUF_SIZE(new_conn.state), send_flag); // not sure what the seq_n should be
           MinetSend(mux, send_pack);
-          // send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, rand(), 0, SEND_BUF_SIZE(new_conn.state), send_flag); // not sure what the seq_n should be
           sleep(1);
           MinetSend(mux, send_pack);
 
@@ -600,7 +599,7 @@ int main(int argc, char *argv[])
           {
             cerr << "\n=== SOCK: WRITE: CONNECTION FOUND ===\n";
             // put data in buffer
-            size_t send_buffer_size = cs->state.TCP_BUFFER_SIZE - cs->state.SendBuffer.GetSize();
+            size_t send_buffer_size = SEND_BUF_SIZE(cs->state);
             // if there is more data than buffer space
             if (send_buffer_size < req.bytes)
             {
@@ -626,6 +625,10 @@ int main(int argc, char *argv[])
             unsigned int win_size = cs->state.GetN(); // window size
             unsigned int rwnd = cs->state.GetRwnd(); // receiver congestion window
             size_t cwnd = cs->state.SendBuffer.GetSize(); // sender congestion window
+
+            cerr << "\n win_size: " << win_size << endl;
+            cerr << "\n rwnd: " << rwnd << endl;
+            cerr << "\n cwnd: " << cwnd << endl;
 
             // iterate through all the packets
             while(win_size < GBN)
