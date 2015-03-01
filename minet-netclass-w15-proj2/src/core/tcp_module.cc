@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
               send_seq_n = cs->state.GetLastSent() + 1;
 
               cs->state.SetState(ESTABLISHED);
-              cs->state.SetLastAcked(rec_ack_n);
+              cs->state.SetLastAcked(rec_ack_n - 1);
               cs->state.SetLastRecvd(rec_seq_n);
               cerr << "SET1: " << cs->state.GetLastSent() << endl;
               cs->state.SetLastSent(send_seq_n);
@@ -697,7 +697,7 @@ int main(int argc, char *argv[])
                 data = cs->state.SendBuffer.Extract(inflight_n, MSS);
                 // set new seq_n
                 cerr << "SET1: " << cs->state.GetLastSent() << endl;
-                cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
+                // cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
                 cerr << "SET2: " << cs->state.GetLastSent() << endl;
                 // move on to the next set of packets
                 inflight_n = inflight_n + MSS;
@@ -714,7 +714,7 @@ int main(int argc, char *argv[])
                 data = cs->state.SendBuffer.Extract(inflight_n, min((int)rwnd, (int)cwnd));
                 // set new seq_n
                 cerr << "SET1: " << cs->state.GetLastSent() << endl;
-                cs->state.SetLastSent(cs->state.GetLastSent() + min((int)rwnd, (int)cwnd));
+                // cs->state.SetLastSent(cs->state.GetLastSent() + min((int)rwnd, (int)cwnd));
                 cerr << "SET2: " << cs->state.GetLastSent() << endl;
                 // move on to the next set of packets
                 inflight_n = inflight_n + min((int)rwnd, (int)cwnd);
@@ -723,6 +723,8 @@ int main(int argc, char *argv[])
                 SET_PSH(send_flag);
                 send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
               }
+
+              cs->state.SetLastSent(cs->state.GetLastSent() + 1);
 
               MinetSend(mux, send_pack);
 
