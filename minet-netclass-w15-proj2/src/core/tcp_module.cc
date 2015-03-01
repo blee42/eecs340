@@ -389,62 +389,57 @@ int main(int argc, char *argv[])
                   {
                     // GO BACK N REPEATED THREE TIMES - MAKE OWN FUNCTION
                     // send data from buffer using "Go Back N"
-                    unsigned int win_size = cs->state.GetN(); // window size
+                    unsigned int inflight_n = cs->state.GetN(); // window size
                     unsigned int rwnd = cs->state.GetRwnd(); // receiver congestion window
                     size_t cwnd = cs->state.SendBuffer.GetSize(); // sender congestion window
 
-                    // iterate through all the packets
-                    while(win_size < GBN)
+                    Buffer data;
+                    while(inflight_n < GBN && (rwnd > 0) && (cwnd > 0))
                     {
-                      Buffer data;
-                      rwnd = rwnd - win_size;
-                      cwnd = cwnd - win_size;
+                      cerr << "\n inflight_n: " << inflight_n << endl;
+                      cerr << "\n rwnd: " << rwnd << endl;
+                      cerr << "\n cwnd: " << cwnd << endl;
+                      send_flag = 0;
 
-                      // if MSS < rwnd < cwnd or MSS < cwnd < rwnd
-                      // MSS is the smallest
-                      // not sure why arithmetic shift?
-                      if(((MSS < rwnd && rwnd << cwnd) || (MSS < cwnd && cwnd < rwnd)) && (win_size + MSS < GBN))
+                      // if MSS < rwnd and MSS < cwnd
+                      // space in rwnd and cwnd
+                      if(MSS < rwnd && MSS < cwnd)
                       {
-                        data = cs->state.SendBuffer.Extract(win_size, MSS);
+                        cerr << "space in rwnd and cwnd" << endl;
+                        data = cs->state.SendBuffer.Extract(inflight_n, MSS);
                         // set new seq_n
                         cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
                         // move on to the next set of packets
-                        win_size = win_size + MSS;
+                        inflight_n = inflight_n + MSS;
+                        CLR_SYN(send_flag);
                         SET_ACK(send_flag);
+                        SET_PSH(send_flag);
                         send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
-
                       }
 
-                      // else if cwnd < MSS < rwnd or cwnd < rwnd < MSS
-                      // cwnd is the smallest
-                      else if (((cwnd < MSS && MSS << rwnd) || (cwnd < rwnd && rwnd < MSS)) && (win_size + cwnd < GBN))
+                      // else space in cwnd or rwnd
+                      else
                       {
-                        data = cs->state.SendBuffer.Extract(win_size, cwnd);
+                        cerr << "space in either or" << endl;
+                        data = cs->state.SendBuffer.Extract(inflight_n, min((int)rwnd, (int)cwnd));
                         // set new seq_n
-                        cs->state.SetLastSent(cs->state.GetLastSent() + cwnd);
+                        cs->state.SetLastSent(cs->state.GetLastSent() + min((int)rwnd, (int)cwnd));
                         // move on to the next set of packets
-                        win_size = win_size + cwnd;
+                        inflight_n = inflight_n + min((int)rwnd, (int)cwnd);
+                        CLR_SYN(send_flag);
                         SET_ACK(send_flag);
-                        send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
-                      }
-
-                      // else if rwnd < MSS < cwnd or rwnd < cwnd < MSS
-                      // rwnd is hte smallest
-                      else if (win_size + rwnd < GBN)
-                      {
-                        data = cs->state.SendBuffer.Extract(win_size, rwnd);
-                        // set new seq_n
-                        cs->state.SetLastSent(cs->state.GetLastSent() + rwnd);
-                        win_size = win_size + rwnd;
-                        SET_ACK(send_flag);
+                        SET_PSH(send_flag);
                         send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
                       }
 
                       MinetSend(mux, send_pack);
+
+                      rwnd = rwnd - inflight_n;
+                      cwnd = cwnd - inflight_n;
                       // set timeout
                     }
 
-                    cs->state.N = win_size;
+                    cs->state.N = inflight_n;
                   }
                 }
               }
@@ -649,12 +644,6 @@ int main(int argc, char *argv[])
               cerr << "\n inflight_n: " << inflight_n << endl;
               cerr << "\n rwnd: " << rwnd << endl;
               cerr << "\n cwnd: " << cwnd << endl;
-
-              if (cwnd <= 0)
-              {
-                int i;
-                cin >> i;
-              }
 
               // if MSS < rwnd and MSS < cwnd
               // space in rwnd and cwnd
