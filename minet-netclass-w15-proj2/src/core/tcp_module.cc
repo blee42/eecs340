@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
       //     }
       //     // else handle each case of timeout
       //   }
-      }
+      // }
     }
     // Unexpected event type
     else if (event.eventtype != MinetEvent::Dataflow || event.direction != MinetEvent::IN)
