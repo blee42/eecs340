@@ -84,7 +84,7 @@ Packet MakePacket(Buffer data, Connection conn, unsigned int seq_n, unsigned int
 int main(int argc, char *argv[])
 {
   MinetHandle mux, sock;
-
+  srand(time(NULL)); // gen seeds
   ConnectionList<TCPState> clist;
 
   MinetInit(MINET_TCP_MODULE);
@@ -585,7 +585,7 @@ int main(int argc, char *argv[])
           unsigned int init_seq = rand();
           new_conn.state.SetLastSent(init_seq);
 
-          cerr << "Last Acked: " << new_conn.state.GetLastAcked() << endl;
+          cerr << "init_seq: " << init_seq << endl;
 
           SET_SYN(send_flag);
           Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, init_seq, 0, SEND_BUF_SIZE(new_conn.state), send_flag); // not sure what the seq_n should be
