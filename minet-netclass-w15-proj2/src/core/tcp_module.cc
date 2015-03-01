@@ -601,9 +601,7 @@ int main(int argc, char *argv[])
           MinetSend(sock, res);
 
           unsigned int init_seq = rand();
-          cerr << "SET1: " << cs->state.GetLastSent() << endl;
           new_conn.state.SetLastSent(init_seq);
-          cerr << "SET2: " << cs->state.GetLastSent() << endl;
 
           cerr << "init_seq: " << init_seq << endl;
           cerr << "init_seq_set: " << new_conn.state.GetLastSent() << endl;
