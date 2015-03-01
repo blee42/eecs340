@@ -594,7 +594,8 @@ int main(int argc, char *argv[])
         {
           cerr << "\n=== SOCK: CONNECT ===\n";
 
-          TCPState connect_conn(rand(), SYN_SENT, MAX_TRIES);
+          init_seq = rand();
+          TCPState connect_conn(init_seq, SYN_SENT, MAX_TRIES);
           connect_conn.N = 0; // TODO: what should this be set to?
           // may need to change timeout time
           ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(), connect_conn, true);
@@ -604,12 +605,6 @@ int main(int argc, char *argv[])
           // res.bytes = 0;
           // res.error = EOK;
           MinetSend(sock, res);
-
-          unsigned int init_seq = rand();
-          new_conn.state.SetLastSent(init_seq);
-
-          cerr << "init_seq: " << init_seq << endl;
-          cerr << "init_seq_set: " << new_conn.state.GetLastSent() << endl;
 
           SET_SYN(send_flag);
           Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, init_seq, 0, SEND_BUF_SIZE(new_conn.state), send_flag); // not sure what the seq_n should be
