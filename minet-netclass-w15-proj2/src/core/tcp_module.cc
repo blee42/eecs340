@@ -404,10 +404,9 @@ int main(int argc, char *argv[])
             {
               cs->state.SetState(ESTABLISHED);
               // cs->state.SetLastAcked(rec_ack_n); // -1?
-              cs->state.SetLastRecvd(rec_seq_n); // okay think about all of this
+              cs->state.SetLastRecvd(rec_seq_n - 1);
               cerr << "SET1: " << cs->state.GetLastSent() << endl;
               cs->state.SetLastSent(send_seq_n);
-              cerr << "SET2: " << cs->state.GetLastSent() << endl;
 
               // timer
               cs->bTmrActive = false;
@@ -491,7 +490,7 @@ int main(int argc, char *argv[])
             // else otherside continues to send data
             else
             {
-              if (IS_ACK(rec_flag))
+              if (IS_ACK(rec_flag) && cs->state.GetLastRecvd() < rec_seq_n)
               {
                 cerr << "ACK flagged.\n";
                 // if there is data
@@ -542,7 +541,7 @@ int main(int argc, char *argv[])
                   res.error = EOK;
                   MinetSend(sock, res);
                 }
-                else if (cs->state.GetLastRecvd() < rec_seq_n)
+                else
                 {
                   cerr << "Not PSH flagged.\n";
                   cs->state.SendBuffer.Erase(0, rec_ack_n - cs->state.GetLastAcked() - 1);
@@ -625,10 +624,6 @@ int main(int argc, char *argv[])
                   }
                   
                 }
-                else
-                {
-                  cerr << "Got a stray packet. \n";
-                }
               }
             }
           }
@@ -636,6 +631,7 @@ int main(int argc, char *argv[])
           case SEND_DATA:
           {
             cerr << "\n=== MUX: SEND_DATA STATE ===\n";
+            // never gets here?
           }
           break;
           case CLOSE_WAIT:
@@ -757,12 +753,11 @@ int main(int argc, char *argv[])
           clist.push_front(new_conn);
          
           res.type = STATUS;
-          // res.bytes = 0;
-          // res.error = EOK;
+          res.error = EOK;
           MinetSend(sock, res);
 
           SET_SYN(send_flag);
-          Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, init_seq, 0, SEND_BUF_SIZE(new_conn.state), send_flag); // not sure what the seq_n should be
+          Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, init_seq, 0, SEND_BUF_SIZE(new_conn.state), send_flag);
           MinetSend(mux, send_pack);
           sleep(1);
 
@@ -891,9 +886,7 @@ int main(int argc, char *argv[])
 
             // TODO: need to loop because write may need more than one packet
             // TODO: save seq and ack number with the state
-            cerr << "SET1: " << cs->state.GetLastSent() << endl;
             // TODO: state.setlastsent - need to set this as getlastsent + mss
-            cerr << "SET2: " << cs->state.GetLastSent() << endl;
           }
           else
           {
