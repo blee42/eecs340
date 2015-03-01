@@ -383,7 +383,7 @@ int main(int argc, char *argv[])
 
                   // send ACK flag packet to mux
                   SET_ACK(send_flag);
-                  send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n + 1, RECV_BUF_SIZE(cs->state), send_flag);
+                  send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, RECV_BUF_SIZE(cs->state), send_flag);
                   MinetSend(mux, send_pack);
 
                   // send WRITE packet to sock 
@@ -398,6 +398,7 @@ int main(int argc, char *argv[])
                 {
                   cs->state.SendBuffer.Erase(0, rec_ack_n - cs->state.GetLastAcked() - 1);
 
+                  cerr << "MINUS: " << rec_ack_n - cs->state.GetLastAcked() - 1 << endl;
                   cs->state.N = cs->state.N - (rec_ack_n - cs->state.GetLastAcked() - 1);
                   cerr << "N after: " << cs->state.N << endl;
 
