@@ -641,10 +641,7 @@ int main(int argc, char *argv[])
             Buffer data;
             while(inflight_n < GBN && (rwnd > 0) && (cwnd > 0))
             {
-              cerr << "\n inflight_n: " << inflight_n << endl;
-              cerr << "\n rwnd: " << rwnd << endl;
-              cerr << "\n cwnd: " << cwnd << endl;
-
+              cerr << "packet: " << cs->state.Print() << endl;
               // if MSS < rwnd and MSS < cwnd
               // space in rwnd and cwnd
               if(MSS < rwnd && MSS < cwnd)
@@ -680,6 +677,10 @@ int main(int argc, char *argv[])
 
               rwnd = rwnd - inflight_n;
               cwnd = cwnd - inflight_n;
+
+              cerr << "\n inflight_n: " << inflight_n << endl;
+              cerr << "\n rwnd: " << rwnd << endl;
+              cerr << "\n cwnd: " << cwnd << endl;
               // set timeout
             }
 
