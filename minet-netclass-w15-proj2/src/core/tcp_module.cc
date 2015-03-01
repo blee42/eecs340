@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
               }
             }
             MinetSend(mux, send_pack);
-            cs->timeout = Time() + RTT
+            cs->timeout = Time() + RTT;
           }
         }
       }
