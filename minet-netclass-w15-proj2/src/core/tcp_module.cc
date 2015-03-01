@@ -609,6 +609,8 @@ int main(int argc, char *argv[])
             cerr << "\n=== SOCK: WRITE: CONNECTION FOUND ===\n";
             // put data in buffer
             size_t send_buffer_size = SEND_BUF_SIZE(cs->state);
+            cs->state.SendBuffer.Print(cerr);
+            cerr << endl;
             // if there is more data than buffer space
             if (send_buffer_size < req.bytes)
             {
