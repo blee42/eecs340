@@ -115,26 +115,76 @@ int main(int argc, char *argv[])
     // Timeout
     if (event.eventtype == MinetEvent::Timeout)
     {
-      // // check all connections in connection list
-      // for (ConnectionList<TCPState>::iterator cs = clist.begin(); cs != clist:end(); cs++)
-      // {
-      //   // check for closed connections
-      //   if (cs->state.GetState() == CLOSED)
-      //   {
-      //     clist.erase(cs);
-      //   }
+      cerr << "\nHIT A TIMEOUT............\n";
+      // check all connections in connection list
+      for (ConnectionList<TCPState>::iterator cs = clist.begin(); cs != clist:end(); cs++)
+      {
+        // check for closed connections
+        if (cs->state.GetState() == CLOSED)
+        {
+          clist.erase(cs);
+        }
 
-      //   // check for active timers
-      //   if (cs.bTmrActive == true)
-      //   {
-      //     // if maxed out number of tries
-      //     if (cs->state.ExpireTimerTries())
-      //     {
-      //       // do something
-      //     }
-      //     // else handle each case of timeout
-      //   }
-      // }
+        Time curr_time = Time();
+        // check for active timers
+        if (cs.bTmrActive == true && cs->timeout < curr_time)
+        {
+          // if maxed out number of tries
+          if (cs->state.ExpireTimerTries())
+          {
+            // do something
+          }
+          // else handle each case of timeout
+          else
+          {
+            Packet send_pack; // resend packets
+            unsigned char send_flag;
+            switch(cs->state.GetState())
+            {
+              case SYN_RCVD:
+              {
+                cerr << "TIMEOUT: SYN_RCVD" << endl;
+                MakePacket(Buffer(NULL, 0), cs->connection, )
+              }
+              break;
+              case SYN_SENT:
+              {
+
+              }
+              break;
+              case ESTABLISHED:
+              {
+
+              }
+              break;
+              case CLOSE_WAIT:
+              {
+
+              }
+              break;
+              case FIN_WAIT1:
+              {
+
+              }
+              break;
+              case CLOSING:
+              {
+
+              }
+              break;
+              case LAST_ACK:
+              {
+
+              }
+              break;
+              case TIME_WAIT:
+              {
+
+              }
+            }
+          }
+        }
+      }
     }
     // Unexpected event type
     else if (event.eventtype != MinetEvent::Dataflow || event.direction != MinetEvent::IN)
