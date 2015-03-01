@@ -30,7 +30,7 @@ using std::cin;
 #define MAX_TRIES 3
 #define MSS 536
 #define TIMEOUT 10
-#define GBN MSS*5
+#define GBN MSS*16
 #define RTT 5
 
 #define RECV_BUF_SIZE(state) (state.TCP_BUFFER_SIZE - state.RecvBuffer.GetSize())
@@ -642,7 +642,8 @@ int main(int argc, char *argv[])
             
 
             // iterate through all the packets
-            while(inflight_n < GBN)
+            Buffer data;
+            while(inflight_n < GBN && (rwnd > 0) && (cwnd > 0))
             {
               cerr << "\n inflight_n: " << inflight_n << endl;
               cerr << "\n rwnd: " << rwnd << endl;
@@ -654,15 +655,11 @@ int main(int argc, char *argv[])
                 cin >> i;
               }
 
-              Buffer data;
-              rwnd = rwnd - inflight_n;
-              cwnd = cwnd - inflight_n;
-
-              // if MSS < rwnd < cwnd or MSS < cwnd < rwnd
-              // MSS is the smallest
-              if(((MSS < rwnd && rwnd << cwnd) || (MSS < cwnd && cwnd < rwnd)) && (inflight_n + MSS < GBN))
+              // if MSS < rwnd and MSS < cwnd
+              // space in rwnd and cwnd
+              if((MSS < rwnd && MSS < cwnd && (win_size + MSS < GBN))
               {
-                cerr << "MSS is the smallest" << endl;
+                cerr << "space in rwnd and cwnd" << endl;
                 data = cs->state.SendBuffer.Extract(inflight_n, MSS);
                 // set new seq_n
                 cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
@@ -672,34 +669,17 @@ int main(int argc, char *argv[])
                 SET_ACK(send_flag);
                 SET_PSH(send_flag);
                 send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
-
               }
 
-              // else if cwnd < MSS < rwnd or cwnd < rwnd < MSS
-              // cwnd is the smallest
-              else if (((cwnd < MSS && MSS << rwnd) || (cwnd < rwnd && rwnd < MSS)) && (inflight_n + cwnd < GBN))
+              // else space in cwnd or rwnd
+              else
               {
-                cerr << "CWND is the smallest" << endl;
-                data = cs->state.SendBuffer.Extract(inflight_n, cwnd);
+                cerr << "space in either or" << endl;
+                data = cs->state.SendBuffer.Extract(inflight_n, min(rwnd, cwnd));
                 // set new seq_n
-                cs->state.SetLastSent(cs->state.GetLastSent() + cwnd);
+                cs->state.SetLastSent(cs->state.GetLastSent() + min(rwnd, cwnd));
                 // move on to the next set of packets
-                inflight_n = inflight_n + cwnd;
-                CLR_SYN(send_flag);
-                SET_ACK(send_flag);
-                SET_PSH(send_flag);
-                send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
-              }
-
-              // else if rwnd < MSS < cwnd or rwnd < cwnd < MSS
-              // rwnd is the smallest
-              else if (inflight_n + rwnd < GBN)
-              {
-                cerr << "RWND is the smallest" << endl;
-                data = cs->state.SendBuffer.Extract(inflight_n, rwnd);
-                // set new seq_n
-                cs->state.SetLastSent(cs->state.GetLastSent() + rwnd);
-                inflight_n = inflight_n + rwnd;
+                inflight_n = inflight_n + min(rwnd, cwnd);
                 CLR_SYN(send_flag);
                 SET_ACK(send_flag);
                 SET_PSH(send_flag);
@@ -707,6 +687,9 @@ int main(int argc, char *argv[])
               }
 
               MinetSend(mux, send_pack);
+
+              rwnd = rwnd - inflight_n;
+              cwnd = cwnd - inflight_n;
               // set timeout
             }
 
