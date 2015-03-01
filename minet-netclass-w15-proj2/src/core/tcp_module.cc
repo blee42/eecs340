@@ -557,7 +557,7 @@ int main(int argc, char *argv[])
           clist.push_front(new_conn);
          
           res.type = STATUS;
-          res.connection = req.connection;
+          // res.connection = req.connection;
           res.bytes = 0;
           res.error = EOK;
           MinetSend(sock, res);
