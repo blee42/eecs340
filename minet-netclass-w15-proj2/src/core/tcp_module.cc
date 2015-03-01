@@ -661,6 +661,7 @@ int main(int argc, char *argv[])
                 cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
                 // move on to the next set of packets
                 win_size = win_size + MSS;
+                CLR_SYN(send_flag);
                 SET_ACK(send_flag);
                 SET_PSH(send_flag);
                 send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
@@ -677,6 +678,7 @@ int main(int argc, char *argv[])
                 cs->state.SetLastSent(cs->state.GetLastSent() + cwnd);
                 // move on to the next set of packets
                 win_size = win_size + cwnd;
+                CLR_SYN(send_flag);
                 SET_ACK(send_flag);
                 SET_PSH(send_flag);
                 send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
@@ -691,6 +693,7 @@ int main(int argc, char *argv[])
                 // set new seq_n
                 cs->state.SetLastSent(cs->state.GetLastSent() + rwnd);
                 win_size = win_size + rwnd;
+                CLR_SYN(send_flag);
                 SET_ACK(send_flag);
                 SET_PSH(send_flag);
                 send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
@@ -698,7 +701,6 @@ int main(int argc, char *argv[])
 
               MinetSend(mux, send_pack);
               // set timeout
-              send_flag = 0;
             }
 
             cs->state.N = win_size;
