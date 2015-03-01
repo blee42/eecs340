@@ -657,7 +657,7 @@ int main(int argc, char *argv[])
 
               // if MSS < rwnd and MSS < cwnd
               // space in rwnd and cwnd
-              if((MSS < rwnd && MSS < cwnd)
+              if(MSS < rwnd && MSS < cwnd)
               {
                 cerr << "space in rwnd and cwnd" << endl;
                 data = cs->state.SendBuffer.Extract(inflight_n, MSS);
