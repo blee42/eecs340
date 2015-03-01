@@ -434,9 +434,7 @@ int main(int argc, char *argv[])
               cs->state.SetState(ESTABLISHED);
               cs->state.SetLastAcked(rec_ack_n - 1);
               cs->state.SetLastRecvd(rec_seq_n);
-              cerr << "SET1: " << cs->state.GetLastSent() << endl;
               cs->state.SetLastSent(send_seq_n);
-              cerr << "SET2: " << cs->state.GetLastSent() << endl;
 
               SET_ACK(send_flag);
               // send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag); // ??
@@ -860,9 +858,7 @@ int main(int argc, char *argv[])
                 cerr << "space in either or" << endl;
                 data = cs->state.SendBuffer.Extract(inflight_n, min((int)rwnd, (int)cwnd));
                 // set new seq_n
-                cerr << "SET1: " << cs->state.GetLastSent() << endl;
                 cs->state.SetLastSent(cs->state.GetLastSent() + min((int)rwnd, (int)cwnd));
-                cerr << "SET2: " << cs->state.GetLastSent() << endl;
                 // move on to the next set of packets
                 inflight_n = inflight_n + min((int)rwnd, (int)cwnd);
                 CLR_SYN(send_flag);
