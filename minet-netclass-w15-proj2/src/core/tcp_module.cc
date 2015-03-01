@@ -111,7 +111,26 @@ int main(int argc, char *argv[])
     // Timeout
     if (event.eventtype == MinetEvent::Timeout)
     {
+      // check all connections in connection list
+      for (ConnectionList<TCPState>::iterator cs = clist.begin(); cs != clist:end(); cs++)
+      {
+        // check for closed connections
+        if (cs->state.GetState() == CLOSED)
+        {
+          clist.erase(cs);
+        }
 
+        // check for active timers
+        if (cs.bTmrActive == true)
+        {
+          // if maxed out number of tries
+          if (cs->state.ExpireTimerTries())
+          {
+            // do something
+          }
+          // else handle each case of timeout
+        }
+      }
     }
     // Unexpected event type
     else if (event.eventtype != MinetEvent::Dataflow || event.direction != MinetEvent::IN)
@@ -531,6 +550,7 @@ int main(int argc, char *argv[])
           connect_conn.N = 0; // TODO: what should this be set to?
           // may need to change timeout time
           ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(), connect_conn, false);
+          clist.push_front(new_conn);
           clist.push_front(new_conn);
          
           res.type = STATUS;
