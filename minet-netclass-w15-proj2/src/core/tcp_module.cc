@@ -635,32 +635,37 @@ int main(int argc, char *argv[])
             MinetSend(sock, res);
 
             // send data from buffer using "Go Back N"
-            unsigned int win_size = cs->state.GetN(); // window size
+            unsigned int inflight_n = cs->state.GetN(); // window size
             unsigned int rwnd = cs->state.GetRwnd(); // receiver congestion window
             size_t cwnd = cs->state.SendBuffer.GetSize(); // sender congestion window
 
-            cerr << "\n win_size: " << win_size << endl;
+            cerr << "\n inflight_n: " << inflight_n << endl;
             cerr << "\n rwnd: " << rwnd << endl;
             cerr << "\n cwnd: " << cwnd << endl;
 
             // iterate through all the packets
-            while(win_size < GBN)
+            while(inflight_n < GBN)
             {
+              if (cwnd <= 0)
+              {
+                int i;
+                cin << i;
+              }
+
               Buffer data;
-              rwnd = rwnd - win_size;
-              cwnd = cwnd - win_size;
+              rwnd = rwnd - inflight_n;
+              cwnd = cwnd - inflight_n;
 
               // if MSS < rwnd < cwnd or MSS < cwnd < rwnd
               // MSS is the smallest
-              // not sure why arithmetic shift?
-              if(((MSS < rwnd && rwnd << cwnd) || (MSS < cwnd && cwnd < rwnd)) && (win_size + MSS < GBN))
+              if(((MSS < rwnd && rwnd << cwnd) || (MSS < cwnd && cwnd < rwnd)) && (inflight_n + MSS < GBN))
               {
                 cerr << "MSS is the smallest" << endl;
-                data = cs->state.SendBuffer.Extract(win_size, MSS);
+                data = cs->state.SendBuffer.Extract(inflight_n, MSS);
                 // set new seq_n
                 cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
                 // move on to the next set of packets
-                win_size = win_size + MSS;
+                inflight_n = inflight_n + MSS;
                 CLR_SYN(send_flag);
                 SET_ACK(send_flag);
                 SET_PSH(send_flag);
@@ -670,14 +675,14 @@ int main(int argc, char *argv[])
 
               // else if cwnd < MSS < rwnd or cwnd < rwnd < MSS
               // cwnd is the smallest
-              else if (((cwnd < MSS && MSS << rwnd) || (cwnd < rwnd && rwnd < MSS)) && (win_size + cwnd < GBN))
+              else if (((cwnd < MSS && MSS << rwnd) || (cwnd < rwnd && rwnd < MSS)) && (inflight_n + cwnd < GBN))
               {
                 cerr << "CWND is the smallest" << endl;
-                data = cs->state.SendBuffer.Extract(win_size, cwnd);
+                data = cs->state.SendBuffer.Extract(inflight_n, cwnd);
                 // set new seq_n
                 cs->state.SetLastSent(cs->state.GetLastSent() + cwnd);
                 // move on to the next set of packets
-                win_size = win_size + cwnd;
+                inflight_n = inflight_n + cwnd;
                 CLR_SYN(send_flag);
                 SET_ACK(send_flag);
                 SET_PSH(send_flag);
@@ -686,13 +691,13 @@ int main(int argc, char *argv[])
 
               // else if rwnd < MSS < cwnd or rwnd < cwnd < MSS
               // rwnd is the smallest
-              else if (win_size + rwnd < GBN)
+              else if (inflight_n + rwnd < GBN)
               {
                 cerr << "RWND is the smallest" << endl;
-                data = cs->state.SendBuffer.Extract(win_size, rwnd);
+                data = cs->state.SendBuffer.Extract(inflight_n, rwnd);
                 // set new seq_n
                 cs->state.SetLastSent(cs->state.GetLastSent() + rwnd);
-                win_size = win_size + rwnd;
+                inflight_n = inflight_n + rwnd;
                 CLR_SYN(send_flag);
                 SET_ACK(send_flag);
                 SET_PSH(send_flag);
@@ -703,7 +708,7 @@ int main(int argc, char *argv[])
               // set timeout
             }
 
-            cs->state.N = win_size;
+            cs->state.N = inflight_n;
 
             // TODO: need to loop because write may need more than one packet
             // TODO: save seq and ack number with the state
