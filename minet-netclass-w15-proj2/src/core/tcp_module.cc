@@ -307,10 +307,10 @@ int main(int argc, char *argv[])
           {
             cerr << "\n=== MUX: ESTABLISHED STATE ===\n";
             // if the otherside is ready to close
-            if (IS_SYN(rec_flag))
-            {
-              cs->state.SetState(LISTEN);
-            }
+            // if (IS_SYN(rec_flag))
+            // {
+            //   cs->state.SetState(LISTEN);
+            // }
             if (IS_FIN(rec_flag))
             {
               int i;
