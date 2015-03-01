@@ -188,6 +188,10 @@ int main(int argc, char *argv[])
       unsigned char rec_flag;
       rec_tcp_h.GetFlags(rec_flag);
 
+      cerr << "clist:\n";
+      clist.Print(cerr);
+      cerr << endl;
+
       // Check for open connection
       ConnectionList<TCPState>::iterator cs = clist.FindMatching(conn);
       // ConnectionList<TCPState>::iterator cs = clist.FindMatchingSource(conn);
@@ -206,6 +210,7 @@ int main(int argc, char *argv[])
         unsigned char send_flag = 0;
         SockRequestResponse res;
         Packet send_pack;
+
 
         switch(cs->state.GetState())
         {
