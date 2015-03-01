@@ -282,6 +282,8 @@ int main(int argc, char *argv[])
               cs->state.SetLastRecvd(rec_seq_n);
               cs->state.SetLastSent(send_seq_n);
 
+              cerr << "Last acked: " << rec_ack_n - 1 << endl;
+
 
               SET_ACK(send_flag);
               // send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag); // ??
@@ -380,10 +382,6 @@ int main(int argc, char *argv[])
                 {
                   cs->state.SendBuffer.Erase(0, rec_ack_n - cs->state.GetLastAcked() - 1);
 
-
-                  cerr << "N before: " << cs->state.N << endl;
-                  cerr << "GetN: " << cs->state.GetN() << endl;
-                  cerr << "Minus: " << (rec_ack_n - cs->state.GetLastAcked() - 1) << endl;
                   cs->state.N = cs->state.N - (rec_ack_n - cs->state.GetLastAcked() - 1);
                   cerr << "N after: " << cs->state.N << endl;
 
