@@ -242,14 +242,14 @@ int main(int argc, char *argv[])
             cerr << "\n=== MUX: SYN_RCVD STATE ===\n";
             cerr << "rec_ack_n: " << rec_ack_n << endl;
             cerr << "get last sent: " << cs->state.GetLastSent() << endl;
-            if (IS_SYN(rec_flag))
-            {
-              // SET_SYN(send_flag);
-              // SET_ACK(send_flag);
-              // send_pack = MakePacket(Buffer(NULL, 0), conn, cs->state.GetLastSent(), cs->state.GetLastRecvd()+1, RECV_BUF_SIZE(cs->state), send_flag);
-              // MinetSend(mux, send_pack);
-              cs->state.SetState(LISTEN);
-            }
+            // if (IS_SYN(rec_flag))
+            // {
+            //   // SET_SYN(send_flag);
+            //   // SET_ACK(send_flag);
+            //   // send_pack = MakePacket(Buffer(NULL, 0), conn, cs->state.GetLastSent(), cs->state.GetLastRecvd()+1, RECV_BUF_SIZE(cs->state), send_flag);
+            //   // MinetSend(mux, send_pack);
+            //   cs->state.SetState(LISTEN);
+            // }
             if (IS_ACK(rec_flag) && cs->state.GetLastSent() == rec_ack_n - 1)
             {
               cs->state.SetState(ESTABLISHED);
