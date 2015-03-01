@@ -382,7 +382,9 @@ int main(int argc, char *argv[])
 
 
                   cerr << "N before: " << cs->state.N << endl;
-                  cs->state.N = cs->state.GetN() - (rec_ack_n - cs->state.GetLastAcked() - 1);
+                  cerr << "GetN: " << cs->state.GetN() << endl;
+                  cerr << "Minus: " << (rec_ack_n - cs->state.GetLastAcked() - 1) << endl;
+                  cs->state.N = cs->state.N - (rec_ack_n - cs->state.GetLastAcked() - 1);
                   cerr << "N after: " << cs->state.N << endl;
 
                   cerr << "last_acked: " << cs->state.GetLastAcked() << endl;
