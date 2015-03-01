@@ -649,6 +649,7 @@ int main(int argc, char *argv[])
                 // move on to the next set of packets
                 win_size = win_size + MSS;
                 SET_ACK(send_flag);
+                SET_PSH(send_flag);
                 send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
 
               }
@@ -664,6 +665,7 @@ int main(int argc, char *argv[])
                 // move on to the next set of packets
                 win_size = win_size + cwnd;
                 SET_ACK(send_flag);
+                SET_PSH(send_flag);
                 send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
               }
 
@@ -677,6 +679,7 @@ int main(int argc, char *argv[])
                 cs->state.SetLastSent(cs->state.GetLastSent() + rwnd);
                 win_size = win_size + rwnd;
                 SET_ACK(send_flag);
+                SET_PSH(send_flag);
                 send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
               }
 
