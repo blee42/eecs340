@@ -144,45 +144,134 @@ int main(int argc, char *argv[])
             {
               case SYN_RCVD:
               {
-                cerr << "TIMEOUT: SYN_RCVD" << endl;
-                MakePacket(Buffer(NULL, 0), cs->connection, )
+                cerr << "TIMEOUT: SYN_RCVD - SEND SYN ACK" << endl;
+                SET_SYN(send_flag);
+                SET_ACK(send_flag);
+                MakePacket(Buffer(NULL, 0), cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd(), RECV_BUF_SIZE(cs->state), send_flag);
               }
               break;
               case SYN_SENT:
               {
-
-              }
+                cerr << "TIMEOUT: SYN_SENT - SEND SYN" << endl;
+                SET_SYN(send_flag);
+                MakePacket(Buffer(NULL, 0), cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd(), SEND_BUF_SIZE(cs->state), send_flag); 
+              } 
               break;
               case ESTABLISHED:
               {
+                cerr << "TIMEOUT: ESTABLISHED - SEND DATA" << endl;
+                // use GBN to resend data
+                if (cs->state.N > 0)
+                {
+                  cerr << "TIMEOUT: ESTABLISHED - SEND DATA - GBN" << endl;
 
+                  // GO BACK N REPEATED THREE TIMES - MAKE OWN FUNCTION
+                  // send data from buffer using "Go Back N"
+                  unsigned int inflight_n = cs->state.GetN(); // window size
+                  unsigned int rwnd = cs->state.GetRwnd(); // receiver congestion window
+                  size_t cwnd = cs->state.SendBuffer.GetSize(); // sender congestion window
+
+                  Buffer data;
+                  while(inflight_n < GBN && (rwnd > 0) && (cwnd > 0))
+                  {
+                    cerr << "\n inflight_n: " << inflight_n << endl;
+                    cerr << "\n rwnd: " << rwnd << endl;
+                    cerr << "\n cwnd: " << cwnd << endl;
+                    send_flag = 0;
+
+                    // if MSS < rwnd and MSS < cwnd
+                    // space in rwnd and cwnd
+                    if(MSS < rwnd && MSS < cwnd)
+                    {
+                      cerr << "space in rwnd and cwnd" << endl;
+                      data = cs->state.SendBuffer.Extract(inflight_n, MSS);
+                      // set new seq_n
+                      cerr << "SET1: " << cs->state.GetLastSent() << endl;
+                      cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
+                      cerr << "SET2: " << cs->state.GetLastSent() << endl;
+                      // move on to the next set of packets
+                      inflight_n = inflight_n + MSS;
+                      CLR_SYN(send_flag);
+                      SET_ACK(send_flag);
+                      SET_PSH(send_flag);
+                      send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
+                    }
+
+                    // else space in cwnd or rwnd
+                    else
+                    {
+                      cerr << "space in either or" << endl;
+                      data = cs->state.SendBuffer.Extract(inflight_n, min((int)rwnd, (int)cwnd));
+                      // set new seq_n
+                      cerr << "SET1: " << cs->state.GetLastSent() << endl;
+                      cs->state.SetLastSent(cs->state.GetLastSent() + min((int)rwnd, (int)cwnd));
+                      cerr << "SET2: " << cs->state.GetLastSent() << endl;
+                      // move on to the next set of packets
+                      inflight_n = inflight_n + min((int)rwnd, (int)cwnd);
+                      CLR_SYN(send_flag);
+                      SET_ACK(send_flag);
+                      SET_PSH(send_flag);
+                      send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
+                    }
+
+                    MinetSend(mux, send_pack);
+
+                    rwnd = rwnd - inflight_n;
+                    cwnd = cwnd - inflight_n;
+                    // set timeout
+                    cs->bTmrActive = true;
+                    cs->timeout = Time() + RTT;
+                  }
+
+                  cs->state.N = inflight_n;
+
+                }
+                // otherwise just need to resend ACK
+                else
+                {
+                  cerr << "TIMEOUT: ESTABLISHED - SEND DATA - SEND ACK" << endl;
+                  SET_ACK(send_flag);
+                  MakePacket(Buffer(NULL, 0), cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd(), RECV_BUF_SIZE(cs->state), send_flag);
+                }
               }
               break;
               case CLOSE_WAIT:
               {
-
+                cerr << "TIMEOUT: CLOSE_WAIT - SEND ACK" << endl;
+                SET_ACK(send_flag);
+                MakePacket(Buffer(NULL, 0), cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd(), RECV_BUF_SIZE(cs->state), send_flag);
               }
               break;
               case FIN_WAIT1:
               {
-
+                cerr << "TIMEOUT: FIN_WAIT1 - SEND FIN" << endl;
+                SET_FIN(send_flag);
+                MakePacket(Buffer(NULL, 0), cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd(), SEND_BUF_SIZE(cs->state), send_flag);
               }
               break;
               case CLOSING:
               {
-
+                cerr << "TIMEOUT: CLOSING - SEND ACK" << endl;
+                SET_ACK(send_flag);
+                MakePacket(Buffer(NULL, 0), cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd(), RECV_BUF_SIZE(cs->state), send_flag);
               }
               break;
               case LAST_ACK:
               {
-
+                cerr << "TIMEOUT: LAST_ACK - SEND FIN" << endl;
+                SET_FIN(send_flag);
+                MakePacket(Buffer(NULL, 0), cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd(), SEND_BUF_SIZE(cs->state), send_flag);
               }
               break;
               case TIME_WAIT:
               {
-
+                cerr << "TIMEOUT: TIME_WAIT - SEND ACK" << endl;
+                SET_ACK(send_flag);
+                MakePacket(Buffer(NULL, 0), cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd(), RECV_BUF_SIZE(cs->state), send_flag);
               }
             }
+            MinetSend(mux, send_pack);
+            cs->timeout = Time() + RTT
           }
         }
       }
@@ -519,6 +608,8 @@ int main(int argc, char *argv[])
                       rwnd = rwnd - inflight_n;
                       cwnd = cwnd - inflight_n;
                       // set timeout
+                      cs->bTmrActive = true;
+                      cs->timeout = Time() + RTT;
                     }
 
                     cs->state.N = inflight_n;
