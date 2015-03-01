@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     // cerr << "\n === EVENT START === \n";
     // Timeout
     if (event.eventtype == MinetEvent::Timeout)
-    // {
+    {
     //   cerr << "\nHIT A TIMEOUT............\n";
     //   // check all connections in connection list
     //   for (ConnectionList<TCPState>::iterator cs = clist.begin(); cs != clist.end(); cs++)
