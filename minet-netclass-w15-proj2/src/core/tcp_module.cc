@@ -352,7 +352,7 @@ int main(int argc, char *argv[])
 
         cerr << "Last Acked: " << cs->state.GetLastAcked() << endl;
         cerr << "Last Sent: " << cs->state.GetLastSent() << endl;
-        cerr << "Last Recv: " << cs->State.GetLastRecvd() << endl;
+        cerr << "Last Recv: " << cs->state.GetLastRecvd() << endl;
 
 
         switch(cs->state.GetState())
