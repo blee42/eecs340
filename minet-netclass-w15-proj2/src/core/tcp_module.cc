@@ -114,25 +114,25 @@ int main(int argc, char *argv[])
     // Timeout
     if (event.eventtype == MinetEvent::Timeout)
     {
-      // check all connections in connection list
-      for (ConnectionList<TCPState>::iterator cs = clist.begin(); cs != clist:end(); cs++)
-      {
-        // check for closed connections
-        if (cs->state.GetState() == CLOSED)
-        {
-          clist.erase(cs);
-        }
+      // // check all connections in connection list
+      // for (ConnectionList<TCPState>::iterator cs = clist.begin(); cs != clist:end(); cs++)
+      // {
+      //   // check for closed connections
+      //   if (cs->state.GetState() == CLOSED)
+      //   {
+      //     clist.erase(cs);
+      //   }
 
-        // check for active timers
-        if (cs.bTmrActive == true)
-        {
-          // if maxed out number of tries
-          if (cs->state.ExpireTimerTries())
-          {
-            // do something
-          }
-          // else handle each case of timeout
-        }
+      //   // check for active timers
+      //   if (cs.bTmrActive == true)
+      //   {
+      //     // if maxed out number of tries
+      //     if (cs->state.ExpireTimerTries())
+      //     {
+      //       // do something
+      //     }
+      //     // else handle each case of timeout
+      //   }
       }
     }
     // Unexpected event type
