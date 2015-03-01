@@ -383,9 +383,13 @@ int main(int argc, char *argv[])
                   cs->state.SetLastAcked(rec_ack_n);
                   cs->state.SetLastRecvd(rec_seq_n);
 
+                  cerr << "N before: " << cs->state.N << endl;
                   cs->state.N = cs->state.GetN() - (rec_ack_n - cs->state.GetLastAcked() - 1);
+                  cerr << "N after: " << cs->state.N << endl;
+                  cs->state.N = 2;
+                  cerr << "N after2: " << cs->state.N << endl;
 
-                  cerr << "SEND BUF:";
+                  cerr << "\nSend Buffer: ";
                   cs->state.SendBuffer.Print(cerr);
                   cerr << endl;
   
@@ -644,7 +648,7 @@ int main(int argc, char *argv[])
             MinetSend(sock, res);
 
             // send data from buffer using "Go Back N"
-            unsigned int inflight_n = cs->state.GetN(); // window size
+            unsigned int inflight_n = cs->state.GetN(); // packets in flight
             unsigned int rwnd = cs->state.GetRwnd(); // receiver congestion window
             size_t cwnd = cs->state.SendBuffer.GetSize(); // sender congestion window
 
