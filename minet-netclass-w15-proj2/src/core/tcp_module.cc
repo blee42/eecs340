@@ -586,11 +586,13 @@ int main(int argc, char *argv[])
           new_conn.state.SetLastSent(init_seq);
 
           cerr << "init_seq: " << init_seq << endl;
+          cerr << "init_seq_set: " << new_conn.state.GetLastSent() << endl;
 
           SET_SYN(send_flag);
           Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, init_seq, 0, SEND_BUF_SIZE(new_conn.state), send_flag); // not sure what the seq_n should be
           MinetSend(mux, send_pack);
           sleep(1);
+
           MinetSend(mux, send_pack);
 
           cerr << "\n=== SOCK: END CONNECT ===\n";
