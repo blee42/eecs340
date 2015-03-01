@@ -491,7 +491,7 @@ int main(int argc, char *argv[])
             // else otherside continues to send data
             else
             {
-              if (IS_ACK(rec_flag) && cs->state.GetLastRecvd() <= rec_seq_n)
+              if (IS_ACK(rec_flag) && cs->state.GetLastRecvd() < rec_seq_n)
               {
                 cerr << "ACK flagged.\n";
                 // if there is data
