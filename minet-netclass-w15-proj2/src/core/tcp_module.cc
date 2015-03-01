@@ -639,13 +639,15 @@ int main(int argc, char *argv[])
             unsigned int rwnd = cs->state.GetRwnd(); // receiver congestion window
             size_t cwnd = cs->state.SendBuffer.GetSize(); // sender congestion window
 
-            cerr << "\n inflight_n: " << inflight_n << endl;
-            cerr << "\n rwnd: " << rwnd << endl;
-            cerr << "\n cwnd: " << cwnd << endl;
+            
 
             // iterate through all the packets
             while(inflight_n < GBN)
             {
+              cerr << "\n inflight_n: " << inflight_n << endl;
+              cerr << "\n rwnd: " << rwnd << endl;
+              cerr << "\n cwnd: " << cwnd << endl;
+
               if (cwnd <= 0)
               {
                 int i;
