@@ -69,6 +69,7 @@ Packet MakePacket(Buffer data, Connection conn, unsigned int seq_n, unsigned int
   send_tcp_h.RecomputeChecksum(send_pack);
   send_pack.PushBackHeader(send_tcp_h);
 
+  cerr << "== MAKING PACKET ==" << endl;
   cerr << "TCP Packet:\n IP Header is "<< send_ip_h <<"\n";
   cerr << "TCP Header is "<< send_tcp_h << "\n";
   cerr << "PACKET:\n" << send_pack << endl;
@@ -83,7 +84,7 @@ Packet MakePacket(Buffer data, Connection conn, unsigned int seq_n, unsigned int
 int main(int argc, char *argv[])
 {
   MinetHandle mux, sock;
-
+  srand(time(NULL)); // gen seeds
   ConnectionList<TCPState> clist;
 
   MinetInit(MINET_TCP_MODULE);
@@ -237,6 +238,10 @@ int main(int argc, char *argv[])
       unsigned char rec_flag;
       rec_tcp_h.GetFlags(rec_flag);
 
+      cerr << "clist:\n";
+      clist.Print(cerr);
+      cerr << endl;
+
       // Check for open connection
       ConnectionList<TCPState>::iterator cs = clist.FindMatching(conn);
       // ConnectionList<TCPState>::iterator cs = clist.FindMatchingSource(conn);
@@ -256,6 +261,7 @@ int main(int argc, char *argv[])
         SockRequestResponse res;
         Packet send_pack;
 
+
         switch(cs->state.GetState())
         {
           case CLOSED:
@@ -270,11 +276,14 @@ int main(int argc, char *argv[])
             if (IS_SYN(rec_flag))
             {
               send_seq_n = rand();
+              cerr << "generated seq: " << send_seq_n << endl;
 
               cs->state.SetState(SYN_RCVD);
               // cs->state.SetLastAcked(rec_ack_n);
               cs->state.SetLastRecvd(rec_seq_n);
+              cerr << "SET1: " << cs->state.GetLastSent() << endl;
               cs->state.SetLastSent(send_seq_n); // generate random SEQ # to send out
+              cerr << "SET2: " << cs->state.GetLastSent() << endl;
 
               // timer?
               cs->bTmrActive = true;
@@ -305,7 +314,9 @@ int main(int argc, char *argv[])
               cs->state.SetState(ESTABLISHED);
               // cs->state.SetLastAcked(rec_ack_n); // -1?
               cs->state.SetLastRecvd(rec_seq_n); // okay think about all of this
+              cerr << "SET1: " << cs->state.GetLastSent() << endl;
               cs->state.SetLastSent(send_seq_n);
+              cerr << "SET2: " << cs->state.GetLastSent() << endl;
 
               // timer
               cs->bTmrActive = false;
@@ -323,15 +334,18 @@ int main(int argc, char *argv[])
           case SYN_SENT:
           {
             cerr << "\n=== MUX: SYN_SENT STATE ===\n";
-            if (IS_SYN(rec_flag) && IS_ACK(rec_flag))
+            cerr << "rec_ack_n: " << rec_ack_n << endl;
+            cerr << "last_sent: " << cs->state.GetLastSent() << endl;
+            if (IS_SYN(rec_flag) && IS_ACK(rec_flag) && rec_ack_n == cs->state.GetLastSent() + 1)
             {
               send_seq_n = cs->state.GetLastSent() + 1;
 
               cs->state.SetState(ESTABLISHED);
               cs->state.SetLastAcked(rec_ack_n - 1);
               cs->state.SetLastRecvd(rec_seq_n);
+              cerr << "SET1: " << cs->state.GetLastSent() << endl;
               cs->state.SetLastSent(send_seq_n);
-
+              cerr << "SET2: " << cs->state.GetLastSent() << endl;
 
               SET_ACK(send_flag);
               // send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag); // ??
@@ -369,7 +383,9 @@ int main(int argc, char *argv[])
               send_seq_n = cs->state.GetLastSent() + 1;
 
               cs->state.SetState(CLOSE_WAIT);
+              cerr << "SET1: " << cs->state.GetLastSent() << endl;
               cs->state.SetLastSent(send_seq_n);
+              cerr << "SET2: " << cs->state.GetLastSent() << endl;
               cs->state.SetLastRecvd(rec_seq_n);
               // cs->state.SetLastAcked(rec_ack_n);
 
@@ -394,19 +410,21 @@ int main(int argc, char *argv[])
                   if (recv_buf_size < data.GetSize()) 
                   {
                     cs->state.RecvBuffer.AddBack(data.ExtractFront(recv_buf_size));
-                    send_ack_n = rec_seq_n + recv_buf_size - 1;
-                    cs->state.SetLastRecvd(send_ack_n); // maybe -1
+                    // send_ack_n = rec_seq_n + recv_buf_size - 1;
+                    // cs->state.SetLastRecvd(send_ack_n); // maybe -1
                   }
                   // else there is no overflow
                   else
                   {
                     cs->state.RecvBuffer.AddBack(data);
-                    send_ack_n = rec_seq_n + data.GetSize() - 1;
-                    cs->state.SetLastRecvd(send_ack_n); // maybe -1
+                    // send_ack_n = rec_seq_n + data.GetSize() - 1;
                   }
 
+                  cs->state.SetLastRecvd(send_ack_n); // maybe -1
                   send_seq_n = cs->state.GetLastSent() + 1;
+                  cerr << "SET1: " << cs->state.GetLastSent() << endl;
                   cs->state.SetLastSent(send_seq_n);
+                  cerr << "SET2: " << cs->state.GetLastSent() << endl;
 
                   cerr << "AFTER" << endl;
                   cerr << "receiver buffer: \n";
@@ -415,7 +433,7 @@ int main(int argc, char *argv[])
 
                   // send ACK flag packet to mux
                   SET_ACK(send_flag);
-                  send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n + 1, RECV_BUF_SIZE(cs->state), send_flag);
+                  send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, RECV_BUF_SIZE(cs->state), send_flag);
                   MinetSend(mux, send_pack);
 
                   // send WRITE packet to sock 
@@ -430,12 +448,16 @@ int main(int argc, char *argv[])
                 {
                   cs->state.SendBuffer.Erase(0, rec_ack_n - cs->state.GetLastAcked() - 1);
 
+                  cerr << "MINUS: " << rec_ack_n - cs->state.GetLastAcked() - 1 << endl;
+                  cs->state.N = cs->state.N - (rec_ack_n - cs->state.GetLastAcked() - 1);
+                  cerr << "N after: " << cs->state.N << endl;
+
+                  cerr << "last_acked: " << cs->state.GetLastAcked() << endl;
+                  cerr << "just_acked: " << rec_ack_n << endl;
                   cs->state.SetLastAcked(rec_ack_n);
                   cs->state.SetLastRecvd(rec_seq_n);
 
-                  cs->state.N = cs->state.GetN() - (rec_ack_n - cs->state.GetLastAcked() - 1);
-
-                  cerr << "SEND BUF:";
+                  cerr << "\nSend Buffer: ";
                   cs->state.SendBuffer.Print(cerr);
                   cerr << endl;
   
@@ -464,7 +486,9 @@ int main(int argc, char *argv[])
                         cerr << "space in rwnd and cwnd" << endl;
                         data = cs->state.SendBuffer.Extract(inflight_n, MSS);
                         // set new seq_n
+                        cerr << "SET1: " << cs->state.GetLastSent() << endl;
                         cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
+                        cerr << "SET2: " << cs->state.GetLastSent() << endl;
                         // move on to the next set of packets
                         inflight_n = inflight_n + MSS;
                         CLR_SYN(send_flag);
@@ -479,7 +503,9 @@ int main(int argc, char *argv[])
                         cerr << "space in either or" << endl;
                         data = cs->state.SendBuffer.Extract(inflight_n, min((int)rwnd, (int)cwnd));
                         // set new seq_n
+                        cerr << "SET1: " << cs->state.GetLastSent() << endl;
                         cs->state.SetLastSent(cs->state.GetLastSent() + min((int)rwnd, (int)cwnd));
+                        cerr << "SET2: " << cs->state.GetLastSent() << endl;
                         // move on to the next set of packets
                         inflight_n = inflight_n + min((int)rwnd, (int)cwnd);
                         CLR_SYN(send_flag);
@@ -518,7 +544,9 @@ int main(int argc, char *argv[])
 
               cs->state.SetState(LAST_ACK);
               cs->state.SetLastRecvd(rec_seq_n);
+              cerr << "SET1: " << cs->state.GetLastSent() << endl;
               cs->state.SetLastSent(send_seq_n);
+              cerr << "SET2: " << cs->state.GetLastSent() << endl;
 
               // timeout stuff
 
@@ -538,7 +566,9 @@ int main(int argc, char *argv[])
 
               cs->state.SetState(CLOSING);
               cs->state.SetLastRecvd(rec_seq_n);
+              cerr << "SET1: " << cs->state.GetLastSent() << endl;
               cs->state.SetLastSent(send_seq_n);
+              cerr << "SET2: " << cs->state.GetLastSent() << endl;
 
               // set timeout
               SET_FIN(send_flag);
@@ -615,7 +645,8 @@ int main(int argc, char *argv[])
         {
           cerr << "\n=== SOCK: CONNECT ===\n";
 
-          TCPState connect_conn(rand(), SYN_SENT, MAX_TRIES);
+          unsigned int init_seq = rand();
+          TCPState connect_conn(init_seq, SYN_SENT, MAX_TRIES);
           connect_conn.N = 0; // TODO: what should this be set to?
           // may need to change timeout time
           ConnectionToStateMapping<TCPState> new_conn(req.connection, Time(), connect_conn, true);
@@ -626,13 +657,11 @@ int main(int argc, char *argv[])
           // res.error = EOK;
           MinetSend(sock, res);
 
-          unsigned int init_seq = rand();
-          new_conn.state.SetLastAcked(init_seq);
-
           SET_SYN(send_flag);
           Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, init_seq, 0, SEND_BUF_SIZE(new_conn.state), send_flag); // not sure what the seq_n should be
           MinetSend(mux, send_pack);
           sleep(1);
+
           MinetSend(mux, send_pack);
 
           cerr << "\n=== SOCK: END CONNECT ===\n";
@@ -694,7 +723,7 @@ int main(int argc, char *argv[])
             MinetSend(sock, res);
 
             // send data from buffer using "Go Back N"
-            unsigned int inflight_n = cs->state.GetN(); // window size
+            unsigned int inflight_n = cs->state.GetN(); // packets in flight
             unsigned int rwnd = cs->state.GetRwnd(); // receiver congestion window
             size_t cwnd = cs->state.SendBuffer.GetSize(); // sender congestion window
 
@@ -717,7 +746,9 @@ int main(int argc, char *argv[])
                 cerr << "space in rwnd and cwnd" << endl;
                 data = cs->state.SendBuffer.Extract(inflight_n, MSS);
                 // set new seq_n
-                cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
+                cerr << "SET1: " << cs->state.GetLastSent() << endl;
+                // cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
+                cerr << "SET2: " << cs->state.GetLastSent() << endl;
                 // move on to the next set of packets
                 inflight_n = inflight_n + MSS;
                 CLR_SYN(send_flag);
@@ -732,7 +763,9 @@ int main(int argc, char *argv[])
                 cerr << "space in either or" << endl;
                 data = cs->state.SendBuffer.Extract(inflight_n, min((int)rwnd, (int)cwnd));
                 // set new seq_n
-                cs->state.SetLastSent(cs->state.GetLastSent() + min((int)rwnd, (int)cwnd));
+                cerr << "SET1: " << cs->state.GetLastSent() << endl;
+                // cs->state.SetLastSent(cs->state.GetLastSent() + min((int)rwnd, (int)cwnd));
+                cerr << "SET2: " << cs->state.GetLastSent() << endl;
                 // move on to the next set of packets
                 inflight_n = inflight_n + min((int)rwnd, (int)cwnd);
                 CLR_SYN(send_flag);
@@ -741,14 +774,16 @@ int main(int argc, char *argv[])
                 send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
               }
 
+              cs->state.SetLastSent(cs->state.GetLastSent() + 1);
+
               MinetSend(mux, send_pack);
 
               rwnd = rwnd - inflight_n;
               cwnd = cwnd - inflight_n;
 
               cerr << "\n inflight_n: " << inflight_n << endl;
-              cerr << "\n rwnd: " << rwnd << endl;
-              cerr << "\n cwnd: " << cwnd << endl;
+              cerr << "rwnd: " << rwnd << endl;
+              cerr << "cwnd: " << cwnd << endl;
               // set timeout
             }
 
@@ -756,7 +791,9 @@ int main(int argc, char *argv[])
 
             // TODO: need to loop because write may need more than one packet
             // TODO: save seq and ack number with the state
+            cerr << "SET1: " << cs->state.GetLastSent() << endl;
             // TODO: state.setlastsent - need to set this as getlastsent + mss
+            cerr << "SET2: " << cs->state.GetLastSent() << endl;
           }
           else
           {
