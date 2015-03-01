@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 
         Time curr_time = Time();
         // check for active timers
-        if (cs.bTmrActive == true && cs->timeout < curr_time)
+        if (cs->bTmrActive == true && cs->timeout < curr_time)
         {
           // if maxed out number of tries
           if (cs->state.ExpireTimerTries())
