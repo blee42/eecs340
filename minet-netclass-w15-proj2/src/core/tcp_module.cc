@@ -386,7 +386,7 @@ int main(int argc, char *argv[])
                   cerr << "N after: " << cs->state.N << endl;
 
                   cerr << "last_acked: " << cs->state.GetLastAcked() << endl;
-                  cerr << "just_acked: " << req_ack_n << endl;
+                  cerr << "just_acked: " << rec_ack_n << endl;
                   cs->state.SetLastAcked(rec_ack_n);
                   cs->state.SetLastRecvd(rec_seq_n);
 
