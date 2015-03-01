@@ -70,9 +70,9 @@ Packet MakePacket(Buffer data, Connection conn, unsigned int seq_n, unsigned int
   send_pack.PushBackHeader(send_tcp_h);
 
   cerr << "== MAKING PACKET ==" << endl;
-  cerr << "TCP Packet:\n IP Header is "<< send_ip_h <<"\n";
-  cerr << "TCP Header is "<< send_tcp_h << "\n";
-  cerr << "PACKET:\n" << send_pack << endl;
+  cerr << send_ip_h <<"\n";
+  cerr << send_tcp_h << "\n";
+  cerr << send_pack << endl;
 
   return send_pack;
 }
@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
                 {
                   cerr << "TIMEOUT: ESTABLISHED - SEND DATA - SEND ACK" << endl;
                   SET_ACK(send_flag);
-                  MakePacket(Buffer(NULL, 0), cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd(), RECV_BUF_SIZE(cs->state), send_flag);
+                  MakePacket(Buffer(NULL, 0), cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, RECV_BUF_SIZE(cs->state), send_flag);
                 }
               }
               break;
@@ -286,20 +286,22 @@ int main(int argc, char *argv[])
     {
       cerr << "\n === IP LAYER START === \n";
 
+      cerr << "  == GOT A PACKET ==\n";
+
       Packet rec_pack;
       MinetReceive(mux, rec_pack);
       
       unsigned tcphlen = TCPHeader::EstimateTCPHeaderLength(rec_pack);
       rec_pack.ExtractHeaderFromPayload<TCPHeader>(tcphlen);
-      cerr << "estimated header len=" << tcphlen << "\n";
+      // cerr << "estimated header len=" << tcphlen << "\n";
 
       IPHeader rec_ip_h = rec_pack.FindHeader(Headers::IPHeader);
       TCPHeader rec_tcp_h = rec_pack.FindHeader(Headers::TCPHeader);
 
-      cerr << "TCP Packet:\n IP Header is "<< rec_ip_h <<"\n";
-      cerr << "TCP Header is "<< rec_tcp_h << "\n";
+      cerr << rec_ip_h <<"\n";
+      cerr << rec_tcp_h << "\n";
       // cerr << "Checksum is " << (rec_tcp_h.IsCorrectChecksum(rec_pack) ? "VALID\n\n" : "INVALID\n\n");
-      cerr << "Packet Contents: " << rec_pack << "\n";
+      cerr << rec_pack << "\n";
 
       // REMOVED HARDCODED PACKET AND NO LONGER WORKS
 
@@ -326,10 +328,6 @@ int main(int argc, char *argv[])
 
       unsigned char rec_flag;
       rec_tcp_h.GetFlags(rec_flag);
-
-      cerr << "clist:\n";
-      clist.Print(cerr);
-      cerr << endl;
 
       // Check for open connection
       ConnectionList<TCPState>::iterator cs = clist.FindMatching(conn);
