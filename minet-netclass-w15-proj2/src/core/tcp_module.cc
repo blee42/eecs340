@@ -380,14 +380,15 @@ int main(int argc, char *argv[])
                 {
                   cs->state.SendBuffer.Erase(0, rec_ack_n - cs->state.GetLastAcked() - 1);
 
-                  cs->state.SetLastAcked(rec_ack_n);
-                  cs->state.SetLastRecvd(rec_seq_n);
 
                   cerr << "N before: " << cs->state.N << endl;
                   cs->state.N = cs->state.GetN() - (rec_ack_n - cs->state.GetLastAcked() - 1);
                   cerr << "N after: " << cs->state.N << endl;
-                  cs->state.N = 2;
-                  cerr << "N after2: " << cs->state.N << endl;
+
+                  cerr << "last_acked: " << cs->state.GetLastAcked() << endl;
+                  cerr << "just_acked: " << req_ack_n << endl;
+                  cs->state.SetLastAcked(rec_ack_n);
+                  cs->state.SetLastRecvd(rec_seq_n);
 
                   cerr << "\nSend Buffer: ";
                   cs->state.SendBuffer.Print(cerr);
@@ -701,8 +702,8 @@ int main(int argc, char *argv[])
               cwnd = cwnd - inflight_n;
 
               cerr << "\n inflight_n: " << inflight_n << endl;
-              cerr << "\n rwnd: " << rwnd << endl;
-              cerr << "\n cwnd: " << cwnd << endl;
+              cerr << "rwnd: " << rwnd << endl;
+              cerr << "cwnd: " << cwnd << endl;
               // set timeout
             }
 
