@@ -564,7 +564,8 @@ int main(int argc, char *argv[])
           Packet send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, rand(), 0, SEND_BUF_SIZE(new_conn.state), send_flag); // not sure what the seq_n should be
           MinetSend(mux, send_pack);
           // send_pack = MakePacket(Buffer(NULL, 0), new_conn.connection, rand(), 0, SEND_BUF_SIZE(new_conn.state), send_flag); // not sure what the seq_n should be
-          // MinetSend(mux, send_pack);
+          sleep(1);
+          MinetSend(mux, send_pack);
 
           cerr << "\n=== SOCK: END CONNECT ===\n";
         }
