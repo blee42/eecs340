@@ -649,7 +649,7 @@ int main(int argc, char *argv[])
               if (cwnd <= 0)
               {
                 int i;
-                cin << i;
+                cin >> i;
               }
 
               Buffer data;
