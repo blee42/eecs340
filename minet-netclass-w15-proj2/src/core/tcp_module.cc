@@ -28,7 +28,7 @@ using std::min;
 //              CONST & MACROS              //
 // ======================================== //
 
-#define MAX_TRIES 400
+#define MAX_TRIES 5
 #define MSS 536
 #define TIMEOUT 10
 #define GBN MSS*16
@@ -555,6 +555,7 @@ int main(int argc, char *argv[])
                   cerr << "just_acked: " << rec_ack_n << endl;
                   cs->state.SetLastAcked(rec_ack_n);
                   cs->state.SetLastRecvd(rec_seq_n);
+                  cerr << "new_ack: " << cs->state.GetLastAcked() << endl;
 
                   cerr << "\nSend Buffer: ";
                   cs->state.SendBuffer.Print(cerr);
