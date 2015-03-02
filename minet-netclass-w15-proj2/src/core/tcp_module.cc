@@ -565,6 +565,8 @@ int main(int argc, char *argv[])
                   cerr << "\nSend Buffer: ";
                   cs->state.SendBuffer.Print(cerr);
                   cerr << endl;
+
+                  cs->state.N = cs->state.N - (rec_ack_n - cs->state.GetLastAcked() - 1);
   
                   // send some of the infromation in the buffer
                   // if there is overflow in the send buffer
@@ -844,7 +846,7 @@ int main(int argc, char *argv[])
 
             // iterate through all the packets
             Buffer data;
-            while(inflight_n < GBN)
+            while(inflight_n < GBN && cwnd != 0 && rwnd != 0)
             {
               cerr << "\n=== SOCK: WRITE: GBN LOOP ===\n";
               // if MSS < rwnd and MSS < cwnd
