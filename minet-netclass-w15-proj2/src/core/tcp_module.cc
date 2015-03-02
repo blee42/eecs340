@@ -405,8 +405,8 @@ int main(int argc, char *argv[])
               cs->state.SetState(ESTABLISHED);
               // cs->state.SetLastAcked(rec_ack_n); // -1?
               cs->state.SetLastRecvd(rec_seq_n - 1); // next will have same seq num
-              cerr << "SET1: " << cs->state.GetLastSent() << endl;
-              cs->state.SetLastSent(send_seq_n);
+              // cerr << "SET1: " << cs->state.GetLastSent() << endl;
+              // cs->state.SetLastSent(send_seq_n);
 
               // timer
               cs->bTmrActive = false;
@@ -429,7 +429,7 @@ int main(int argc, char *argv[])
             // if (IS_SYN(rec_flag) && IS_ACK(rec_flag) && rec_ack_n == cs->state.GetLastSent() + 1)
             if (IS_SYN(rec_flag) && IS_ACK(rec_flag))
             {
-              send_seq_n = cs->state.GetLastSent() + data.GetSize();
+              send_seq_n = cs->state.GetLastSent() + data.GetSize() + 1;
 
               cs->state.SetState(ESTABLISHED);
               cs->state.SetLastAcked(rec_ack_n - 1);
@@ -474,7 +474,7 @@ int main(int argc, char *argv[])
               cerr << "FIN flagged.\n";
               int i;
               cin >> i; 
-              send_seq_n = cs->state.GetLastSent() + data.GetSize();
+              send_seq_n = cs->state.GetLastSent() + data.GetSize() + 1;
 
               cs->state.SetState(CLOSE_WAIT);
               cerr << "SET1: " << cs->state.GetLastSent() << endl;
@@ -648,7 +648,7 @@ int main(int argc, char *argv[])
             if (IS_FIN(rec_flag))
             {
               // send a fin ack back
-              send_seq_n = cs->state.GetLastSent() + data.GetSize();
+              send_seq_n = cs->state.GetLastSent() + data.GetSize() + 1;
 
               cs->state.SetState(LAST_ACK);
               cs->state.SetLastRecvd(rec_seq_n);
@@ -670,7 +670,7 @@ int main(int argc, char *argv[])
             cerr << "\n=== MUX: FIN_WAIT1 STATE ===\n";
             if (IS_FIN(rec_flag))
             {
-              send_seq_n = cs->state.GetLastSent() + data.GetSize();
+              send_seq_n = cs->state.GetLastSent() + data.GetSize() + 1;
 
               cs->state.SetState(CLOSING);
               cs->state.SetLastRecvd(rec_seq_n);
