@@ -445,7 +445,7 @@ int main(int argc, char *argv[])
               send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, SEND_BUF_SIZE(cs->state), send_flag);
               MinetSend(mux, send_pack);
 
-              cs->state.SetLastSent(max(7, (int) send_seq_n));
+              cs->state.SetLastSent(max(cs->state.GetLastSent() + 7, (int) send_seq_n));
               // create res to send to sock
               res.type = WRITE;
               res.connection = conn;
