@@ -433,7 +433,7 @@ int main(int argc, char *argv[])
 
               cs->state.SetState(ESTABLISHED);
               cs->state.SetLastAcked(rec_ack_n - 1);
-              cs->state.SetLastRecvd(rec_seq_n - 1); // first data will be the same as this
+              cs->state.SetLastRecvd(rec_seq_n); // first data will be the same as this
               cs->state.SetLastSent(send_seq_n);
 
               cerr << "Last Acked: " << cs->state.GetLastAcked() << endl;
