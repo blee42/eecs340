@@ -172,6 +172,7 @@ int main(int argc, char *argv[])
                   unsigned int rwnd = cs->state.GetRwnd(); // receiver congestion window
                   size_t cwnd = cs->state.SendBuffer.GetSize(); // sender congestion window
 
+                  Buffer data;
                   while(inflight_n < GBN && cwnd != 0 && rwnd != 0)
                   {
                     cerr << "\n inflight_n: " << inflight_n << endl;
