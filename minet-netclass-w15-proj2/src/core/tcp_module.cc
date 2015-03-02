@@ -656,7 +656,6 @@ int main(int argc, char *argv[])
                 }
               }
             }
-            cerr << "\n=== MUX: END ESTABLISHED STATE ===\n";
           }
           break;
           case SEND_DATA:
