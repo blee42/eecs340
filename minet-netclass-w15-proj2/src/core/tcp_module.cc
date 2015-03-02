@@ -553,9 +553,14 @@ int main(int argc, char *argv[])
 
                   cerr << "last_acked: " << cs->state.GetLastAcked() << endl;
                   cerr << "just_acked: " << rec_ack_n << endl;
-                  cs->state.SetLastAcked(rec_ack_n);
+                  bool succ = cs->state.SetLastAcked(rec_ack_n);
                   cs->state.SetLastRecvd(rec_seq_n);
                   cerr << "new_ack: " << cs->state.GetLastAcked() << endl;
+                  cerr << "success: " << succ << endl;
+
+                  cs->state.last_acked = rec_ack_n;
+                  cerr << "wbnow: " << cs->state.GetLastAcked() << endl;
+
 
                   cerr << "\nSend Buffer: ";
                   cs->state.SendBuffer.Print(cerr);
