@@ -85,7 +85,7 @@ Packet MakePacket(Buffer data, Connection conn, unsigned int seq_n, unsigned int
 int main(int argc, char *argv[])
 {
   MinetHandle mux, sock;
-  srand(time(NULL)); // gen seeds
+  srand(time(NULL)); // generate seeds
   ConnectionList<TCPState> clist;
 
   MinetInit(MINET_TCP_MODULE);
@@ -105,19 +105,15 @@ int main(int argc, char *argv[])
     return -1;
   }
 
-  cerr << "\nBEGINNING TO HANDLE TCP.......\n";
-
   MinetSendToMonitor(MinetMonitoringEvent("tcp_module handling TCP traffic"));
 
   MinetEvent event;
 
   while (MinetGetNextEvent(event, TIMEOUT) == 0) 
   {
-    // cerr << "\n === EVENT START === \n";
-    // Timeout
+
     if (event.eventtype == MinetEvent::Timeout)
     {
-      // cerr << "\nHIT A TIMEOUT............\n";
       // check all connections in connection list
       for (ConnectionList<TCPState>::iterator cs = clist.begin(); cs != clist.end(); cs++)
       {
@@ -127,8 +123,8 @@ int main(int argc, char *argv[])
           clist.erase(cs);
         }
 
-        Time curr_time = Time();
         // check for active timers
+        Time curr_time = Time();
         if (cs->bTmrActive == true && cs->timeout < curr_time)
         {
           // if maxed out number of tries
@@ -443,8 +439,7 @@ int main(int argc, char *argv[])
               cerr << "Last Acked: " << cs->state.GetLastAcked() << endl;
               cerr << "Last Sent: " << cs->state.GetLastSent() << endl;
               cerr << "Last Recv: " << cs->state.GetLastRecvd() << endl;
-              // send_seq_n = cs->state.GetLastSent() + data.GetSize() + 1;
-              send_seq_n = cs->state.GetLastSent() + 1;
+              send_seq_n = cs->state.GetLastSent() + data.GetSize() + 1;
               cerr << "increment" << data.GetSize() + 1;
 
               cs->state.SetState(ESTABLISHED);
