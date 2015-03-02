@@ -28,7 +28,7 @@ using std::min;
 //              CONST & MACROS              //
 // ======================================== //
 
-#define MAX_TRIES 3
+#define MAX_TRIES 400
 #define MSS 536
 #define TIMEOUT 10
 #define GBN MSS*16
