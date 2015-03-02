@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
           {
             SockRequestResponse res;
             res.type = CLOSE;
-            res.connection = conn;
+            res.connection = cs->connection;
             res.error = EOK;
             MinetSend(sock, res);
           }
