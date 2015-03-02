@@ -130,7 +130,11 @@ int main(int argc, char *argv[])
           // if maxed out number of tries
           if (cs->state.ExpireTimerTries())
           {
-            // do something
+            SockRequestResponse res;
+            res.type = CLOSE;
+            res.connection = cs->connection;
+            res.error = EOK;
+            MinetSend(sock, res);
           }
           // else handle each case of timeout
           else
@@ -164,12 +168,11 @@ int main(int argc, char *argv[])
 
                   // GO BACK N REPEATED THREE TIMES - MAKE OWN FUNCTION
                   // send data from buffer using "Go Back N"
-                  unsigned int inflight_n = 0; // window size
+                  unsigned int inflight_n = cs->state.GetN(); // window size
                   unsigned int rwnd = cs->state.GetRwnd(); // receiver congestion window
                   size_t cwnd = cs->state.SendBuffer.GetSize(); // sender congestion window
 
                   Buffer data;
-                  unsigned int last_seq = cs->state.GetLastAcked();
                   while(inflight_n < GBN && cwnd != 0 && rwnd != 0)
                   {
                     cerr << "\n inflight_n: " << inflight_n << endl;
@@ -189,9 +192,11 @@ int main(int argc, char *argv[])
                       CLR_SYN(send_flag);
                       SET_ACK(send_flag);
                       SET_PSH(send_flag);
-                      send_pack = MakePacket(data, cs->connection, last_seq, cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
+                      send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
 
-                      last_seq += MSS;
+                      cerr << "SET1: " << cs->state.GetLastSent() << endl;
+                      cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
+                      cerr << "SET2: " << cs->state.GetLastSent() << endl;
                     }
 
                     // else space in cwnd or rwnd
@@ -205,8 +210,8 @@ int main(int argc, char *argv[])
                       CLR_SYN(send_flag);
                       SET_ACK(send_flag);
                       SET_PSH(send_flag);
-                      send_pack = MakePacket(data, cs->connection, last_seq, cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
-                      last_seq += min((int)rwnd, (int)cwnd);
+                      send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
+                      cs->state.SetLastSent(cs->state.GetLastSent() + min((int)rwnd, (int)cwnd));
                     }
 
                     MinetSend(mux, send_pack);
@@ -480,8 +485,6 @@ int main(int argc, char *argv[])
             if (IS_FIN(rec_flag))
             {
               cerr << "FIN flagged.\n";
-              int i;
-              cin >> i; 
               send_seq_n = cs->state.GetLastSent() + data.GetSize() + 1;
 
               cs->state.SetState(CLOSE_WAIT);
@@ -653,6 +656,7 @@ int main(int argc, char *argv[])
                 }
               }
             }
+            cerr << "\n=== MUX: END ESTABLISHED STATE ===\n";
           }
           break;
           case SEND_DATA:
@@ -676,9 +680,11 @@ int main(int argc, char *argv[])
               cerr << "SET2: " << cs->state.GetLastSent() << endl;
 
               // timeout stuff
+              cs->bTmrActive = true;
+              cs->timeout = Time() + RTT;
+              cs->state.SetTimerTries(MAX_TRIES);
 
               SET_FIN(send_flag);
-              // send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag); // ??
               send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, RECV_BUF_SIZE(cs->state), send_flag);
               MinetSend(mux, send_pack);
             }
@@ -698,6 +704,10 @@ int main(int argc, char *argv[])
               cerr << "SET2: " << cs->state.GetLastSent() << endl;
 
               // set timeout
+              cs->bTmrActive = true;
+              cs->timeout = Time() + RTT;
+              cs->state.SetTimerTries(MAX_TRIES);
+
               SET_FIN(send_flag);
               SET_ACK(send_flag);
               send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, SEND_BUF_SIZE(cs->state), send_flag);
@@ -707,14 +717,22 @@ int main(int argc, char *argv[])
             {
 
               cs->state.SetState(FIN_WAIT2);
-
-
+              cs->state.SetLastSent(send_seq_n);
+              cs->state.SetLastAcked(rec_ack_n - 1);
             }
           }
           break;
           case CLOSING:
           {
             cerr << "\n=== MUX: CLOSING STATE ===\n";
+            if (IS_ACK(rec_flag))
+            {
+              // done, not sending any other packets
+              // move to time-wait
+              cs->state.SetState(TIME_WAIT);
+              cs->state.SetLastAcked(rec_ack_n - 1);
+              cs->state.SetLastRecvd(rec_seq_n);
+            }
           }
           break;
           case LAST_ACK:
@@ -723,14 +741,35 @@ int main(int argc, char *argv[])
             if (IS_ACK(rec_flag))
             {
               // set anything last things?
+              // when other side closes, set itself to close
+              // no packet is sent
               cs->state.SetState(CLOSED);
+              cs->state.SetLastAcked(rec_ack_n - 1);
+              cs->state.SetLastRecvd(rec_seq_n);
             }
           }
           break;
           case FIN_WAIT2:
           {
             cerr << "\n=== MUX: FIN_WAIT2 STATE ===\n";
-            // 
+            if (IS_FIN(rec_flag))
+            {
+              send_seq_n = cs->state.GetLastSent() + data.GetSize() + 1;
+
+              cs->state.SetState(TIME_WAIT);
+              cs->state.SetLastRecvd(rec_seq_n);
+              cs->state.SetLastSent(send_seq_n);
+              cs->state.SetLastAcked(rec_ack_n - 1);
+ 
+              // set timeout
+              cs->bTmrActive = true;
+              cs->timeout = Time() + RTT;
+              cs->state.SetTimerTries(MAX_TRIES);
+
+              SET_ACK(send_flag);
+              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, SEND_BUF_SIZE(cs->state), send_flag);
+              MinetSend(mux, send_pack);
+            }
           }
           break;
           case TIME_WAIT:
@@ -946,6 +985,16 @@ int main(int argc, char *argv[])
         case CLOSE:
         {
           cerr << "\n=== SOCK: CLOSE ===\n";
+          ConnectionList<TCPState>::iterator cs = clist.FindMatching(req.connection);
+          if (cs->state.GetState() == ESTABLISHED)
+          {
+            unsigned char send_flag;
+            Packet send_pack;
+            cs->state.SetState(FIN_WAIT1);
+            SET_FIN(send_flag);
+            send_pack = MakePacket(Buffer(NULL, 0), cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, RECV_BUF_SIZE(cs->state), send_flag);
+            MinetSend(mux, send_pack);
+          }
           cerr << "\n=== SOCK: END CLOSE ===\n";
         }
           // TODO: find connection of request
