@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
                       SET_ACK(send_flag);
                       SET_PSH(send_flag);
                       send_pack = MakePacket(data, cs->connection, last_seq, cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
-                      last_seq += min((int)rwnd, (int)cwnd));
+                      last_seq += min((int)rwnd, (int)cwnd);
                     }
 
                     MinetSend(mux, send_pack);
