@@ -338,6 +338,9 @@ int main(int argc, char *argv[])
       if (cs != clist.end() && rec_tcp_h.IsCorrectChecksum(rec_pack))
       {   
         cerr << "Found matching connection\n";
+        cerr << "Last Acked: " << cs->state.GetLastAcked() << endl;
+        cerr << "Last Sent: " << cs->state.GetLastSent() << endl;
+        cerr << "Last Recv: " << cs->state.GetLastRecvd() << endl << endl;;
         rec_tcp_h.GetHeaderLen((unsigned char&)tcphlen);
         tcphlen -= TCP_HEADER_MAX_LENGTH;
         Buffer data = rec_pack.GetPayload().ExtractFront(tcphlen);
@@ -348,9 +351,6 @@ int main(int argc, char *argv[])
         SockRequestResponse res;
         Packet send_pack;
 
-        cerr << "Last Acked: " << cs->state.GetLastAcked() << endl;
-        cerr << "Last Sent: " << cs->state.GetLastSent() << endl;
-        cerr << "Last Recv: " << cs->state.GetLastRecvd() << endl;
 
 
         switch(cs->state.GetState())
@@ -424,11 +424,14 @@ int main(int argc, char *argv[])
           case SYN_SENT:
           {
             cerr << "\n=== MUX: SYN_SENT STATE ===\n";
-            cerr << "rec_ack_n: " << rec_ack_n << endl;
-            cerr << "last_sent: " << cs->state.GetLastSent() << endl;
+            // cerr << "rec_ack_n: " << rec_ack_n << endl;
+            // cerr << "last_sent: " << cs->state.GetLastSent() << endl;
             // if (IS_SYN(rec_flag) && IS_ACK(rec_flag) && rec_ack_n == cs->state.GetLastSent() + 1)
             if (IS_SYN(rec_flag) && IS_ACK(rec_flag))
             {
+              cerr << "Last Acked: " << cs->state.GetLastAcked() << endl;
+              cerr << "Last Sent: " << cs->state.GetLastSent() << endl;
+              cerr << "Last Recv: " << cs->state.GetLastRecvd() << endl;
               send_seq_n = cs->state.GetLastSent() + data.GetSize() + 1;
 
               cs->state.SetState(ESTABLISHED);
@@ -436,9 +439,6 @@ int main(int argc, char *argv[])
               cs->state.SetLastRecvd(rec_seq_n); // first data will be the same as this
               cs->state.SetLastSent(send_seq_n);
 
-              cerr << "Last Acked: " << cs->state.GetLastAcked() << endl;
-              cerr << "Last Sent: " << cs->state.GetLastSent() << endl;
-              cerr << "Last Recv: " << cs->state.GetLastRecvd() << endl;
 
               SET_ACK(send_flag);
               // send_pack = MakePacket(Buffer(NULL, 0), conn, rec_ack_n, send_ack_n, send_flag); // ??
@@ -830,7 +830,7 @@ int main(int argc, char *argv[])
             MinetSend(sock, res);
 
             // send data from buffer using "Go Back N"
-            unsigned int inflight_n = cs->state.GetN(); // packets in flight
+            unsigned int inflight_n = 0; // packets in flight
             unsigned int rwnd = cs->state.GetRwnd(); // receiver congestion window
             size_t cwnd = cs->state.SendBuffer.GetSize(); // sender congestion window
 
@@ -844,7 +844,7 @@ int main(int argc, char *argv[])
 
             // iterate through all the packets
             Buffer data;
-            while(inflight_n < GBN && (rwnd > 0) && (cwnd > 0))
+            while(inflight_n < GBN)
             {
               cerr << "\n=== SOCK: WRITE: GBN LOOP ===\n";
               // if MSS < rwnd and MSS < cwnd
@@ -883,8 +883,15 @@ int main(int argc, char *argv[])
 
               MinetSend(mux, send_pack);
 
-              rwnd = rwnd - inflight_n;
-              cwnd = cwnd - inflight_n;
+              if ((rwnd < rwnd - inflight_n) && (cwnd < cwnd - inflight_n)) 
+              {
+                break;
+              }
+              else
+              {
+                rwnd = rwnd - inflight_n;
+                cwnd = cwnd - inflight_n;                
+              }
 
               cerr << "\n inflight_n: " << inflight_n << endl;
               cerr << "rwnd: " << rwnd << endl;
