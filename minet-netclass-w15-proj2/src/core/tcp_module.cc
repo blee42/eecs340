@@ -579,8 +579,7 @@ int main(int argc, char *argv[])
                     unsigned int rwnd = cs->state.GetRwnd(); // receiver congestion window
                     size_t cwnd = cs->state.SendBuffer.GetSize(); // sender congestion window
 
-                    Buffer data;
-                    while(inflight_n < GBN && (rwnd > 0) && (cwnd > 0))
+                    while(inflight_n < GBN && cwnd != 0 && rwnd != 0)
                     {
                       cerr << "\n inflight_n: " << inflight_n << endl;
                       cerr << "\n rwnd: " << rwnd << endl;
@@ -594,15 +593,16 @@ int main(int argc, char *argv[])
                         cerr << "space in rwnd and cwnd" << endl;
                         data = cs->state.SendBuffer.Extract(inflight_n, MSS);
                         // set new seq_n
-                        cerr << "SET1: " << cs->state.GetLastSent() << endl;
-                        cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
-                        cerr << "SET2: " << cs->state.GetLastSent() << endl;
                         // move on to the next set of packets
                         inflight_n = inflight_n + MSS;
                         CLR_SYN(send_flag);
                         SET_ACK(send_flag);
                         SET_PSH(send_flag);
                         send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
+
+                        cerr << "SET1: " << cs->state.GetLastSent() << endl;
+                        cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
+                        cerr << "SET2: " << cs->state.GetLastSent() << endl;
                       }
 
                       // else space in cwnd or rwnd
@@ -611,21 +611,30 @@ int main(int argc, char *argv[])
                         cerr << "space in either or" << endl;
                         data = cs->state.SendBuffer.Extract(inflight_n, min((int)rwnd, (int)cwnd));
                         // set new seq_n
-                        cerr << "SET1: " << cs->state.GetLastSent() << endl;
-                        cs->state.SetLastSent(cs->state.GetLastSent() + min((int)rwnd, (int)cwnd));
-                        cerr << "SET2: " << cs->state.GetLastSent() << endl;
                         // move on to the next set of packets
                         inflight_n = inflight_n + min((int)rwnd, (int)cwnd);
                         CLR_SYN(send_flag);
                         SET_ACK(send_flag);
                         SET_PSH(send_flag);
                         send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
+                        cs->state.SetLastSent(cs->state.GetLastSent() + min((int)rwnd, (int)cwnd));
                       }
 
                       MinetSend(mux, send_pack);
 
-                      rwnd = rwnd - inflight_n;
-                      cwnd = cwnd - inflight_n;
+                      if ((rwnd < rwnd - inflight_n) && (cwnd < cwnd - inflight_n)) 
+                      {
+                        break;
+                      }
+                      else
+                      {
+                        rwnd = rwnd - inflight_n;
+                        cwnd = cwnd - inflight_n;                
+                      }
+
+                      cerr << "\n inflight_n: " << inflight_n << endl;
+                      cerr << "rwnd: " << rwnd << endl;
+                      cerr << "cwnd: " << cwnd << endl;
                       // set timeout
                       cs->bTmrActive = true;
                       cs->timeout = Time() + RTT;
