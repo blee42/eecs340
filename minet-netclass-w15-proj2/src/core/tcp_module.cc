@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 
                   // GO BACK N REPEATED THREE TIMES - MAKE OWN FUNCTION
                   // send data from buffer using "Go Back N"
-                  unsigned int inflight_n = cs->state.GetN(); // window size
+                  unsigned int inflight_n = 0; // window size
                   unsigned int rwnd = cs->state.GetRwnd(); // receiver congestion window
                   size_t cwnd = cs->state.SendBuffer.GetSize(); // sender congestion window
 
