@@ -134,7 +134,11 @@ int main(int argc, char *argv[])
           // if maxed out number of tries
           if (cs->state.ExpireTimerTries())
           {
-            // do something
+            SockRequestResponse res;
+            res.type = CLOSING;
+            res.connection = conn;
+            res.error = EOK;
+            MinetSend(sock, res);
           }
           // else handle each case of timeout
           else
@@ -680,9 +684,11 @@ int main(int argc, char *argv[])
               cerr << "SET2: " << cs->state.GetLastSent() << endl;
 
               // timeout stuff
+              cs->state.bTmrActive = true;
+              cs->state.timeout = Time() + RTT;
+              cs->state.SetTimerTries(MAX_TRIES);
 
               SET_FIN(send_flag);
-              // send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, send_flag); // ??
               send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, RECV_BUF_SIZE(cs->state), send_flag);
               MinetSend(mux, send_pack);
             }
@@ -702,6 +708,10 @@ int main(int argc, char *argv[])
               cerr << "SET2: " << cs->state.GetLastSent() << endl;
 
               // set timeout
+              cs->state.bTmrActive = true;
+              cs->state.timeout = Time() + RTT;
+              cs->state.SetTimerTries(MAX_TRIES);
+
               SET_FIN(send_flag);
               SET_ACK(send_flag);
               send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, SEND_BUF_SIZE(cs->state), send_flag);
@@ -711,14 +721,22 @@ int main(int argc, char *argv[])
             {
 
               cs->state.SetState(FIN_WAIT2);
-
-
+              cs->state.SetLastSent(send_seq_n);
+              cs->state.SetLastAcked(rec_ack_n - 1);
             }
           }
           break;
           case CLOSING:
           {
             cerr << "\n=== MUX: CLOSING STATE ===\n";
+            if (IS_ACK(rec_flag))
+            {
+              // done, not sending any other packets
+              // move to time-wait
+              cs->state.SetState(TIME_WAIT);
+              cs->state.SetLastAcked(rec_ack_n - 1);
+              cs->state.SetLastRecvd(rec_seq_n);
+            }
           }
           break;
           case LAST_ACK:
@@ -727,14 +745,35 @@ int main(int argc, char *argv[])
             if (IS_ACK(rec_flag))
             {
               // set anything last things?
+              // when other side closes, set itself to close
+              // no packet is sent
               cs->state.SetState(CLOSED);
+              cs->state.SetLastAcked(rec_ack_n - 1);
+              cs->state.SetLastRecvd(rec_seq_n);
             }
           }
           break;
           case FIN_WAIT2:
           {
             cerr << "\n=== MUX: FIN_WAIT2 STATE ===\n";
-            // 
+            if (IS_FIN(rec_flag))
+            {
+              send_seq_n = cs->state.GetLastSent() + data.GetSize() + 1;
+
+              cs->state.SetState(TIME_WAIT);
+              cs->state.SetLastRecvd(rec_seq_n);
+              cs->state.SetLastSent(send_seq_n);
+              cs->state.SetLastAcked(rec_ack_n - 1);
+ 
+              // set timeout
+              cs->state.bTmrActive = true;
+              cs->state.timeout = Time() + RTT;
+              cs->state.SetTimerTries(MAX_TRIES);
+
+              SET_ACK(send_flag);
+              send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, SEND_BUF_SIZE(cs->state), send_flag);
+              MinetSend(mux, send_pack);
+            }
           }
           break;
           case TIME_WAIT:
