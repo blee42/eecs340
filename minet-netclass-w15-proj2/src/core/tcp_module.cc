@@ -23,6 +23,7 @@ using std::cerr;
 using std::string;
 using std::cin;
 using std::min;
+using std::max;
 
 // ======================================== //
 //              CONST & MACROS              //
@@ -432,12 +433,11 @@ int main(int argc, char *argv[])
               cerr << "Last Acked: " << cs->state.GetLastAcked() << endl;
               cerr << "Last Sent: " << cs->state.GetLastSent() << endl;
               cerr << "Last Recv: " << cs->state.GetLastRecvd() << endl;
-              send_seq_n = cs->state.GetLastSent() + 6 + 1; // data transforms from 0 to 6 in size
+              send_seq_n = cs->state.GetLastSent() + data.GetSize() + 1;
 
               cs->state.SetState(ESTABLISHED);
               cs->state.SetLastAcked(rec_ack_n - 1);
               cs->state.SetLastRecvd(rec_seq_n); // first data will be the same as this
-              cs->state.SetLastSent(send_seq_n);
 
 
               SET_ACK(send_flag);
@@ -445,6 +445,7 @@ int main(int argc, char *argv[])
               send_pack = MakePacket(Buffer(NULL, 0), conn, send_seq_n, send_ack_n, SEND_BUF_SIZE(cs->state), send_flag);
               MinetSend(mux, send_pack);
 
+              cs->state.SetLastSent(max(7, send_seq_n));
               // create res to send to sock
               res.type = WRITE;
               res.connection = conn;
