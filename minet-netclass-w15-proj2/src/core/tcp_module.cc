@@ -172,11 +172,12 @@ int main(int argc, char *argv[])
 
                   // GO BACK N REPEATED THREE TIMES - MAKE OWN FUNCTION
                   // send data from buffer using "Go Back N"
-                  unsigned int inflight_n = cs->state.GetN(); // window size
+                  unsigned int inflight_n = 0; // window size
                   unsigned int rwnd = cs->state.GetRwnd(); // receiver congestion window
                   size_t cwnd = cs->state.SendBuffer.GetSize(); // sender congestion window
 
                   Buffer data;
+                  unsigned int last_seq = cs->state.GetLastAcked();
                   while(inflight_n < GBN && cwnd != 0 && rwnd != 0)
                   {
                     cerr << "\n inflight_n: " << inflight_n << endl;
@@ -196,11 +197,9 @@ int main(int argc, char *argv[])
                       CLR_SYN(send_flag);
                       SET_ACK(send_flag);
                       SET_PSH(send_flag);
-                      send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
+                      send_pack = MakePacket(data, cs->connection, last_seq, cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
 
-                      cerr << "SET1: " << cs->state.GetLastSent() << endl;
-                      cs->state.SetLastSent(cs->state.GetLastSent() + MSS);
-                      cerr << "SET2: " << cs->state.GetLastSent() << endl;
+                      last_seq += MSS;
                     }
 
                     // else space in cwnd or rwnd
@@ -214,8 +213,8 @@ int main(int argc, char *argv[])
                       CLR_SYN(send_flag);
                       SET_ACK(send_flag);
                       SET_PSH(send_flag);
-                      send_pack = MakePacket(data, cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
-                      cs->state.SetLastSent(cs->state.GetLastSent() + min((int)rwnd, (int)cwnd));
+                      send_pack = MakePacket(data, cs->connection, last_seq, cs->state.GetLastRecvd() + 1, SEND_BUF_SIZE(cs->state), send_flag);
+                      last_seq += min((int)rwnd, (int)cwnd);
                     }
 
                     MinetSend(mux, send_pack);
@@ -448,7 +447,9 @@ int main(int argc, char *argv[])
               cerr << "Last Acked: " << cs->state.GetLastAcked() << endl;
               cerr << "Last Sent: " << cs->state.GetLastSent() << endl;
               cerr << "Last Recv: " << cs->state.GetLastRecvd() << endl;
-              send_seq_n = cs->state.GetLastSent() + data.GetSize() + 1;
+              // send_seq_n = cs->state.GetLastSent() + data.GetSize() + 1;
+              send_seq_n = cs->state.GetLastSent() + 1;
+              cerr << "increment" << data.GetSize() + 1;
 
               cs->state.SetState(ESTABLISHED);
               cs->state.SetLastAcked(rec_ack_n - 1);
