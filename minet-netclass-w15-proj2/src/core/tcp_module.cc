@@ -443,7 +443,9 @@ int main(int argc, char *argv[])
               cerr << "Last Acked: " << cs->state.GetLastAcked() << endl;
               cerr << "Last Sent: " << cs->state.GetLastSent() << endl;
               cerr << "Last Recv: " << cs->state.GetLastRecvd() << endl;
-              send_seq_n = cs->state.GetLastSent() + data.GetSize() + 1;
+              // send_seq_n = cs->state.GetLastSent() + data.GetSize() + 1;
+              send_seq_n = cs->state.GetLastSent() + 1;
+              cerr << "increment" << data.GetSize() + 1;
 
               cs->state.SetState(ESTABLISHED);
               cs->state.SetLastAcked(rec_ack_n - 1);
