@@ -996,7 +996,7 @@ int main(int argc, char *argv[])
             Packet send_pack;
             cs->state.SetState(FIN_WAIT1);
             SET_FIN(send_flag);
-            send_pack = MakePacket(Buffer(NULL, 0), cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd + 1, RECV_BUF_SIZE(cs->state), send_flag);
+            send_pack = MakePacket(Buffer(NULL, 0), cs->connection, cs->state.GetLastSent(), cs->state.GetLastRecvd() + 1, RECV_BUF_SIZE(cs->state), send_flag);
             MinetSend(mux, send_pack);
           }
           cerr << "\n=== SOCK: END CLOSE ===\n";
