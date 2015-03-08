@@ -1,5 +1,4 @@
 Project 2: TCP
-
 Kevin Chen & Brittany Lee.
 
 We spend many, many, many, many long hard hours coding this together. The majority of this project was pair programmed, with small sections taken off to the side and fleshed out or debugged.
