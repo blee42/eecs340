@@ -25,7 +25,7 @@ ostream & Entry::Print(ostream &os) const
 	return os;
 }
 
-deque<Entry> Table::GetRows() {
+deque<Entry> Table::GetEntrys() {
     return contents;
 }
 

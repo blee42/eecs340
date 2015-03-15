@@ -230,7 +230,7 @@ Node *Node::GetNextHop(const Node *destination) const
   unsigned dest_num = destination->GetNumber();
   Entry* dest_entry = GetRoutingTable()->GetEntry(dest_num);
 
-  return new Node(dest_entry->next_node, context, 0, 0);
+  return new Node(dest_entry->next_node, NULL, 0, 0);
 }
 
 Table *Node::GetRoutingTable() const
