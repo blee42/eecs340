@@ -163,9 +163,9 @@ void Node::LinkHasBeenUpdated(const Link *link)
       2. Cost directly to neighbor is lower than cost current in table -> Update.
       3. Cost in table is for direct path (e.g. information outdated) -> Update.
   */
-  if (neighbor == NULL || 
-    neighbor->cost > new_cost ||
-    neighbor->dest_node == neighbor->next_node)
+  if (neighbor || 
+    neighbor.cost > new_cost ||
+    neighbor.dest_node == neighbor.next_node)
   {
     cerr << "Found neighbor: " << neighbor << endl;
     table.EditEntry(dest, Entry(dest, dest, new_cost));
@@ -195,8 +195,8 @@ void Node::ProcessIncomingRoutingMessage(const RoutingMessage *message)
   }
 
   // check this node's distance to the destination in message
-  Entry* src_entry = table.GetEntry(src_num);
-  Entry* dest_entry = table.GetEntry(dest_num);
+  Entry src_entry = table.GetEntry(src_num);
+  Entry dest_entry = table.GetEntry(dest_num);
 
   // compare that with this node's distance to the source in the message + cost in the message
 
@@ -209,9 +209,9 @@ void Node::ProcessIncomingRoutingMessage(const RoutingMessage *message)
     return;
   }
   else if (dest_entry == NULL || 
-    dest_entry->cost > src_entry->cost + sd_cost) 
+    dest_entry.cost > src_entry.cost + sd_cost) 
   {
-    double new_cost = src_entry->cost + sd_cost;
+    double new_cost = src_entry.cost + sd_cost;
     table.EditEntry(dest_num, Entry(dest_num, src_num, new_cost));
 
     SendToNeighbors(new RoutingMessage(*this, Node(dest_num, context, 0, 0), new_cost));
@@ -228,9 +228,9 @@ void Node::TimeOut()
 Node *Node::GetNextHop(const Node *destination) const
 {
   unsigned dest_num = destination->GetNumber();
-  Entry* dest_entry = table.GetEntry(dest_num);
+  Entry dest_entry = table.GetEntry(dest_num);
 
-  Node* next_node = Node(dest_entry->next_node, context, 0, 0);
+  Node* next_node = Node(dest_entry.next_node, context, 0, 0);
   return next_node;
 }
 
