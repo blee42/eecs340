@@ -38,7 +38,7 @@ deque<Entry>::iterator Table::GetDestinationEntry(unsigned dest) {
     return contents.end();
 }
 
-Entry Table::GetEntry(unsigned dest) {
+Entry* Table::GetEntry(unsigned dest) {
   deque<Entry>::iterator entry = GetDestinationEntry(dest);
   if (entry != contents.end()) {
     return new Entry(entry->dest_node, entry->next_node, entry->cost);
@@ -51,9 +51,9 @@ Entry Table::GetEntry(unsigned dest) {
 void Table::EditEntry(unsigned dest, Entry new_entry) {
     deque<Entry>::iterator entry = GetDestinationEntry(dest);
     if (entry != contents.end()) {
-      entry->dest_node = new_entry->dest_node;
-      entry->next_node = new_entry->next_node;
-      entry->cost = new_entry->cost;
+      entry->dest_node = new_entry.dest_node;
+      entry->next_node = new_entry.next_node;
+      entry->cost = new_entry.cost;
     }
     else {
       contents.push_back(new_entry);
