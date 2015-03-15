@@ -33,6 +33,7 @@ struct RoutingMessage {
   RoutingMessage();
   RoutingMessage(const RoutingMessage &rhs);
   RoutingMessage &operator=(const RoutingMessage &rhs);
+  RoutingMessage(Node s, Node d, double c);
 
   ostream & Print(ostream &os) const;
 };

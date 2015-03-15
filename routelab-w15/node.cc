@@ -167,7 +167,7 @@ void Node::LinkHasBeenUpdated(const Link *link)
     neighbor.cost > new_cost ||
     neighbor.dest_node == neighbor.next_node)
   {
-    cerr << "Found neighbor: " << neighbor << endl;
+    // cerr << "Found neighbor: " << neighbor << endl;
     table.EditEntry(dest, Entry(dest, dest, new_cost));
 
     // Making a new Node a good idea? Look for GetNode by dest or something...
