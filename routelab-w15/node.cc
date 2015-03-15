@@ -228,7 +228,7 @@ void Node::TimeOut()
 Node *Node::GetNextHop(const Node *destination) const
 {
   unsigned dest_num = destination->GetNumber();
-  Entry* dest_entry = GetRoutingTable().GetEntry(dest_num);
+  Entry* dest_entry = GetRoutingTable()->GetEntry(dest_num);
 
   return new Node(dest_entry->next_node, context, 0, 0);
 }
