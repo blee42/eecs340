@@ -155,7 +155,7 @@ void Node::LinkHasBeenUpdated(const Link *link)
 
   unsigned dest = link->GetDest();
   double new_cost = link->GetLatency();
-  Entry neighbor = table.GetEntry(dest);
+  Entry* neighbor = &table.GetEntry(dest);
 
   /*
     Cases:
@@ -163,9 +163,9 @@ void Node::LinkHasBeenUpdated(const Link *link)
       2. Cost directly to neighbor is lower than cost current in table -> Update.
       3. Cost in table is for direct path (e.g. information outdated) -> Update.
   */
-  if (neighbor || 
-    neighbor.cost > new_cost ||
-    neighbor.dest_node == neighbor.next_node)
+  if (neighbor == NULL|| 
+    neighbor->cost > new_cost ||
+    neighbor->dest_node == neighbor->next_node)
   {
     // cerr << "Found neighbor: " << neighbor << endl;
     table.EditEntry(dest, Entry(dest, dest, new_cost));
@@ -230,8 +230,7 @@ Node *Node::GetNextHop(const Node *destination) const
   unsigned dest_num = destination->GetNumber();
   Entry dest_entry = table.GetEntry(dest_num);
 
-  Node next_node = Node(dest_entry.next_node, context, 0, 0);
-  return next_node;
+  return &Node(dest_entry.next_node, context, 0, 0);
 }
 
 Table *Node::GetRoutingTable() const
