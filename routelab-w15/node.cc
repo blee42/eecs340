@@ -149,17 +149,74 @@ ostream & Node::Print(ostream &os) const
 
 #if defined(DISTANCEVECTOR)
 
-void Node::LinkHasBeenUpdated(const Link *l)
+void Node::LinkHasBeenUpdated(const Link *link)
 {
-  // update our table
-  // send out routing mesages
-  cerr << *this << ": Link Update: " << *l << endl;
+  cerr << *this << ": Link Update: " << *link << endl;
+
+  unsigned dest = link->GetDest();
+  double new_cost = link->GetLatency();
+  Entry* neighbor = table.GetEntry(dest);
+
+  /*
+    Cases:
+      1. No entry currently in the table -> Make one.
+      2. Cost directly to neighbor is lower than cost current in table -> Update.
+      3. Cost in table is for direct path (e.g. information outdated) -> Update.
+  */
+  if (neighbor == NULL || 
+    neighbor->cost > new_cost ||
+    neighbor->dest == neighbor->next)
+  {
+    cerr << "Found neighbor: " << neighbor << endl;
+    table.EditEntry(dest, Entry(dest, dest, new_cost));
+
+    // Making a new Node a good idea? Look for GetNode by dest or something...
+    // ignoring bw and l because they're unimportant
+    SendToNeighbors(new RoutingMessage(*this, Node(dest, context, 0, 0), new_cost));
+    // PropagateChanges();
+  }
 }
 
 
-void Node::ProcessIncomingRoutingMessage(const RoutingMessage *m)
+void Node::ProcessIncomingRoutingMessage(const RoutingMessage *message)
 {
+  message.Print(cerr);
 
+  // unpack data
+  Node src = message->src;
+  unsigned src_num = src.GetNumber();
+  Node dest = message->dest;
+  unsigned dest_num = dest.GetNumber();
+  double sd_cost = message->cost;
+
+  // unnecessary routing message received
+  if (dest_num == GetNumber()) {
+    return;
+  }
+
+  // check this node's distance to the destination in message
+  Entry* src_entry = table.getEntry(src_num);
+  Entry* dest_entry = table.getEntry(dest_num);
+
+  // compare that with this node's distance to the source in the message + cost in the message
+
+  /* Cases:
+      1. src_entry nonexistent -> no updates possible.
+      2. dest_entry nonexistent -> definitely update.
+      3. cost in table > new cost -> update.
+  */
+  if (src_entry == NULL) {
+    return;
+  }
+  else if (dest_entry == NULL || 
+    dest_entry->cost > src_entry->cost + sd_cost) 
+  {
+    double new_cost = src_entry->cost + sd_cost;
+    table.EditEntry(dest_num, Entry(dest_num, src_num, new_cost));
+
+    SendToNeighbors(new RoutingMessage(*this, Node(dest, context, 0, 0), new_cost));
+    // PropagateChanges();
+  }
 }
 
 void Node::TimeOut()
@@ -170,11 +227,21 @@ void Node::TimeOut()
 
 Node *Node::GetNextHop(const Node *destination) const
 {
+  unsigned dest_num = destination->GetNumber();
+  Entry* dest_entry = table.getEntry(dest_num);
+
+  return Node(dest_entry->next_node, context, 0, 0);
 }
 
 Table *Node::GetRoutingTable() const
 {
+  return table;
 }
+
+// void Node::PropagateChanges() 
+// {
+
+// }
 
 
 ostream & Node::Print(ostream &os) const

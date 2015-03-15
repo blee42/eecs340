@@ -29,33 +29,26 @@ public:
 #include <deque>
 
 
-/*
-	Each row is for getting TO a destination. Each column is
-	the via path.
-
-	For some node A:
-	deque		via B			via C 			via D
-	  |		RowLL (to B) -> RowLL (to B) -> RowLL (to B)
-	  |		RowLL (to C) -> RowLL (to C) -> RowLL (to C)
-	  v     RowLL (to D) -> RowLL (to D) -> RowLL (to D)
-*/
-struct RowLL {
+// Each entry is the shortest path to the destination node that's
+// not a direct neighbor.
+struct Entry {
 private:
-	unsigned dest_node;
-	unsigned next_entry;
+	unsigned dest_node; // end goal
+	unsigned next_node; // node to immediately forward to 
 	double cost;
 	ostream & Print(ostream &os) const;
 
-	RowLL(unsigned dest, unsigned next, double c);
+	Entry(unsigned dest, unsigned next, double c);
 };
 
 class Table {
 private:
-	deque<RowLL> contents;
+	deque<Entry> contents;
 public:
-	deque<RowLL> GetRows();
-	deque<RowLL> GetDestinationRow(unsigned dest);
-	void AddRowEntry(unsigned dest, RowLL entry);
+	deque<Entry> GetEntrys();
+	deque<Entry> GetDestinationEntry(unsigned dest);
+	Entry GetEntry(unsigned dest);
+	void EditEntry(unsigned dest, Entry entry);
 	ostream & Print(ostream &os) const;
 };
 #endif
