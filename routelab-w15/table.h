@@ -46,7 +46,7 @@ private:
 public:
 	deque<Entry> GetEntrys();
 	deque<Entry> GetDestinationEntry(unsigned dest);
-	Entry GetEntry(unsigned dest);
+	Entry* GetEntry(unsigned dest);
 	void EditEntry(unsigned dest, Entry entry);
 	ostream & Print(ostream &os) const;
 };
