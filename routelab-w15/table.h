@@ -52,6 +52,6 @@ public:
 };
 #endif
 
-inline ostream & operator<<(ostream &os, const Table &t) { return t.Print(os);}
+inline ostream & operator << (ostream &os, const Table &t) { return t.Print(os);}
 
 #endif
