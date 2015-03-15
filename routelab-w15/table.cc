@@ -64,7 +64,7 @@ ostream & Table::Print(ostream &os) const
 {
   os << "Table(rows={";
   for (deque<Entry>::const_iterator entry = contents.begin(); entry != contents.end(); entry++) { 
-    os << (*entry) << ", ";
+    os << entry << ", ";
   }
   os << "})";
   return os;
