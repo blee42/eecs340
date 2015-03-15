@@ -181,6 +181,7 @@ void Node::LinkHasBeenUpdated(const Link *link)
 void Node::ProcessIncomingRoutingMessage(const RoutingMessage *message)
 {
   // message.Print(cerr);
+  cerr << *this << ": Got Message: " << *message << endl;
 
   // unpack data
   Node src = message->src;
