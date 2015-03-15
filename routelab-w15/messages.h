@@ -26,6 +26,9 @@ struct RoutingMessage {
 
 #if defined(DISTANCEVECTOR)
 struct RoutingMessage {
+  Node src;
+  Node dest;
+  double cost;
 
   RoutingMessage();
   RoutingMessage(const RoutingMessage &rhs);

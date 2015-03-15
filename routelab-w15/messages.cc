@@ -38,7 +38,12 @@ RoutingMessage::RoutingMessage()
 {}
 
 
-RoutingMessage::RoutingMessage(const RoutingMessage &rhs)
+RoutingMessage::RoutingMessage(const RoutingMessage &rhs) :
+  src(rhs.src), dest(rhs.dest), cost(rhs.cost)
+{}
+
+RoutingMessage::RoutingMessage(Node s, Node d, double c) :
+  src(s), dest(d), cost(c)
 {}
 
 #endif
