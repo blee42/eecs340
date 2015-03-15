@@ -8,19 +8,19 @@ using namespace std;
 
 #if defined(GENERIC)
 class Table {
-  // Students should write this class
+	// Students should write this class
 
- public:
-  ostream & Print(ostream &os) const;
+public:
+	ostream & Print(ostream &os) const;
 };
 #endif
 
 
 #if defined(LINKSTATE)
 class Table {
-  // Students should write this class
- public:
-  ostream & Print(ostream &os) const;
+	// Students should write this class
+public:
+	ostream & Print(ostream &os) const;
 };
 #endif
 
@@ -28,9 +28,22 @@ class Table {
 
 #include <deque>
 
+struct RowLL {
+private:
+	unsigned dest_node;
+	unsigned next_entry;
+	double cost;
+	ostream & Print(ostream &os) const;
+
+	RowLL(unsigned dest, unsigned next, double c);
+};
+
 class Table {
- public:
-  ostream & Print(ostream &os) const;
+private:
+	deque<RowLL> contents;
+public:
+	deque<RowLL> 
+	ostream & Print(ostream &os) const;
 };
 #endif
 

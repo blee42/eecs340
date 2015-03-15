@@ -19,7 +19,7 @@ class Node {
 
   ostream & Print(ostream &os) const;
 
-}
+};
 
 inline ostream & operator<<(ostream &os, const Node &n) { return n.Print(os);}
 
