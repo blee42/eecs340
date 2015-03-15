@@ -48,7 +48,7 @@ void Node::SendToNeighbors(const RoutingMessage *message)
 
 void Node::SendToNeighbor(const Node *dest, const RoutingMessage *message)
 {
-  context->SendToNeighbor(this, dest, message)
+  context->SendToNeighbor(this, dest, message);
 }
 
 deque<Node*> *Node::GetNeighbors()
@@ -155,7 +155,7 @@ void Node::LinkHasBeenUpdated(const Link *link)
 
   unsigned dest = link->GetDest();
   double new_cost = link->GetLatency();
-  Entry* neighbor = table.GetEntry(dest);
+  Entry neighbor = table.GetEntry(dest);
 
   /*
     Cases:
@@ -165,7 +165,7 @@ void Node::LinkHasBeenUpdated(const Link *link)
   */
   if (neighbor == NULL || 
     neighbor->cost > new_cost ||
-    neighbor->dest == neighbor->next)
+    neighbor->dest_node == neighbor->next_node)
   {
     cerr << "Found neighbor: " << neighbor << endl;
     table.EditEntry(dest, Entry(dest, dest, new_cost));
@@ -180,7 +180,7 @@ void Node::LinkHasBeenUpdated(const Link *link)
 
 void Node::ProcessIncomingRoutingMessage(const RoutingMessage *message)
 {
-  message.Print(cerr);
+  // message.Print(cerr);
 
   // unpack data
   Node src = message->src;
@@ -195,8 +195,8 @@ void Node::ProcessIncomingRoutingMessage(const RoutingMessage *message)
   }
 
   // check this node's distance to the destination in message
-  Entry* src_entry = table.getEntry(src_num);
-  Entry* dest_entry = table.getEntry(dest_num);
+  Entry* src_entry = table.GetEntry(src_num);
+  Entry* dest_entry = table.GetEntry(dest_num);
 
   // compare that with this node's distance to the source in the message + cost in the message
 
@@ -214,7 +214,7 @@ void Node::ProcessIncomingRoutingMessage(const RoutingMessage *message)
     double new_cost = src_entry->cost + sd_cost;
     table.EditEntry(dest_num, Entry(dest_num, src_num, new_cost));
 
-    SendToNeighbors(new RoutingMessage(*this, Node(dest, context, 0, 0), new_cost));
+    SendToNeighbors(new RoutingMessage(*this, Node(dest_num, context, 0, 0), new_cost));
     // PropagateChanges();
   }
 }
@@ -228,14 +228,15 @@ void Node::TimeOut()
 Node *Node::GetNextHop(const Node *destination) const
 {
   unsigned dest_num = destination->GetNumber();
-  Entry* dest_entry = table.getEntry(dest_num);
+  Entry* dest_entry = table.GetEntry(dest_num);
 
-  return Node(dest_entry->next_node, context, 0, 0);
+  Node* next_node = Node(dest_entry->next_node, context, 0, 0);
+  return next_node;
 }
 
 Table *Node::GetRoutingTable() const
 {
-  return table;
+  return *table;
 }
 
 // void Node::PropagateChanges() 

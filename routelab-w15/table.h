@@ -32,7 +32,6 @@ public:
 // Each entry is the shortest path to the destination node that's
 // not a direct neighbor.
 struct Entry {
-private:
 	unsigned dest_node; // end goal
 	unsigned next_node; // node to immediately forward to 
 	double cost;
