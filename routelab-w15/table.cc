@@ -63,8 +63,8 @@ void Table::EditEntry(unsigned dest, Entry new_entry) {
 ostream & Table::Print(ostream &os) const
 {
   os << "Table(entries={";
-  for (deque<Entry>::iterator entry = contents.begin(); entry != contents.end(); entry++) { 
-    // os << *entry << ", ";
+  for (deque<Entry>::const_iterator entry = contents.begin(); entry != contents.end(); entry++) { 
+    os << *entry << ", ";
   }
   os << "})";
   return os;
