@@ -19,19 +19,19 @@ Node & Node::operator=(const Node &rhs)
 }
 
 void Node::SetNumber(const unsigned n) 
-{ number=n;}
+{ number = n;}
 
 unsigned Node::GetNumber() const 
 { return number;}
 
 void Node::SetLatency(const double l)
-{ lat=l;}
+{ lat = l;}
 
 double Node::GetLatency() const 
 { return lat;}
 
 void Node::SetBW(const double b)
-{ bw=b;}
+{ bw = b;}
 
 double Node::GetBW() const 
 { return bw;}
@@ -41,13 +41,14 @@ Node::~Node()
 
 // Implement these functions  to post an event to the event queue in the event simulator
 // so that the corresponding node can recieve the ROUTING_MESSAGE_ARRIVAL event at the proper time
-void Node::SendToNeighbors(const RoutingMessage *m)
+void Node::SendToNeighbors(const RoutingMessage *message)
 {
+  context->SendToNeighbors(this, message);
 }
 
-void Node::SendToNeighbor(const Node *n, const RoutingMessage *m)
+void Node::SendToNeighbor(const Node *dest, const RoutingMessage *message)
 {
-
+  context->SendToNeighbor(this, dest, message)
 }
 
 deque<Node*> *Node::GetNeighbors()
@@ -140,7 +141,7 @@ Table *Node::GetRoutingTable() const
 
 ostream & Node::Print(ostream &os) const
 {
-  os << "Node(number="<<number<<", lat="<<lat<<", bw="<<bw<<")";
+  os << "Node(number=" << number << ", lat=" << lat << ", bw=" << bw << ")";
   return os;
 }
 #endif
@@ -152,7 +153,7 @@ void Node::LinkHasBeenUpdated(const Link *l)
 {
   // update our table
   // send out routing mesages
-  cerr << *this<<": Link Update: "<<*l<<endl;
+  cerr << *this << ": Link Update: " << *l << endl;
 }
 
 
@@ -163,7 +164,7 @@ void Node::ProcessIncomingRoutingMessage(const RoutingMessage *m)
 
 void Node::TimeOut()
 {
-  cerr << *this << " got a timeout: ignored"<<endl;
+  cerr << *this << " got a timeout: ignored" << endl;
 }
 
 
@@ -178,7 +179,7 @@ Table *Node::GetRoutingTable() const
 
 ostream & Node::Print(ostream &os) const
 {
-  os << "Node(number="<<number<<", lat="<<lat<<", bw="<<bw;
+  os << "Node(number=" << number << ", lat=" << lat << ", bw=" << bw;
   return os;
 }
 #endif

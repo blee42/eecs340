@@ -25,4 +25,21 @@ ostream & RowLL::Print(ostream &os) const
 	return os;
 }
 
+deque<RowLL> Table::GetRows() {
+    return contents;
+}
+
+deque<RowLL>::iterator Table::GetDestinationRow(unsigned dest) {
+    for(deque<RowLL>::iterator entry = contents.begin(); entry != contents.end(); entry++){
+      if(entry->dest_node == dest){
+        return entry;
+      } 
+    }
+    return contents.end();
+}
+
+void Table::AddRowEntry(unsigned dest, RowLL entry) {
+    deque<RowLL>::iterator dest_row = GetDestinationRow(dest);
+}
+
 #endif
