@@ -45,7 +45,7 @@ private:
 	deque<Entry> contents;
 public:
 	deque<Entry> GetEntrys();
-	deque<Entry> GetDestinationEntry(unsigned);
+	deque<Entry>::iterator GetDestinationEntry(unsigned);
 	Entry* GetEntry(unsigned);
 	void EditEntry(unsigned, Entry);
 	ostream & Print(ostream &os) const;
