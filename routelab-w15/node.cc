@@ -155,7 +155,7 @@ void Node::LinkHasBeenUpdated(const Link *link)
 
   unsigned dest = link->GetDest();
   double new_cost = link->GetLatency();
-  Entry* neighbor = &table.GetEntry(dest);
+  Entry* neighbor = table.GetEntry(dest);
 
   /*
     Cases:
@@ -195,8 +195,8 @@ void Node::ProcessIncomingRoutingMessage(const RoutingMessage *message)
   }
 
   // check this node's distance to the destination in message
-  Entry* src_entry = &table.GetEntry(src_num);
-  Entry* dest_entry = &table.GetEntry(dest_num);
+  Entry* src_entry = table.GetEntry(src_num);
+  Entry* dest_entry = table.GetEntry(dest_num);
 
   // compare that with this node's distance to the source in the message + cost in the message
 
