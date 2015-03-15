@@ -40,7 +40,7 @@ struct Entry {
 	Entry(unsigned dest, unsigned next, double c);
 };
 
-inline ostream & operator<<(ostream &os, const Entry &e) { return r.Print(os);}
+inline ostream & operator<<(ostream &os, const Entry &e) { return e.Print(os);}
 
 class Table {
 private:
