@@ -60,4 +60,14 @@ void Table::EditEntry(unsigned dest, Entry new_entry) {
     }
 }
 
+ostream & Table::Print(ostream &os) const 
+{
+  os << "Table(rows={";
+  for (deque<Row>::const_iterator i = m.begin(); i != m.end(); i++) { 
+    os << (*i) << ", ";
+  }
+  os << "})";
+  return os;
+}
+
 #endif
