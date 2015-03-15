@@ -228,14 +228,14 @@ void Node::TimeOut()
 Node *Node::GetNextHop(const Node *destination) const
 {
   unsigned dest_num = destination->GetNumber();
-  Entry dest_entry = table.GetEntry(dest_num);
+  Entry* dest_entry = table.GetEntry(dest_num);
 
-  return &Node(dest_entry.next_node, context, 0, 0);
+  return &Node(dest_entry->next_node, context, 0, 0);
 }
 
 Table *Node::GetRoutingTable() const
 {
-  return *table;
+  return new Table(table);
 }
 
 // void Node::PropagateChanges() 
