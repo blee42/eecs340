@@ -227,8 +227,8 @@ Node *Node::GetNextHop(const Node *destination) const
           if (distance->dest == entry->dest_node &&
             distance->cost > compare_cost)
           {
-            distance.predecessor = min_next;
-            distance.cost = compare_cost;
+            distance->predecessor = min_next;
+            distance->cost = compare_cost;
           }
         }
       }
