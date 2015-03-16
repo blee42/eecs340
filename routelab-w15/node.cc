@@ -116,9 +116,10 @@ void Node::LinkHasBeenUpdated(const Link *l)
 }
 
 
-void Node::ProcessIncomingRoutingMessage(const RoutingMessage *m)
+void Node::ProcessIncomingRoutingMessage(const RoutingMessage *message)
 {
-  cerr << *this << " Routing Message: "<<*m;
+  cerr << *this << " Routing Message: "<<*message;
+  if 
 }
 
 void Node::TimeOut()
@@ -228,6 +229,7 @@ void Node::TimeOut()
 
 Node *Node::GetNextHop(const Node *destination) const
 {
+  cerr << "Next Hop, Destination: " *destination << endl;
   unsigned dest_num = destination->GetNumber();
   Entry* dest_entry = GetRoutingTable()->GetEntry(dest_num);
 
