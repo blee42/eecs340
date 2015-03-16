@@ -80,7 +80,7 @@ deque<Entry> Table::GetEntrys() {
 }
 
 deque<Entry>::iterator Table::GetDestinationEntry(unsigned dest) {
-    cerr << "GET DESTINATION, CALLED WITH: " << dest;
+    cerr << "GET DESTINATION, CALLED WITH: " << dest << endl;
     for(deque<Entry>::iterator entry = contents.begin(); entry != contents.end(); entry++){
       if(entry->dest_node == dest){
         return entry;
@@ -90,6 +90,7 @@ deque<Entry>::iterator Table::GetDestinationEntry(unsigned dest) {
 }
 
 Entry* Table::GetEntry(unsigned dest) {
+  cerr << "GET ENTRY, CALLED WITH: " << dest << endl;
   deque<Entry>::iterator entry = GetDestinationEntry(dest);
   if (entry != contents.end()) {
     Entry* res = new Entry(entry->dest_node, entry->next_node, entry->cost);
