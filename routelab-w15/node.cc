@@ -283,7 +283,7 @@ Table *Node::GetRoutingTable() const
 void Node::UpdatesFromNeighbors() 
 {
   deque<Entry> entries = table.GetEntrys();
-  deque<Node*> neighbors = GetNeighbors();
+  deque<Node*>* neighbors = GetNeighbors();
 
   for(deque<Entry>::iterator entry = entries.begin(); entry != entries.end(); entry++)
   {
