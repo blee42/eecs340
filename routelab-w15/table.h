@@ -19,7 +19,7 @@ public:
 
 #if defined(LINKSTATE)
 
-#include <vector>
+#include <deque>
 
 struct Entry {
 	unsigned src_node;
