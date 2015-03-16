@@ -158,7 +158,7 @@ void Node::ProcessIncomingRoutingMessage(const RoutingMessage *m)
   if (message_seq_n > seq_num)
   {
     // recalculate table
-    table.SetContents(message_table.GetContents());
+    table.SetContents(*message_table.GetContents());
     SendToNeighbors(m);
   }
 }
@@ -170,7 +170,7 @@ void Node::TimeOut()
 
 Node *Node::GetNextHop(const Node *destination) const
 {
-  deque<Entry> contents = table.GetContents();
+  deque<Entry> contents = *table.GetContents();
   unsigned src = GetNumber();
   unsigned dest_n = destination->GetNumber();
   deque<Entry> neighbors;
@@ -187,21 +187,29 @@ Node *Node::GetNextHop(const Node *destination) const
   {
     if (entry->src_node == src)
     {
+<<<<<<< HEAD
       DistanceEntry new_distance;
       new_distance->cost = entry->cost;
       new_distance->predecessor = pred_node;
       new_distance->dest = dest_n;
       distances.push_back(new_distance);
+=======
+      distances.push_back(DistanceEntry(entry->cost, pred_node, dest_n));
+>>>>>>> 6032ebd41dc4bd5bc663fd7c438e81fbdcfd5e04
     }
     else 
     {
       remaining_nodes.push_back(entry->src_node);
+<<<<<<< HEAD
 
       DistanceEntry new_distance;
       new_distance->cost = std::numeric_limits<double>::infinity();
       new_distance->predecessor = pred_node;
       new_distance->dest = dest_n;
       distances.push_back(new_distance);
+=======
+      distances.push_back(DistanceEntry(std::numeric_limits<double>::infinity(), pred_node, dest_n));
+>>>>>>> 6032ebd41dc4bd5bc663fd7c438e81fbdcfd5e04
     }
   }
 
@@ -236,8 +244,8 @@ Node *Node::GetNextHop(const Node *destination) const
           if (distance->dest == entry->dest_node &&
             distance->cost > compare_cost)
           {
-            distance.predecessor = min_next;
-            distance.cost = compare_cost;
+            distance->predecessor = min_next;
+            distance->cost = compare_cost;
           }
         }
       }

@@ -31,8 +31,8 @@ struct Entry {
 
 struct DistanceEntry {
 	double cost;
-	unsigned dest;
 	unsigned predecessor;
+	unsigned dest;
 	ostream & Print(ostream &os) const;
 	
 	DistanceEntry(double c, unsigned p, unsigned d);
