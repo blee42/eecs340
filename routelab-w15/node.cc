@@ -188,9 +188,9 @@ Node *Node::GetNextHop(const Node *destination) const
     if (entry->src_node == src)
     {
       DistanceEntry new_distance;
-      new_distance->cost = entry->cost;
-      new_distance->predecessor = pred_node;
-      new_distance->dest = dest_n;
+      new_distance.cost = entry->cost;
+      new_distance.predecessor = pred_node;
+      new_distance.dest = dest_n;
       distances.push_back(new_distance);
     }
     else 
@@ -198,14 +198,14 @@ Node *Node::GetNextHop(const Node *destination) const
       remaining_nodes.push_back(entry->src_node);
 
       DistanceEntry new_distance;
-      new_distance->cost = std::numeric_limits<double>::infinity();
-      new_distance->predecessor = pred_node;
-      new_distance->dest = dest_n;
+      new_distance.cost = std::numeric_limits<double>::infinity();
+      new_distance.predecessor = pred_node;
+      new_distance.dest = dest_n;
       distances.push_back(new_distance);
     }
   }
 
-  while(remaining_nodes.size > 0)
+  while(&remaining_nodes.size > 0)
   {
     // find minimum in dist
     double min_cost = std::numeric_limits<double>::infinity();
