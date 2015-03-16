@@ -130,10 +130,6 @@ ostream & Node::Print(ostream &os) const
 #if defined(LINKSTATE)
 #include <limits>
 
-DistanceEntry::DistanceEntry(double c, unsigned p, unsigned d) :
-  cost(c), predecessor(p), dest(d)
-{}
-
 void Node::LinkHasBeenUpdated(const Link *link)
 {
   cerr << *this<<": Link Update: "<<*link<<endl;
@@ -159,7 +155,7 @@ void Node::ProcessIncomingRoutingMessage(const RoutingMessage *m)
   if (message_seq_n > seq_num)
   {
     // recalculate table
-    table.SetContents(*message_table.GetContents());
+    table.SetContents(message_table.GetContents());
     SendToNeighbors(m);
   }
 }
@@ -171,7 +167,7 @@ void Node::TimeOut()
 
 Node *Node::GetNextHop(const Node *destination) const
 {
-  deque<Entry> contents = *GetRoutingTable()->GetContents();
+  deque<Entry> contents = GetRoutingTable()->GetContents();
   unsigned src = GetNumber();
   unsigned dest_n = destination->GetNumber();
   deque<Entry> neighbors;

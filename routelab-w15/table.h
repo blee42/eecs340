@@ -44,7 +44,7 @@ class Table {
 private:
 	deque<Entry> contents;
 public:
-	deque<Entry>* GetContents();
+	deque<Entry> GetContents();
 	void SetContents(deque<Entry> new_contents);
 	Entry* GetEntry(unsigned src, unsigned dest);
 	void EditEntry(unsigned src, unsigned dest, Entry new_entry);
