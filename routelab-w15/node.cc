@@ -130,10 +130,6 @@ ostream & Node::Print(ostream &os) const
 #if defined(LINKSTATE)
 #include <limits>
 
-DistanceEntry::DistanceEntry(double c, unsigned p, unsigned d) :
-  cost(c), predecessor(p), dest(d)
-{}
-
 void Node::LinkHasBeenUpdated(const Link *link)
 {
   cerr << *this<<": Link Update: "<<*link<<endl;
