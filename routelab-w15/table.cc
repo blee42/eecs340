@@ -31,12 +31,12 @@ ostream & DistanceEntry::Print(ostream &os) const
   return os;
 }
 
-deque<Entry>* Table::GetContents()
+deque<Entry> Table::GetContents()
 {
   return contents;
 }
 
-void SetContents(deque<Entry> new_contents)
+void Table::SetContents(deque<Entry> new_contents)
 {
   this->contents = new_contents;
 }
