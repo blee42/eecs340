@@ -3,7 +3,7 @@
 #include "error.h"
 
 #if defined(LINKSTATE)
-Node::Node(const unsigned n, SimulationContext *c, double b, double l) : 
+Node::Node(const unsigned n, SimulationContext *c, double b, double l, unsigned sq_n) : 
     number(n), context(c), bw(b), lat(l), seq_num(0) 
 {}
 
