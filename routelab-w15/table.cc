@@ -21,7 +21,7 @@ ostream & Entry::Print(ostream &os) const
   return os;
 }
 
-DistanceEntry::DistanceEntry(double c, unsigned p, double d) :
+DistanceEntry::DistanceEntry(double c, unsigned p, unsigned d) :
   cost(c), predecessor(p), dest(d)
 {}
 
@@ -38,7 +38,7 @@ deque<Entry>* Table::GetContents()
 
 void SetContents(deque<Entry> new_contents)
 {
-  contents = new_contents;
+  this->contents = new_contents;
 }
 
 Entry* Table::GetEntry(unsigned src, unsigned dest)
