@@ -64,10 +64,10 @@ void Table::EditEntry(unsigned src, unsigned dest, Entry new_entry)
       entry->cost = new_entry.cost;
       return;
     }
-  }
-  else
-  {
-    contents.push_back(new_entry);
+    else
+    {
+      contents.push_back(new_entry);
+    }
   }
 }
 
