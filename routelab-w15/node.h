@@ -25,14 +25,6 @@ class Node {
 #if defined(LINKSTATE)
   unsigned seq_num;
   Table table;
-
-  struct DistanceEntry {
-    double cost;
-    unsigned dest;
-    unsigned predecessor;
-    ostream & Print(ostream &os) const;
-    DistanceEntry(double c, unsigned p, unsigned d);
-  };
 #endif
 
 #if defined(DISTANCEVECTOR)

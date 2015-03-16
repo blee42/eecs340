@@ -8,7 +8,7 @@ Node::Node(const unsigned n, SimulationContext *c, double b, double l) :
 {}
 
 Node::Node(const Node &rhs) : 
-  number(rhs.number), context(rhs.context), bw(rhs.bw), lat(rhs.lat, seq_num(rhs.seq_num)) {}
+  number(rhs.number), context(rhs.context), bw(rhs.bw), lat(rhs.lat), seq_num(rhs.seq_num) {}
 #endif
 
 #if defined(GENERIC)

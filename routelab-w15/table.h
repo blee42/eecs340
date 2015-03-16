@@ -35,7 +35,7 @@ class Table {
 private:
 	deque<Entry> contents;
 public:
-	deque<Entry> GetContents();
+	deque<Entry>* GetContents();
 	void SetContents(deque<Entry> new_contents);
 	Entry* GetEntry(unsigned src, unsigned dest);
 	void EditEntry(unsigned src, unsigned dest, Entry new_entry);
@@ -56,6 +56,14 @@ struct Entry {
 	double cost;
 	ostream & Print(ostream &os) const;
 	Entry(unsigned dest, unsigned next, double c);
+};
+
+struct DistanceEntry {
+	double cost;
+	unsigned dest;
+	unsigned predecessor;
+	ostream & Print(ostream &os) const;
+	DistanceEntry(double c, unsigned p, unsigned d);
 };
 
 inline ostream & operator<<(ostream &os, const Entry &e) { return e.Print(os);}
