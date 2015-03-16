@@ -213,7 +213,7 @@ void Node::LinkHasBeenUpdated(const Link *link)
     // Making a new Node a good idea? Look for GetNode by dest or something...
     // ignoring bw and l because they're unimportant
     SendToNeighbors(new RoutingMessage(*this, Node(dest, context, 0, 0), new_cost));
-    // PropagateChanges();
+    UpdatesFromNeighbors();
   }
 }
 
@@ -256,7 +256,7 @@ void Node::ProcessIncomingRoutingMessage(const RoutingMessage *message)
     table.EditEntry(dest_num, Entry(dest_num, src_num, new_cost));
 
     SendToNeighbors(new RoutingMessage(*this, Node(dest_num, context, 0, 0), new_cost));
-    // PropagateChanges();
+    UpdatesFromNeighbors();
   }
 }
 
@@ -280,10 +280,40 @@ Table *Node::GetRoutingTable() const
   return new Table(table);
 }
 
-// void Node::PropagateChanges() 
-// {
+void Node::UpdatesFromNeighbors() 
+{
+  deque<Entry> entries = table.GetEntrys();
+  deque<Node*> neighbors = GetNeighbors();
 
-// }
+  for(deque<Entry>::iterator entry = entries.begin(); entry != entries.end(); entry++)
+  {
+    double lowest_cost_so_far = entry->cost;
+    unsigned next_so_far = entry->next_node;
+
+    for(deque<Node*>::iterator neighbor = neighbors.begin(); neighbor != neighbors.end(); neighbor++)
+    {
+      // should be no way this is null...
+      double neighbor_cost = table.GetEntry(neighbor->GetNumber())->cost;
+      Entry* neighbor_to_dest = neighbor->GetRoutingTable()->GetEntry(entry->dest_node);
+      if (neighbor_to_dest != NULL)
+      {
+        double this_cost = neighbor_cost + neighbor_to_dest->cost;
+        if (this_cost < lowest_cost_so_far)
+        {
+          lowest_cost_so_far = this_cost;
+          next_so_far = neighbor->GetNumber();
+        }
+      }
+    }
+    // cost was lowered. change and flood
+    if (lowest_cost_so_far != entry->cost)
+    {
+      table.EditEntry(entry->dest_node, Entry(entry->dest_node, next_so_far, lowest_cost_so_far));
+      SendToNeighbors(new RoutingMessage(*this, Node(entry->dest_node, context, 0, 0), lowest_cost_so_far));
+    }
+  }
+
+}
 
 
 ostream & Node::Print(ostream &os) const
