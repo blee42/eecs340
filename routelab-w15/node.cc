@@ -295,7 +295,7 @@ void Node::UpdatesFromNeighbors()
       // should be no way this is null...
       cerr << "ITERATING: " << endl;
       // cerr << (*neighbor)->GetNumber() << endl;
-      cerr << table.GetEntry((*neighbor)->GetNumber()) << endl;
+      cerr << table.GetEntry((*neighbor)->GetNumber())->cost << endl;
       // double neighbor_cost = table.GetEntry((*neighbor)->GetNumber())->cost;
       // cerr << 'Neighbor Cost: ' << neighbor_cost << endl;
       // Entry* neighbor_to_dest = (*neighbor)->GetRoutingTable()->GetEntry(entry->dest_node);
