@@ -216,8 +216,7 @@ Node *Node::GetNextHop(const Node *destination) const
       return new Node(min_next, NULL, 0, 0);
     }
     seen_nodes.push_back(min_next);
-    // remaining_nodes.erase(remove(remaining_nodes.begin(), remaining_nodes.end(), min_next), remaining_nodes.end());
-    remove(remaining_nodes.begin(), remaining_nodes.end(), min_next);
+    remaining_nodes.erase(std::remove(remaining_nodes.begin(), remaining_nodes.end(), min_next), remaining_nodes.end());
 
     for(deque<Entry>::iterator entry = contents.begin(); entry != contents.end(); entry++)
     {
