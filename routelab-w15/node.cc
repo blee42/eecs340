@@ -171,6 +171,7 @@ void Node::TimeOut()
 
 Node *Node::GetNextHop(const Node *destination) const
 {
+  deque<Entry> contents = table.GetContents();
   unsigned src = GetNumber();
   unsigned dest_n = destination->GetNumber();
   deque<Entry> neighbors;
@@ -178,9 +179,11 @@ Node *Node::GetNextHop(const Node *destination) const
   // find the least cost path (Dijkstra's)
   unsigned pred_node = src;
   deque<unsigned> seen_nodes;
+  vector<unsigned> remaining_nodes;
   deque<DistanceEntry> distances;
   seen_nodes.push_back(src);
   double cost, curent_cost, neigh_cost;
+
 
   // initlization
   for(deque<Entry>::iterator entry = contents.begin(); entry != contents.end(); entry++)
@@ -195,6 +198,8 @@ Node *Node::GetNextHop(const Node *destination) const
     }
     else 
     {
+      remaining_nodes.push_back(entry->src_node);
+
       DistanceEntry new_distance;
       new_distance->cost = std::numeric_limits<double>::infinity();
       new_distance->predecessor = pred_node;
@@ -203,46 +208,46 @@ Node *Node::GetNextHop(const Node *destination) const
     }
   }
 
-  // loop through all nodes
-  for(deque<Entry>::iterator current_node = contents.begin(); current_node != contents.end(); current_node++)
+  while(remaining_nodes.size > 0)
   {
-    // find out if current_node has been seen yet
-    if (find(seen_nodes.begin(), seen_nodes.end(), current_node) != seen_nodes.end())
+    // find minimum in dist
+    double min_cost = std::numeric_limits<double>::infinity();
+    unsigned min_next;
+    for(deque<DistanceEntry>::iterator distance = distances.begin(); distance != distances.end(); distance++)
     {
-      seen_nodes.push_back(current_node);
-
-      // if a neighbor
-      if (pred_node == current_node->GetNumber())
+      if (distance->cost < min_cost && find(seen_nodes.begin(), seen_nodes.end(), distance->dest) == seen_nodes.end())
       {
-        // find distance value for neighbor and current
-        for(deque<DistanceEntry>::iterator distance_node = distances.begin(); distance_node != distances.end(); distance_node++)
+        min_cost = distance->cost;
+        min_next = distance->dest;
+      }
+    }
+
+    if (min_next == dest_n)
+    {
+      return new Node(min_next, NULL, 0, 0, 0);
+    }
+    seen_nodes.push_back(min_next);
+    remaing_nodes.erase(remove(remaining_nodes.begin(), remaining_nodes.end(), min_next), remaining_nodes.end());
+
+    for(deque<Entry>::iterator entry = contents.begin(); entry != contents.end(); entry++)
+    {
+      if (entry->src_node == min_next)
+      {
+        double compare_cost = min_cost + entry->cost;
+        for(deque<DistanceEntry>::iterator distance = distances.begin(); distance != distances.end(); distance++)
         {
-          // current node cost
-          if (distance_node->dest == current_node->dest)
+          if (distance->dest == entry->dest_node &&
+            distance->cost > compare_cost)
           {
-            current_cost = distance_node->cost + current_node->cost;
-          }
-          else if (distance_node->dest == entry->dest)
-          {
-            neigh_cost = distance_node->cost;
+            distance->predecessor = min_next;
+            distance->cost = compare_cost;
           }
         }
-
-        cost = min(neigh_cost, current_cost);
-        DistanceEntry new_distance;
-        new_distance->cost = cost;
-        new_distance->predecessor = pred_node;
-        new_distance->dest = dest_n;
       }
     }
   }
 
-
-
-
-
-
-  return 0;
+  return NULL;
 }
 
 Table *Node::GetRoutingTable() const
