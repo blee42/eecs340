@@ -294,7 +294,8 @@ void Node::UpdatesFromNeighbors()
     {
       // should be no way this is null...
       cerr << "ITERATING: " << endl;
-      cerr << (*neighbor)->GetNumber() << endl;
+      // cerr << (*neighbor)->GetNumber() << endl;
+      cerr << table.GetEntry((*neighbor)->GetNumber()) << endl;
       // double neighbor_cost = table.GetEntry((*neighbor)->GetNumber())->cost;
       // cerr << 'Neighbor Cost: ' << neighbor_cost << endl;
       // Entry* neighbor_to_dest = (*neighbor)->GetRoutingTable()->GetEntry(entry->dest_node);
@@ -307,6 +308,7 @@ void Node::UpdatesFromNeighbors()
       //     next_so_far = (*neighbor)->GetNumber();
       //   }
       // }
+      cerr << "DONE!" << endl;
     }
     // cost was lowered. change and flood
     if (lowest_cost_so_far != entry->cost)
