@@ -27,7 +27,7 @@ DistanceEntry::DistanceEntry(double c, unsigned p, double d) :
 
 ostream & DistanceEntry::Print(ostream &os) const
 {
-  os << "DistanceEntry(src=" << src_node << ", dest=" << dest_node << ", cost=" << cost << ")";
+  // os << "DistanceEntry(src=" << src_node << ", dest=" << dest_node << ", cost=" << cost << ")";
   return os;
 }
 
