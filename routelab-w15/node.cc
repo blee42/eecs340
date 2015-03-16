@@ -293,7 +293,7 @@ void Node::UpdatesFromNeighbors()
     for(deque<Node*>::iterator neighbor = neighbors->begin(); neighbor != neighbors->end(); neighbor++)
     {
       // should be no way this is null...
-      cerr << 'hihihii' << endl;
+      cerr << *neighbor << endl;
       // double neighbor_cost = table.GetEntry((*neighbor)->GetNumber())->cost;
       // cerr << 'Neighbor Cost: ' << neighbor_cost << endl;
       // Entry* neighbor_to_dest = (*neighbor)->GetRoutingTable()->GetEntry(entry->dest_node);
