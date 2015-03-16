@@ -1,6 +1,7 @@
 #include "node.h"
 #include "context.h"
 #include "error.h"
+#include <algorithm>
 
 #if defined(LINKSTATE)
 Node::Node(const unsigned n, SimulationContext *c, double b, double l) : 
@@ -170,7 +171,7 @@ void Node::TimeOut()
 
 Node *Node::GetNextHop(const Node *destination) const
 {
-  deque<Entry> contents = *GetRoutingTable().GetContents();
+  deque<Entry> contents = *GetRoutingTable()->GetContents();
   unsigned src = GetNumber();
   unsigned dest_n = destination->GetNumber();
   deque<Entry> neighbors;
@@ -196,7 +197,7 @@ Node *Node::GetNextHop(const Node *destination) const
     }
   }
 
-  while(remaining_nodes.size > 0)
+  while(remaining_nodes.size() > 0)
   {
     // find minimum in dist
     double min_cost = std::numeric_limits<double>::infinity();
