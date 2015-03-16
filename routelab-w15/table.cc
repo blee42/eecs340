@@ -91,7 +91,9 @@ deque<Entry>::iterator Table::GetDestinationEntry(unsigned dest) {
 Entry* Table::GetEntry(unsigned dest) {
   deque<Entry>::iterator entry = GetDestinationEntry(dest);
   if (entry != contents.end()) {
-    return new Entry(entry->dest_node, entry->next_node, entry->cost);
+    Entry* res = new Entry(entry->dest_node, entry->next_node, entry->cost);
+    cerr << res;
+    return res;
   } 
   else {
     return NULL;
