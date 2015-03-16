@@ -80,6 +80,7 @@ deque<Entry> Table::GetEntrys() {
 }
 
 deque<Entry>::iterator Table::GetDestinationEntry(unsigned dest) {
+    cerr << "hihi" << endl;
     for(deque<Entry>::iterator entry = contents.begin(); entry != contents.end(); entry++){
       if(entry->dest_node == dest){
         return entry;
