@@ -92,7 +92,7 @@ Entry* Table::GetEntry(unsigned dest) {
   deque<Entry>::iterator entry = GetDestinationEntry(dest);
   if (entry != contents.end()) {
     Entry* res = new Entry(entry->dest_node, entry->next_node, entry->cost);
-    cerr << res;
+    cerr << *res;
     return res;
   } 
   else {
