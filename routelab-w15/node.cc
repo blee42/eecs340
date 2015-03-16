@@ -282,10 +282,10 @@ Table *Node::GetRoutingTable() const
 
 void Node::UpdatesFromNeighbors() 
 {
-  // deque<Entry> entries = table.GetEntrys();
-  // deque<Node*>* neighbors = GetNeighbors();
+  deque<Entry> entries = table.GetEntrys();
+  deque<Node*>* neighbors = GetNeighbors();
 
-  // for(deque<Entry>::iterator entry = entries.begin(); entry != entries.end(); entry++)
+  for(deque<Entry>::iterator entry = entries.begin(); entry != entries.end(); entry++)
   // {
   //   cerr << 'HI!' << endl;
   //   double lowest_cost_so_far = entry->cost;
@@ -312,7 +312,7 @@ void Node::UpdatesFromNeighbors()
   //     table.EditEntry(entry->dest_node, Entry(entry->dest_node, next_so_far, lowest_cost_so_far));
   //     SendToNeighbors(new RoutingMessage(*this, Node(entry->dest_node, context, 0, 0), lowest_cost_so_far));
   //   }
-  // }
+  }
 
 }
 
