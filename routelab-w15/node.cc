@@ -140,16 +140,15 @@ void Node::LinkHasBeenUpdated(const Link *link)
   unsigned src = GetNumber();
   unsigned dest = link->GetDest();
   double new_cost = link->GetLatency();
-  Entry* neighbor = table.GetEntry(src, dest);
 
-  Entry* new_entry = Entry(src, dest, new_cost);
+  Entry new_entry = Entry(src, dest, new_cost);
   table.EditEntry(src, dest, new_entry);
 
   SendToNeighbors(new RoutingMessage(seq_num+1, table));
 }
 
 
-void Node::ProcessIncomingRoutingMessage(const RoutingMessage *m
+void Node::ProcessIncomingRoutingMessage(const RoutingMessage *m)
 {
   cerr << *this << " Routing Message: "<<*m;
 
