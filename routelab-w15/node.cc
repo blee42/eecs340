@@ -2,16 +2,35 @@
 #include "context.h"
 #include "error.h"
 
-
+#if defined(LINKSTATE)
 Node::Node(const unsigned n, SimulationContext *c, double b, double l) : 
-    number(n), context(c), bw(b), lat(l) 
+    number(n), context(c), bw(b), lat(l), seq_num(0) 
 {}
 
-Node::Node() 
-{ throw GeneralException(); }
+Node::Node(const Node &rhs) : 
+  number(rhs.number), context(rhs.context), bw(rhs.bw), lat(rhs.lat, seq_num(rhs.seq_num)) {}
+#endif
+
+#if defined(GENERIC)
+Node::Node(const unsigned n, SimulationContext *c, double b, double l) : 
+    number(n), context(c), bw(b), lat(l)
+{}
 
 Node::Node(const Node &rhs) : 
   number(rhs.number), context(rhs.context), bw(rhs.bw), lat(rhs.lat) {}
+#endif
+
+#if defined(DISTANCEVECTOR)
+Node::Node(const unsigned n, SimulationContext *c, double b, double l) : 
+    number(n), context(c), bw(b), lat(l)
+{}
+
+Node::Node(const Node &rhs) : 
+  number(rhs.number), context(rhs.context), bw(rhs.bw), lat(rhs.lat) {}
+#endif
+
+Node::Node() 
+{ throw GeneralException(); }
 
 Node & Node::operator=(const Node &rhs) 
 {
@@ -110,15 +129,35 @@ ostream & Node::Print(ostream &os) const
 #if defined(LINKSTATE)
 
 
-void Node::LinkHasBeenUpdated(const Link *l)
+void Node::LinkHasBeenUpdated(const Link *link)
 {
-  cerr << *this<<": Link Update: "<<*l<<endl;
+  cerr << *this<<": Link Update: "<<*link<<endl;
+
+  unsigned src = GetNumber();
+  unsigned dest = link->GetDest();
+  double new_cost = link->GetLatency();
+  Entry* neighbor = table.GetEntry(src, dest);
+
+  Entry* new_entry = Entry(src, dest, new_cost);
+  table.EditEntry(src, dest, new_entry);
+
+  SendToNeighbors(new RoutingMessage(seq_num+1, table));
 }
 
 
 void Node::ProcessIncomingRoutingMessage(const RoutingMessage *m)
 {
   cerr << *this << " Routing Message: "<<*m;
+
+  unsigned message_seq_n = m->seq_num;
+  Table message_table = m->table;
+
+  if (message_seq_n > seq_num)
+  {
+    // recalculate table
+    table.SetContents(message_table.GetContents());
+    SendToNeighbors(m);
+  }
 }
 
 void Node::TimeOut()
