@@ -182,8 +182,6 @@ Node *Node::GetNextHop(const Node *destination) const
   vector<unsigned> remaining_nodes;
   deque<DistanceEntry> distances;
   seen_nodes.push_back(src);
-  double cost, curent_cost, neigh_cost;
-
 
   // initlization
   for(deque<Entry>::iterator entry = contents.begin(); entry != contents.end(); entry++)
@@ -239,8 +237,8 @@ Node *Node::GetNextHop(const Node *destination) const
           if (distance->dest == entry->dest_node &&
             distance->cost > compare_cost)
           {
-            distance->predecessor = min_next;
-            distance->cost = compare_cost;
+            distance.predecessor = min_next;
+            distance.cost = compare_cost;
           }
         }
       }
