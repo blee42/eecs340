@@ -188,6 +188,8 @@ ostream & Node::Print(ostream &os) const
 
 #if defined(DISTANCEVECTOR)
 
+void Node::UpdatesFromNeighbors();
+
 void Node::LinkHasBeenUpdated(const Link *link)
 {
   cerr << *this << ": Link Update: " << *link << endl;
