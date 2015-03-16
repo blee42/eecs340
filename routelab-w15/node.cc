@@ -298,7 +298,6 @@ void Node::UpdatesFromNeighbors()
       if (neighbor_entry != NULL)
       {
         double neighbor_cost = neighbor_entry->cost;
-        cerr << 'Neighbor Cost: ' << neighbor_cost << endl;
         Entry* neighbor_to_dest = (*neighbor)->GetRoutingTable()->GetEntry(entry->dest_node);
         if (neighbor_to_dest != NULL)
         {
