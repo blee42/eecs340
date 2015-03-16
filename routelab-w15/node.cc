@@ -293,22 +293,23 @@ void Node::UpdatesFromNeighbors()
     for(deque<Node*>::iterator neighbor = neighbors->begin(); neighbor != neighbors->end(); neighbor++)
     {
       // should be no way this is null...
-      cerr << "ITERATING: " << endl;
       // cerr << (*neighbor)->GetNumber() << endl;
-      cerr << table.GetEntry((*neighbor)->GetNumber()) << endl;
-      // double neighbor_cost = table.GetEntry((*neighbor)->GetNumber())->cost;
-      // cerr << 'Neighbor Cost: ' << neighbor_cost << endl;
-      // Entry* neighbor_to_dest = (*neighbor)->GetRoutingTable()->GetEntry(entry->dest_node);
-      // if (neighbor_to_dest != NULL)
-      // {
-      //   double this_cost = neighbor_cost + neighbor_to_dest->cost;
-      //   if (this_cost < lowest_cost_so_far)
-      //   {
-      //     lowest_cost_so_far = this_cost;
-      //     next_so_far = (*neighbor)->GetNumber();
-      //   }
-      // }
-      cerr << "DONE!" << endl;
+      Entry* neighbor_entry = table.GetEntry((*neighbor)->GetNumber());
+      if (neighbor_entry != NULL)
+      {
+        double neighbor_cost = neighbor_entry->cost;
+        cerr << 'Neighbor Cost: ' << neighbor_cost << endl;
+        Entry* neighbor_to_dest = (*neighbor)->GetRoutingTable()->GetEntry(entry->dest_node);
+        if (neighbor_to_dest != NULL)
+        {
+          double this_cost = neighbor_cost + neighbor_to_dest->cost;
+          if (this_cost < lowest_cost_so_far)
+          {
+            lowest_cost_so_far = this_cost;
+            next_so_far = (*neighbor)->GetNumber();
+          }
+        }
+      }
     }
     // cost was lowered. change and flood
     if (lowest_cost_so_far != entry->cost)
