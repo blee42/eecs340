@@ -170,7 +170,7 @@ void Node::TimeOut()
 
 Node *Node::GetNextHop(const Node *destination) const
 {
-  deque<Entry> contents = *table.GetContents();
+  deque<Entry> contents = *GetRoutingTable().GetContents();
   unsigned src = GetNumber();
   unsigned dest_n = destination->GetNumber();
   deque<Entry> neighbors;
