@@ -3,7 +3,7 @@
 #include "error.h"
 
 #if defined(LINKSTATE)
-Node::Node(const unsigned n, SimulationContext *c, double b, double l, unsigned sq_n) : 
+Node::Node(const unsigned n, SimulationContext *c, double b, double l) : 
     number(n), context(c), bw(b), lat(l), seq_num(0) 
 {}
 
@@ -212,7 +212,7 @@ Node *Node::GetNextHop(const Node *destination) const
 
     if (min_next == dest_n)
     {
-      return new Node(min_next, NULL, 0, 0, 0);
+      return new Node(min_next, NULL, 0, 0);
     }
     seen_nodes.push_back(min_next);
     remaining_nodes.erase(remove(remaining_nodes.begin(), remaining_nodes.end(), min_next), remaining_nodes.end());
