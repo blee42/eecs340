@@ -21,6 +21,16 @@ ostream & Entry::Print(ostream &os) const
   return os;
 }
 
+deque<Entry>* Table::GetContents()
+{
+  return contents;
+}
+
+void SetContents(deque<Entry> new_contents)
+{
+  contents = new_contents;
+}
+
 Entry* Table::GetEntry(unsigned src, unsigned dest)
 {
   for(deque<Entry>::iterator entry = contents.begin(); entry != contents.end(); entry++)
