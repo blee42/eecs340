@@ -208,7 +208,7 @@ void Node::LinkHasBeenUpdated(const Link *link)
   {
     // cerr << "Found neighbor: " << neighbor << endl;
     table.EditEntry(dest, Entry(dest, dest, new_cost));
-    cerr << *this << ": Current Table: " << table << endl;
+    // cerr << *this << ": Current Table: " << table << endl;
 
     // Making a new Node a good idea? Look for GetNode by dest or something...
     // ignoring bw and l because they're unimportant
@@ -221,6 +221,7 @@ void Node::LinkHasBeenUpdated(const Link *link)
 void Node::ProcessIncomingRoutingMessage(const RoutingMessage *message)
 {
   // message.Print(cerr);
+  cerr << *this << ": Received Message: " << *message << endl;
 
   // unpack data
   Node src = message->src;
