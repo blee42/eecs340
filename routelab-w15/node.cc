@@ -268,7 +268,7 @@ void Node::TimeOut()
 Node *Node::GetNextHop(const Node *destination) const
 {
   cerr << "Where's my hops" << endl;
-  cerr << "Next Hop, Destination: " *destination << endl;
+  cerr << "Next Hop, Destination: " << *destination << endl;
   unsigned dest_num = destination->GetNumber();
   Entry* dest_entry = GetRoutingTable()->GetEntry(dest_num);
 
