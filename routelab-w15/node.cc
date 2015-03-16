@@ -1,6 +1,7 @@
 #include "node.h"
 #include "context.h"
 #include "error.h"
+#include <algorithm>
 
 #if defined(LINKSTATE)
 Node::Node(const unsigned n, SimulationContext *c, double b, double l) : 
