@@ -127,7 +127,7 @@ ostream & Node::Print(ostream &os) const
 #endif
 
 #if defined(LINKSTATE)
-#define INFINITY
+#include <limits>
 
 DistanceEntry::DistanceEntry(double c, unsigned p, unsigned d) :
   cost(c), predecessor(p), dest(d)
@@ -192,16 +192,11 @@ Node *Node::GetNextHop(const Node *destination) const
     else 
     {
       remaining_nodes.push_back(entry->src_node);
-
-      DistanceEntry new_distance;
-      new_distance->cost = std::numeric_limits<double>::infinity();
-      new_distance->predecessor = pred_node;
-      new_distance->dest = dest_n;
       distances.push_back(DistanceEntry(std::numeric_limits<double>::infinity(), pred_node, dest_n));
     }
   }
 
-  while(remaining_nodes.size > 0)
+  while(&remaining_nodes.size > 0)
   {
     // find minimum in dist
     double min_cost = std::numeric_limits<double>::infinity();
@@ -220,7 +215,7 @@ Node *Node::GetNextHop(const Node *destination) const
       return new Node(min_next, NULL, 0, 0, 0);
     }
     seen_nodes.push_back(min_next);
-    remaing_nodes.erase(remove(remaining_nodes.begin(), remaining_nodes.end(), min_next), remaining_nodes.end());
+    remaining_nodes.erase(remove(remaining_nodes.begin(), remaining_nodes.end(), min_next), remaining_nodes.end());
 
     for(deque<Entry>::iterator entry = contents.begin(); entry != contents.end(); entry++)
     {
