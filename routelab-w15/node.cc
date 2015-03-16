@@ -287,6 +287,7 @@ void Node::UpdatesFromNeighbors()
 
   for(deque<Entry>::iterator entry = entries.begin(); entry != entries.end(); entry++)
   {
+    cerr << 'HI!' << endl;
     double lowest_cost_so_far = entry->cost;
     unsigned next_so_far = entry->next_node;
 
