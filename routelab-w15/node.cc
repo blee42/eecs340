@@ -127,7 +127,11 @@ ostream & Node::Print(ostream &os) const
 #endif
 
 #if defined(LINKSTATE)
+#define INFINITY
 
+DistanceEntry::DistanceEntry(double c, unsigned p, unsigned d) :
+  cost(c), predecessor(p), dest(d)
+{}
 
 void Node::LinkHasBeenUpdated(const Link *link)
 {
@@ -167,7 +171,77 @@ void Node::TimeOut()
 
 Node *Node::GetNextHop(const Node *destination) const
 {
-  // WRITE
+  unsigned src = GetNumber();
+  unsigned dest_n = destination->GetNumber();
+  deque<Entry> neighbors;
+
+  // find the least cost path (Dijkstra's)
+  unsigned pred_node = src;
+  deque<unsigned> seen_nodes;
+  deque<DistanceEntry> distances;
+  seen_nodes.push_back(src);
+  double cost, curent_cost, neigh_cost;
+
+  // initlization
+  for(deque<Entry>::iterator entry = contents.begin(); entry != contents.end(); entry++)
+  {
+    if (entry->src_node == src)
+    {
+      DistanceEntry new_distance;
+      new_distance->cost = entry->cost;
+      new_distance->predecessor = pred_node;
+      new_distance->dest = dest_n;
+      distances.push_back(new_distance);
+    }
+    else 
+    {
+      DistanceEntry new_distance;
+      new_distance->cost = std::numeric_limits<double>::infinity();
+      new_distance->predecessor = pred_node;
+      new_distance->dest = dest_n;
+      distances.push_back(new_distance);
+    }
+  }
+
+  // loop through all nodes
+  for(deque<Entry>::iterator current_node = contents.begin(); current_node != contents.end(); current_node++)
+  {
+    // find out if current_node has been seen yet
+    if (find(seen_nodes.begin(), seen_nodes.end(), current_node) != seen_nodes.end())
+    {
+      seen_nodes.push_back(current_node);
+
+      // if a neighbor
+      if (pred_node == current_node->GetNumber())
+      {
+        // find distance value for neighbor and current
+        for(deque<DistanceEntry>::iterator distance_node = distances.begin(); distance_node != distances.end(); distance_node++)
+        {
+          // current node cost
+          if (distance_node->dest == current_node->dest)
+          {
+            current_cost = distance_node->cost + current_node->cost;
+          }
+          else if (distance_node->dest == entry->dest)
+          {
+            neigh_cost = distance_node->cost;
+          }
+        }
+
+        cost = min(neigh_cost, current_cost);
+        DistanceEntry new_distance;
+        new_distance->cost = cost;
+        new_distance->predecessor = pred_node;
+        new_distance->dest = dest_n;
+      }
+    }
+  }
+
+
+
+
+
+
   return 0;
 }
 
