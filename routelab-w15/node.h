@@ -66,6 +66,9 @@ class Node {
   //
   // Students will WRITE THESE
   //
+  #if defined(DISTANCEVECTOR)
+    void UpdatesFromNeighbors();
+  #endif
   virtual void LinkHasBeenUpdated(const Link *l);
   virtual void ProcessIncomingRoutingMessage(const RoutingMessage *m);
   virtual void TimeOut();
