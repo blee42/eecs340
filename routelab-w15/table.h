@@ -10,6 +10,7 @@ using namespace std;
 class Table {
 	// Students should write this class
 
+
 public:
 	ostream & Print(ostream &os) const;
 };
@@ -17,9 +18,25 @@ public:
 
 
 #if defined(LINKSTATE)
+
+#include <vector>
+
+struct Entry {
+	unsigned src_node;
+	unsigned dest_node;
+	double cost;
+	ostream & Print(ostream &os) const;
+	Entry(unsigned src, unsigned dest, double c);
+};
+
+inline ostream & operator<<(ostream &os, const Entry &e) { return e.Print(os);}
+
 class Table {
-	// Students should write this class
+private:
+	deque<Entry> contents;
 public:
+	deque<Entry> GetEntry(unsigned src, unsigned dest);
+	void EditEntry(unsigned src, unsigned dest, Entry new_entry);
 	ostream & Print(ostream &os) const;
 };
 #endif
@@ -36,7 +53,6 @@ struct Entry {
 	unsigned next_node; // node to immediately forward to 
 	double cost;
 	ostream & Print(ostream &os) const;
-
 	Entry(unsigned dest, unsigned next, double c);
 };
 

@@ -15,10 +15,13 @@ struct RoutingMessage {
 
 #if defined(LINKSTATE)
 struct RoutingMessage {
+  unsigned seq_num;
+  Table table;
 
   RoutingMessage();
   RoutingMessage(const RoutingMessage &rhs);
   RoutingMessage &operator=(const RoutingMessage &rhs);
+  RoutingMessage(unsigned seq_n, Table t);
 
   ostream & Print(ostream &os) const;
 };
@@ -38,7 +41,6 @@ struct RoutingMessage {
   ostream & Print(ostream &os) const;
 };
 #endif
-
 
 inline ostream & operator<<(ostream &os, const RoutingMessage &m) { return m.Print(os);}
 

@@ -14,6 +14,7 @@ ostream &RoutingMessage::Print(ostream &os) const
 
 ostream &RoutingMessage::Print(ostream &os) const
 {
+  os << "RoutingMessage(src=" << src << ", dest=" << dest << ", cost=" << cost << ")";
   return os;
 }
 
@@ -22,6 +23,11 @@ RoutingMessage::RoutingMessage()
 
 
 RoutingMessage::RoutingMessage(const RoutingMessage &rhs)
+  seq_num(rhs.seq_num), table(rhs.table)
+{}
+
+RoutingMessage::RoutingMessage(unsigned seq_n, Table t) :
+  seq_num(seq_n), table(t)
 {}
 
 #endif
@@ -31,6 +37,7 @@ RoutingMessage::RoutingMessage(const RoutingMessage &rhs)
 
 ostream &RoutingMessage::Print(ostream &os) const
 {
+  os << "RoutingMessage(src=" << src << ", dest=" << dest << ", cost=" << cost << ")";
   return os;
 }
 

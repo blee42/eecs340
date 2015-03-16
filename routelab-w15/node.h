@@ -23,6 +23,8 @@ class Node {
   double   lat;
 
 #if defined(LINKSTATE)
+  unsigned seq_num;
+  Table table;
 #endif
 
 #if defined(DISTANCEVECTOR)

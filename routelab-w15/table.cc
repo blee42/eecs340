@@ -11,6 +11,46 @@ ostream & Table::Print(ostream &os) const
 
 #if defined(LINKSTATE)
 
+Entry::Entry(unsigned src, unsigned dest, double c) :
+  src_node(src), dest_node(dest), cost(c)
+{}
+
+ostream & Entry::Print(ostream &os) const
+{
+  os << "Entry(src=" << src_node << ", dest=" << dest_node << ", cost=" << cost << ")";
+  return os;
+}
+
+Entry* Table::GetEntry(unsigned src, unsigned dest)
+{
+  for(deque<Entry>::iterator entry = contents.begin(); entry != contents.end(); entry++)
+  {
+    if (entry->src_node == src && entry->dest_node == dest)
+    {
+      return new Entry(entry->src_node, entry->dest_node, entry->cost);
+    }
+  }
+  return NULL;
+}
+
+void Table::EditEntry(unsigned src, unsigned dest, Entry new_entry)
+{
+  for(deque<Entry>::iterator entry = contents.begin(); entry != contents.end(); entry++)
+  {
+    if (entry->src_node == src && entry->dest_node == dest)
+    {
+      entry->src_node = new_entry.src_node;
+      entry->dest_node = new_entry.dest_node;
+      entry->cost = new_entry.cost;
+      return;
+    }
+  }
+  else
+  {
+    contents.push_back(new_entry);
+  }
+}
+
 #endif
 
 #if defined(DISTANCEVECTOR)
