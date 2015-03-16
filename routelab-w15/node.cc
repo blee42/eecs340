@@ -290,18 +290,18 @@ void Node::UpdatesFromNeighbors()
     double lowest_cost_so_far = entry->cost;
     unsigned next_so_far = entry->next_node;
 
-    for(deque<Node*>::iterator neighbor = neighbors.begin(); neighbor != neighbors.end(); neighbor++)
+    for(deque<Node*>::iterator neighbor = neighbors->begin(); neighbor != neighbors->end(); neighbor++)
     {
       // should be no way this is null...
-      double neighbor_cost = table.GetEntry(*neighbor->GetNumber())->cost;
-      Entry* neighbor_to_dest = *neighbor->GetRoutingTable()->GetEntry(entry->dest_node);
+      double neighbor_cost = table.GetEntry((*neighbor)->GetNumber())->cost;
+      Entry* neighbor_to_dest = (*neighbor)->GetRoutingTable()->GetEntry(entry->dest_node);
       if (neighbor_to_dest != NULL)
       {
         double this_cost = neighbor_cost + neighbor_to_dest->cost;
         if (this_cost < lowest_cost_so_far)
         {
           lowest_cost_so_far = this_cost;
-          next_so_far = *neighbor->GetNumber();
+          next_so_far = (*neighbor)->GetNumber();
         }
       }
     }
