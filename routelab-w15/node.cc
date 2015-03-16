@@ -127,7 +127,7 @@ ostream & Node::Print(ostream &os) const
 #endif
 
 #if defined(LINKSTATE)
-#define INFINITY
+#include <limits>
 
 DistanceEntry::DistanceEntry(double c, unsigned p, unsigned d) :
   cost(c), predecessor(p), dest(d)
@@ -225,7 +225,7 @@ Node *Node::GetNextHop(const Node *destination) const
       return new Node(min_next, NULL, 0, 0, 0);
     }
     seen_nodes.push_back(min_next);
-    remaing_nodes.erase(remove(remaining_nodes.begin(), remaining_nodes.end(), min_next), remaining_nodes.end());
+    remaining_nodes.erase(remove(remaining_nodes.begin(), remaining_nodes.end(), min_next), remaining_nodes.end());
 
     for(deque<Entry>::iterator entry = contents.begin(); entry != contents.end(); entry++)
     {
