@@ -29,6 +29,15 @@ struct Entry {
 	Entry(unsigned src, unsigned dest, double c);
 };
 
+struct DistanceEntry {
+	double cost;
+	unsigned dest;
+	unsigned predecessor;
+	ostream & Print(ostream &os) const;
+	
+	DistanceEntry(double c, unsigned p, unsigned d);
+};
+
 inline ostream & operator<<(ostream &os, const Entry &e) { return e.Print(os);}
 
 class Table {
@@ -56,14 +65,6 @@ struct Entry {
 	double cost;
 	ostream & Print(ostream &os) const;
 	Entry(unsigned dest, unsigned next, double c);
-};
-
-struct DistanceEntry {
-	double cost;
-	unsigned dest;
-	unsigned predecessor;
-	ostream & Print(ostream &os) const;
-	DistanceEntry(double c, unsigned p, unsigned d);
 };
 
 inline ostream & operator<<(ostream &os, const Entry &e) { return e.Print(os);}

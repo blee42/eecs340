@@ -21,6 +21,16 @@ ostream & Entry::Print(ostream &os) const
   return os;
 }
 
+DistanceEntry::DistanceEntry(double c, unsigned p, double d) :
+  cost(c), predecessor(p), dest(d)
+{}
+
+ostream & DistanceEntry::Print(ostream &os) const
+{
+  os << "DistanceEntry(src=" << src_node << ", dest=" << dest_node << ", cost=" << cost << ")";
+  return os;
+}
+
 deque<Entry>* Table::GetContents()
 {
   return contents;
