@@ -170,7 +170,7 @@ void Node::TimeOut()
 
 Node *Node::GetNextHop(const Node *destination) const
 {
-  deque<Entry> contents = *table.GetContents();
+  deque<Entry> contents = *GetRoutingTable().GetContents();
   unsigned src = GetNumber();
   unsigned dest_n = destination->GetNumber();
   deque<Entry> neighbors;
@@ -196,7 +196,7 @@ Node *Node::GetNextHop(const Node *destination) const
     }
   }
 
-  while(&remaining_nodes.size > 0)
+  while(remaining_nodes.size > 0)
   {
     // find minimum in dist
     double min_cost = std::numeric_limits<double>::infinity();
