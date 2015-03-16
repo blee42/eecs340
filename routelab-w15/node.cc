@@ -196,7 +196,7 @@ Node *Node::GetNextHop(const Node *destination) const
     }
   }
 
-  while(&remaining_nodes.size > 0)
+  while(remaining_nodes.size > 0)
   {
     // find minimum in dist
     double min_cost = std::numeric_limits<double>::infinity();
@@ -212,7 +212,7 @@ Node *Node::GetNextHop(const Node *destination) const
 
     if (min_next == dest_n)
     {
-      return new Node(min_next, NULL, 0, 0, 0);
+      return new Node(min_next, NULL, 0, 0);
     }
     seen_nodes.push_back(min_next);
     remaining_nodes.erase(remove(remaining_nodes.begin(), remaining_nodes.end(), min_next), remaining_nodes.end());
